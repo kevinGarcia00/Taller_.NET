@@ -39,7 +39,7 @@ Este es un proyecto para un taller de .NET.
 
 
 ## Reglas de Agente
-- Antes de escribir cualquier bloque de código C#, debes tener en cuenta las reglas estáticas y de diseño definidas en los otros archivos de esta carpeta (AGENTS.md).
+- Antes de escribir cualquier bloque de código C#, debes tener en cuenta las reglas estáticas y de diseño definidas en los otros archivos de esta carpeta (AGENTS.md o cualquier otro archivo .md que este dentro de los modulos).
 - No asumas que tu código es perfecto. Cada vez que crees, modifiques o refactorices código (especialmente si agregas nuevas dependencias, clases, repositorios o servicios), tienes la OBLIGACIÓN de verificar que no has roto la arquitectura.
 - Si al ejecutar dotnet test algún test de ArchUnitNET falla, NO le pidas al usuario que lo arregle ni des por terminada tu tarea.
 - Lee el mensaje de error del test fallido (que indica qué regla arquitectónica rompiste).
