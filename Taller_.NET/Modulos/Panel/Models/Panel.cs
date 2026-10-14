@@ -1,6 +1,4 @@
-using Taller_.NET.Modulos.Panel;
-
-namespace Taller_.NET.Modulos.ParqueSolar.Models
+namespace Taller_.NET.Modulos.Panel
 {
     public class Panel
     {
