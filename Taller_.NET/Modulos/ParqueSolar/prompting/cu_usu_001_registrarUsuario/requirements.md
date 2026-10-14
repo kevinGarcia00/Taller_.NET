@@ -5,7 +5,6 @@ Como Administrador del sistema SolarUY, quiero poder registrar un nuevo usuario 
 
 ## Criterios de Aceptación
 1. Formulario de registro: El sistema debe permitir el ingreso de los siguientes datos obligatorios:
-
    - Nombre (Obligatorio).
    - Apellido (Obligatorio).
    - Correo (Obligatorio, único en el sistema).

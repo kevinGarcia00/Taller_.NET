@@ -17,7 +17,7 @@
   - Dependencias: `IUsersDbContext` (para acceso a BD).
   - Método: `EliminarUsuarioAsync(long id, long idUsuarioAutenticado)`
   - Lógica: 
-        1. Validar que `id != idUsuarioAutenticado`. Si un usuario intenta eliminarse a sí mismo, lanzar excepción.
+        1. Si un usuario intenta eliminarse a sí mismo, lanzar excepción.
         2. Consultar el usuario en la BD por `Id` incluyendo sus roles. Si no existe, lanzar excepción.
         3. Remover la entidad del DbSet: `Usuarios.Remove(usuario)`.
         4. Confirmar la operación con `SaveChangesAsync()`.

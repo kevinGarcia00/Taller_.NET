@@ -10,13 +10,13 @@
 
 - [ ] **3. Capa Application**
   - [ ] 3.1 Agregar a `IUsuarioService` e implementar en `UsuarioService` el método `EliminarUsuarioAsync(long id, long idUsuarioAutenticado)`.
-  - [ ] 3.4 Implementar la lógica en `EliminarUsuarioAsync`:
+  - [ ] 3.2 Implementar la lógica en `EliminarUsuarioAsync`:
       - Validar que el usuario no intente eliminarse a sí mismo.
       - Consultar el usuario por `Id` incluyendo roles.
       - Verificar la existencia del usuario
       - Validar que no sea el único usuario con el rol "Administrador" registrado en el sistema.
       - Remover la entidad mediante `_dbContext.Usuarios.Remove(usuario)` y persistir cambios con `SaveChangesAsync()`.
-  - [ ] 3.5 Crear Test Unitarios para verificar:
+  - [ ] 3.3 Crear Test Unitarios para verificar:
     - Excepción cuando el usuario no existe.
     - Excepción al intentar eliminar el usuario autenticado actualmente.
     - Excepción al intentar eliminar el último Administrador del sistema.
