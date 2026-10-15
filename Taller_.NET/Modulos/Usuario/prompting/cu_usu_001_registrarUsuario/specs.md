@@ -42,7 +42,6 @@
 
 ### 3. Capa Infrastructure (Persistencia)
 - **Configuración de Entity Framework:** 
-
 - `UsuarioConfiguration : IEntityTypeConfiguration<Usuario>`
   - Definir la tabla y longitud máxima de columnas.
   - Configurar el Id como clave primaria de tipo long (bigint).
