@@ -1,21 +1,23 @@
-namespace Taller_.NET.Modulos.Usuario.Models
-{
-    public class Usuario{
-        public int Id{ get; set; }
-        public string Nombre{ get; set; }
-        public string Apellido{ get; set; }
-        public string Telefono { get; set; }
-        public string Correo { get; set; }
+using Taller_.NET.Modulos.Rol.Models;
 
-    public Usuario(int id, string nombre, string apellido, string telefono, string correo)
+public class Usuario
+{
+    public string Id { get; private set; }
+    public string Nombre { get; private set; }
+    public string Apellido { get; private set; }
+    public string Correo { get; private set; }
+    public string Telefono { get; private set; }
+    
+    private readonly List<Rol> _roles = new();
+    public IReadOnlyCollection<Rol> Roles => _roles.AsReadOnly();
+
+    public Usuario(string id, string nombre, string apellido, string correo, string telefono)
     {
         Id = id;
         Nombre = nombre;
         Apellido = apellido;
-        Telefono = telefono;
         Correo = correo;
+        Telefono = telefono;
     }
-
-    }
+    
 }
-
