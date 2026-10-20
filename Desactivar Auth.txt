@@ -1,0 +1,1 @@
+Auth0__PermitirUsuariosAnonimos=true dotnet run
