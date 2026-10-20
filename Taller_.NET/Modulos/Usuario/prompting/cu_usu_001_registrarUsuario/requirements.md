@@ -11,7 +11,7 @@ Como usuario con rol en el sistema SolarUY, quiero poder registrar un nuevo usua
    - Telefono (Opcional).
    - Rol asignado (Obligatorio, p. ej., Administrador, Mantenimiento).
 2. Validación de formato: El correo electrónico debe cumplir con una estructura válida (usuario@dominio.com).
-3. Seguridad: Solo los usuarios con el rol de "Administrador" están autorizados a realizar el alta de nuevos usuarios
+3. Seguridad: Solo los usuarios autenticados mediante Auth0 y con el rol de "Administrador" están autorizados a realizar el alta de nuevos usuarios
 4. Seguridad: Verifica los datos ingresados para evitar inyecciones SQL.
 
 ## Reglas de Negocio

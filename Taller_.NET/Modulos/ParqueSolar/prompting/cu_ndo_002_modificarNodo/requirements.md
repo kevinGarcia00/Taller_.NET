@@ -13,7 +13,7 @@ Como Administrador del sistema SolarUY, quiero modificar los datos de un nodo ex
    - **Fecha de creación (`fechaCreacion`):** Se conserva el valor registrado originalmente en el alta y no es editable.
    - **Energía generada (`energiaGenerada`):** No se modifica de forma manual (se mantiene el valor acumulado o calculado automáticamente).
 4. Confirmación: Al confirmar los cambios, el sistema valida las reglas de negocio, actualiza la información del nodo y muestra un mensaje de éxito.
-5. Seguridad: Solo los usuarios con el rol de "Administrador" están autorizados a modificar nodos.
+5. Seguridad: Solo los usuarios autenticados mediante Auth0 y con el rol de "Administrador" están autorizados a modificar nodos.
 
 ## Reglas de Negocio
 - El nodo se mantiene asociado a su parque solar original. No es posible transferir un nodo a otro parque solar mediante esta operación.
