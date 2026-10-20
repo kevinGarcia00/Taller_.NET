@@ -1,0 +1,78 @@
+@page "/parques/alta"
+@attribute [Authorize(Roles = "Administrador")]
+@rendermode InteractiveServer
+@inject IParqueService ParqueService
+@inject NotificationService NotificationService
+@inject NavigationManager NavigationManager
+
+<PageTitle>Alta de Parque Solar</PageTitle>
+
+<h1>Alta de Parque Solar</h1>
+
+<AuthorizeView Roles="Administrador" Context="autorizacion">
+    <Authorized>
+        <RadzenCard>
+            <RadzenTemplateForm TItem="CrearParqueDto" Data="@_modelo" Submit="OnValidSubmit">
+                <RadzenStack Gap="1rem">
+                    <RadzenFormField Text="Nombre" Variant="Variant.Outlined">
+                        <RadzenTextBox @bind-Value="_modelo.Nombre" MaxLength="@Parque.LongitudMaximaNombre" />
+                    </RadzenFormField>
+
+                    <RadzenFormField Text="Ubicacion" Variant="Variant.Outlined">
+                        <RadzenTextBox @bind-Value="_modelo.Ubicacion" MaxLength="@Parque.LongitudMaximaUbicacion" />
+                    </RadzenFormField>
+
+                    <RadzenFormField Text="Cantidad maxima de nodos" Variant="Variant.Outlined">
+                        <RadzenNumeric @bind-Value="_modelo.CantMaxNodos" Min="1" />
+                    </RadzenFormField>
+
+                    <RadzenButton Text="Registrar parque" ButtonType="ButtonType.Submit" Icon="add_circle_outline" />
+                </RadzenStack>
+            </RadzenTemplateForm>
+        </RadzenCard>
+    </Authorized>
+    <NotAuthorized>
+        <RadzenAlert AlertStyle="AlertStyle.Warning" Title="Acceso restringido">
+            Solo los usuarios con el rol de Administrador pueden registrar parques solares.
+        </RadzenAlert>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    private CrearParqueDto _modelo = new();
+
+    private async Task OnValidSubmit()
+    {
+        try
+        {
+            await ParqueService.CrearParqueAsync(_modelo);
+
+            NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Success,
+                Summary = "Parque registrado",
+                Detail = $"El parque '{_modelo.Nombre}' se registró correctamente."
+            });
+
+            NavigationManager.NavigateTo("/parques");
+        }
+        catch (ParqueNombreDuplicadoException excepcion)
+        {
+            NotificarError(excepcion.Message);
+        }
+        catch (UsuarioNoAutorizadoException excepcion)
+        {
+            NotificarError(excepcion.Message);
+        }
+    }
+
+    private void NotificarError(string detalle)
+    {
+        NotificationService.Notify(new NotificationMessage
+        {
+            Severity = NotificationSeverity.Error,
+            Summary = "No se pudo registrar el parque",
+            Detail = detalle
+        });
+    }
+}

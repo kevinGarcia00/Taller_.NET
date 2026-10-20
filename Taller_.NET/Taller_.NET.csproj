@@ -8,8 +8,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.13" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.13">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.13" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.11.0" />
+    <PackageReference Include="Radzen.Blazor" Version="12.1.5" />
     <PackageReference Include="TngTech.ArchUnitNET.xUnit" Version="0.13.4" />
     <PackageReference Include="xunit" Version="2.9.3" />
     <PackageReference Include="xunit.runner.visualstudio" Version="4.0.1">
@@ -22,7 +29,6 @@
     <Folder Include="Modulos\Historico\Controllers\" />
     <Folder Include="Modulos\Historico\Infraestructure\" />
     <Folder Include="Modulos\ParqueSolar\Controllers\" />
-    <Folder Include="Modulos\ParqueSolar\Infraestructure\" />
     <Folder Include="Modulos\Usuario\Controllers\" />
     <Folder Include="Modulos\Usuario\Infraestructure\" />
   </ItemGroup>

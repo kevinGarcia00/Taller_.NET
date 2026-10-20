@@ -1,14 +1,14 @@
-# Especificaciones Técnicas: Registrar Panel
+# Especificaciones Técnicas: Registrar ParqueSolar
 
 ## Arquitectura y Patrones
-- **Estilo:** Monolito Modular con Clean Architecture por Módulo (Modules.Panel).
-- **Patrones:** Application Services. El módulo Panel no referencia a Nodo ni a ParqueSolar. La comprobación del nodo seleccionado se hace por un mediador exclusivo entre Panel y Nodo.
+- **Estilo:** Monolito Modular con Clean Architecture por Módulo (Modules.ParqueSolar).
+- **Patrones:** Application Services. La comprobación del nodo seleccionado se hace por un mediador exclusivo entre Parque y Nodo.
 
 ## Detalles de Implementación por Capa
 
-### 1. Capa Domain (Modules.Panel.Domain)
+### 1. Capa Domain (Modules.ParqueSolar.Domain)
 - **Entidades:**
-    - **Panel**
+    - **Parque**
         - **Propiedades:**
             - `Id` (int, PK)
             - `Nombre` (string, max 100 caracteres)
@@ -27,7 +27,7 @@
     - Dependencias: `IParqueRepository` y `IMediadorParqueNodo`, inyectadas por constructor.
     - Método: `CrearParqueAsync(CrearParqueDto dto)`
     - Lógica:
-        1. Validar que no exista otro panel con el mismo nombre en ese nodo.
+        1. Validar que no exista otro ParqueSolar con el mismo nombre en ese nodo.
         2. Instanciar `ParqueSolar`, asignar `FechaCreacion` y persistir.
         3. Retornar el Id generado.
 - **Mediador:** `IMediadorParqueNodo` es el único canal entre Parque y Nodo. Ninguna capa de Parque referencia tipos del módulo Nodo.
@@ -35,25 +35,21 @@
 ### 3. Capa Infrastructure (Persistencia)
 - **Repositorio:** `ParqueRepository` implementa `IParqueRepostory`.
 - **Configuración de Entity Framework:**
-- `ParqueConfiguration : IEntityTypeConfiguration<Panel>`
+- `ParqueConfiguration : IEntityTypeConfiguration<Parque>`
     - Definir la tabla y la longitud máxima de columnas.
     - Configurar `Id` como clave primaria de tipo int.
-- **DbContext:** Exponer en `IPanelDbContext` el conjunto:
-    - `DbSet<Panel> Paneles { get; set; }`
+- **DbContext:** Exponer en `IParqueDbContext` el conjunto:
+    - `DbSet<ParqueSolar> Parque { get; set; }`
 - **Migraciones:** Generar y aplicar una migración para reflejar la tabla de parques.
 
 ### 4. Capa Presentation (Blazor Server con Radzen)
-- **Componente:** `AltaPanel.razor`
+- **Componente:** `AltaParque.razor`
     - **Ruta:** `@page "/parques/alta"`
     - **Seguridad:** Utilizar `<AuthorizeView Roles="Administrador">` o el atributo `[Authorize(Roles = "Administrador")]`.
     - **UI (Radzen):**
-        - Utilizar `RadzenTemplateForm` vinculado al modelo `CrearPanelDto`.
-        - Campos:
-            - `RadzenTextBox` para Nombre y Vida útil.
-            - `RadzenNumeric` para Potencia.
-            - `RadzenDropDown` para Estado, con los valores de `EstadoPanel`.
+        - Utilizar `RadzenTemplateForm` vinculado al modelo `CrearParqueDto`.
         - El parque y el nodo se muestran como contexto de solo lectura, tomados de la ruta.
         - Botón de envío: `RadzenButton` de tipo submit.
     - **Flujo:**
-        1. En `OnValidSubmit`, el componente inyecta `IPanelService` y ejecuta `CrearPanelAsync(dto)` con el `NodoId` y el `ParqueSolarId` de la ruta.
-        2. Tras el éxito, muestra una notificación con `NotificationService` de Radzen y redirige al listado de paneles del nodo con `NavigationManager`.
+        1. En `OnValidSubmit`, el componente inyecta `IParqueService` y ejecuta `CrearParqueAsync(dto)`.
+        2. Tras el éxito, muestra una notificación con `NotificationService` de Radzen y redirige al listado de parques `NavigationManager`.
