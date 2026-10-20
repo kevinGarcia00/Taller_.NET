@@ -1,31 +1,30 @@
 # Especificaciones Técnicas: Eliminar Panel
 
 ## Arquitectura y Patrones
-- **Estilo:** Monolito Modular con Clean Architecture por Módulo (Modules.Panel).
-- **Patrones:** Application Services. Se reutilizan la entidad, el repositorio y el mediador Panel–Nodo. Panel no referencia al módulo Nodo.
+- **Estilo:** Monolito Modular con Clean Architecture por Módulo (Modules.ParqueSolar).
+- **Patrones:** Application Services. Se reutilizan `Panel`, `Nodo` y los repositorios del mismo módulo.
 
 ## Detalles de Implementación por Capa
 
-### 1. Capa Domain (Modules.Panel.Domain)
+### 1. Capa Domain (Modules.ParqueSolar.Domain)
 - **Entidades:**
-    - Reutilizar `Panel`, `EstadoPanel` y `ContextoNodo`.
+    - Reutilizar `Panel`, `EstadoPanel` y la navegación `Nodo`.
 - **Comportamiento:**
-    - La eliminación no agrega comportamiento de negocio sobre la entidad. La regla de pertenencia al nodo se resuelve al cargar el panel por `Id` y `NodoId`.
+    - La eliminación no agrega comportamiento de negocio sobre la entidad. La pertenencia al nodo se resuelve al cargar el panel por `Id` dentro de ese `Nodo`.
 
 ### 2. Capa Application (Servicios)
 - **Parámetros de entrada:** `int id`, `int nodoId`, `int parqueSolarId`.
 - **Servicio:** `PanelService` (implementa la interfaz `IPanelService`)
-  - Dependencias: `IPanelRepository` y `IMediadorPanelNodo`.
+  - Dependencias: `IPanelRepository` e `INodoRepository`.
   - Método: `EliminarPanelAsync(int id, int nodoId, int parqueSolarId)`
   - Lógica:
-    1. Confirmar mediante el mediador que el nodo existe y pertenece al parque seleccionado. Si no, lanzar excepción.
+    1. Cargar el nodo y comprobar que pertenece al parque seleccionado. Si no, lanzar excepción.
     2. Obtener el panel por `Id` dentro de ese nodo. Si no existe, lanzar excepción.
     3. Remover el panel mediante el repositorio y confirmar la persistencia.
 
 ### 3. Capa Infrastructure (Persistencia)
 - **Configuración de Entity Framework:**
-    - Reutilizar `PanelConfiguration`. El panel no mantiene colecciones propias que exijan un borrado en cascada adicional.
-- **DbContext:** Reutilizar `DbSet<Panel> Paneles` en `IPanelDbContext`.
+    - Reutilizar `PanelConfiguration` y `DbSet<Panel> Paneles` en `IParqueDbContext`.
 - **Repositorio:** `PanelRepository` expone la baja del panel ya cargado y la confirmación de cambios.
 
 ### 4. Capa Presentation (Blazor Server con Radzen)

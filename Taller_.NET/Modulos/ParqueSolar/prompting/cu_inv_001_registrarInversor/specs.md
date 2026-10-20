@@ -1,12 +1,12 @@
 # Especificaciones Técnicas: Registrar Inversor
 
 ## Arquitectura y Patrones
-- **Estilo:** Monolito Modular con Clean Architecture por Módulo (Modules.Inversor).
-- **Patrones:** Application Services. El módulo Inversor no referencia a Nodo ni a ParqueSolar. La comprobación del nodo y la asociación 1:1 se hacen por el mediador ya definido entre Nodo e Inversor (`IMediadorNodoInversor`).
+- **Estilo:** Monolito Modular con Clean Architecture por Módulo (Modules.ParqueSolar).
+- **Patrones:** Application Services. Inversor, Nodo y Parque pertenecen al mismo módulo. La relación 1:1 se guarda en `Nodo` como navegación hacia `Inversor`. No hay mediador interno. La persistencia usa `IParqueDbContext`.
 
 ## Detalles de Implementación por Capa
 
-### 1. Capa Domain (Modules.Inversor.Domain)
+### 1. Capa Domain (Modules.ParqueSolar.Domain)
 - **Entidades:**
     - **Inversor**
         - **Propiedades:**
@@ -15,7 +15,7 @@
             - `FechaCreacion` (DateTime)
 - **Comportamiento:**
     - Constructor que exige `Nombre`, asigna `FechaCreacion` y valida que el nombre no sea nulo ni espacios en blanco.
-    - La pertenencia al nodo no se modela como navegación hacia el módulo Nodo. El vínculo 1:1 lo mantiene el nodo mediante `InversorId` y se actualiza solo a través del mediador.
+    - En `Nodo`, método `AsignarInversor(Inversor inversor)` que rechaza la asignación si el nodo ya tiene un inversor.
 
 ### 2. Capa Application (Servicios)
 - **DTO de Entrada:** `CrearInversorDto`
@@ -23,15 +23,13 @@
 - **Validador:** `CrearInversorDtoValidator` (usando FluentValidation)
   - Reglas: `Nombre` requerido (max 100), `NodoId` requerido, `ParqueSolarId` requerido.
 - **Servicio:** `InversorService` (implementa la interfaz `IInversorService`)
-  - Dependencias: `IInversorRepository` e `IMediadorNodoInversor`, inyectadas por constructor.
+  - Dependencias: `IInversorRepository` e `INodoRepository`, inyectadas por constructor.
   - Método: `CrearInversorAsync(CrearInversorDto dto)`
   - Lógica:
-    1. Consultar al mediador para confirmar que el nodo existe y pertenece al parque seleccionado. Si no, lanzar excepción.
-    2. Consultar al mediador si ese nodo ya tiene un inversor. Si ya tiene uno, lanzar excepción.
-    3. Instanciar `Inversor` y persistirlo mediante el repositorio.
-    4. Pedir al mediador que asocie el `Id` generado al nodo (`InversorId`), manteniendo la relación 1:1.
-    5. Retornar el Id generado.
-- **Mediador:** `IMediadorNodoInversor` es el único canal entre Inversor y Nodo. Ninguna capa de Inversor referencia tipos del módulo Nodo ni del módulo ParqueSolar.
+    1. Cargar el nodo y comprobar que pertenece al parque seleccionado. Si no, lanzar excepción.
+    2. Si ese nodo ya tiene un inversor, lanzar excepción.
+    3. Instanciar `Inversor`, persistirlo y asignarlo al nodo.
+    4. Retornar el Id generado.
 
 ### 3. Capa Infrastructure (Persistencia)
 - **Repositorio:** `InversorRepository` implementa `IInversorRepository`.
@@ -39,10 +37,10 @@
 - `InversorConfiguration : IEntityTypeConfiguration<Inversor>`
   - Definir la tabla y la longitud máxima de `Nombre`.
   - Configurar `Id` como clave primaria de tipo int.
-  - No mapear claves foráneas ni navegaciones hacia Nodo o ParqueSolar.
-- **DbContext:** Exponer en `IInversorDbContext` el conjunto:
+- En `NodoConfiguration`, configurar la relación 1:1 opcional con `Inversor` y un índice único sobre `InversorId`.
+- **DbContext:** Exponer en `IParqueDbContext` el conjunto:
     - `DbSet<Inversor> Inversores { get; set; }`
-- **Migraciones:** Generar y aplicar una migración para reflejar la tabla de inversores.
+- **Migraciones:** Generar y aplicar una migración del módulo ParqueSolar para reflejar la tabla de inversores.
 
 ### 4. Capa Presentation (Blazor Server con Radzen)
 - **Componente:** `AltaInversor.razor`

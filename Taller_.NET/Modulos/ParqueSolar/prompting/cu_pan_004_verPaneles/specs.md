@@ -1,14 +1,14 @@
 # Especificaciones Técnicas: Ver Paneles
 
 ## Arquitectura y Patrones
-- **Estilo:** Monolito Modular con Clean Architecture por Módulo (Modules.Panel).
-- **Patrones:** Application Services. La lectura reutiliza `Panel` y `IPanelRepository`. La comprobación del nodo usa `IMediadorPanelNodo`, sin referencia directa al módulo Nodo.
+- **Estilo:** Monolito Modular con Clean Architecture por Módulo (Modules.ParqueSolar).
+- **Patrones:** Application Services. La lectura reutiliza `Panel`, `Nodo` e `IPanelRepository` dentro del mismo módulo.
 
 ## Detalles de Implementación por Capa
 
-### 1. Capa Domain (Modules.Panel.Domain)
+### 1. Capa Domain (Modules.ParqueSolar.Domain)
 - **Entidades:**
-    - Reutilizar `Panel`, `EstadoPanel` y `ContextoNodo`.
+    - Reutilizar `Panel`, `EstadoPanel` y la navegación `Nodo`.
 - **Comportamiento:**
     - La consulta expone los datos ya definidos en la entidad. Este caso de uso no agrega métodos que cambien el estado del panel.
 
@@ -18,19 +18,19 @@
 - **DTO de listado:** `PanelListadoDto`
   - Propiedades: `Id` (int), `Nombre` (string), `Estado` (string), `Potencia` (decimal).
 - **Servicio:** `PanelService` (implementa la interfaz `IPanelService`)
-  - Dependencias: `IPanelRepository` y `IMediadorPanelNodo`.
+  - Dependencias: `IPanelRepository` e `INodoRepository`.
   - Métodos:
     - `ObtenerPanelesPorNodoAsync(int nodoId, int parqueSolarId)`
     - `ObtenerPanelAsync(int id, int nodoId, int parqueSolarId)`
   - Lógica:
-    1. Confirmar mediante el mediador que el nodo existe y pertenece al parque seleccionado.
+    1. Cargar el nodo y comprobar que pertenece al parque seleccionado.
     2. En el listado, obtener los paneles de ese nodo y proyectarlos a `PanelListadoDto`.
     3. En el detalle, obtener el panel por `Id` y `NodoId`. Si no existe, lanzar excepción.
     4. Proyectar la entidad a `PanelDetalleDto` y retornarla sin modificarla.
 
 ### 3. Capa Infrastructure (Persistencia)
 - **Configuración de Entity Framework:**
-    - Reutilizar `PanelConfiguration` y `DbSet<Panel> Paneles`.
+    - Reutilizar `PanelConfiguration` y `DbSet<Panel> Paneles` en `IParqueDbContext`.
 - **Repositorio:**
     - La consulta del listado filtra por `NodoId` y ordena por `Nombre`.
     - La consulta del detalle filtra por `Id` y `NodoId`, y proyecta solo los campos necesarios.
