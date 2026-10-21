@@ -15,6 +15,7 @@ using Taller_.NET.Modulos.ParqueSolar.Application.Puertos;
 using Taller_.NET.Modulos.ParqueSolar.Application.Servicios;
 using Taller_.NET.Modulos.ParqueSolar.Application.Validadores;
 using Taller_.NET.Modulos.ParqueSolar.Domain;
+using Taller_.NET.Modulos.ParqueSolar.Infrastructure.Mediadores;
 using Taller_.NET.Modulos.ParqueSolar.Infrastructure.Persistencia;
 using Taller_.NET.Modulos.ParqueSolar.Infrastructure.Repositorios;
 using Taller_.NET.Modulos.ParqueSolar.Infrastructure.Seguridad;
@@ -70,8 +71,10 @@ builder.Services.AddDbContext<ParqueDbContext>(options =>
 builder.Services.AddScoped<IParqueDbContext>(proveedor => proveedor.GetRequiredService<ParqueDbContext>());
 builder.Services.AddScoped<IParqueRepository, ParqueRepository>();
 builder.Services.AddScoped<IParqueService, ParqueService>();
+builder.Services.AddScoped<IMediadorParqueNodo, MediadorParqueNodo>();
 builder.Services.AddScoped<IUsuarioActualProvider, UsuarioActualProvider>();
 builder.Services.AddScoped<IValidator<CrearParqueDto>, CrearParqueDtoValidator>();
+builder.Services.AddScoped<IValidator<ModificarParqueDto>, ModificarParqueDtoValidator>();
 
 var app = builder.Build();
 

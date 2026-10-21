@@ -1,0 +1,66 @@
+@page "/parques"
+@attribute [Authorize(Roles = "Administrador")]
+@rendermode InteractiveServer
+@inject IParqueService ParqueService
+@inject NavigationManager NavigationManager
+@inject NotificationService NotificationService
+
+<PageTitle>Parques Solares</PageTitle>
+
+<h1>Parques Solares</h1>
+
+<AuthorizeView Roles="Administrador" Context="autorizacion">
+    <Authorized>
+        <RadzenStack Gap="1rem">
+            <RadzenButton Text="Nuevo parque" Icon="add_circle_outline" ButtonStyle="ButtonStyle.Primary"
+                          Click="@(() => NavigationManager.NavigateTo("/parques/alta"))" />
+
+            <RadzenDataGrid Data="@_parques" TItem="ParqueListadoDto" AllowSorting="true" IsLoading="@_cargando">
+                <Columns>
+                    <RadzenDataGridColumn TItem="ParqueListadoDto" Property="Nombre" Title="Nombre" />
+                    <RadzenDataGridColumn TItem="ParqueListadoDto" Property="Ubicacion" Title="Ubicacion" />
+                    <RadzenDataGridColumn TItem="ParqueListadoDto" Property="CantidadNodosActuales" Title="Nodos actuales" />
+                    <RadzenDataGridColumn TItem="ParqueListadoDto" Title="Acciones" Sortable="false" Filterable="false">
+                        <Template Context="parque">
+                            <RadzenButton Text="Ver informacion" Icon="visibility" Size="ButtonSize.Small"
+                                          Click="@(() => NavigationManager.NavigateTo($"/parques/{parque.Id}"))" />
+                            <RadzenButton Text="Modificar" Icon="edit" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary"
+                                          Click="@(() => NavigationManager.NavigateTo($"/parques/modificar/{parque.Id}"))" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </RadzenDataGrid>
+        </RadzenStack>
+    </Authorized>
+    <NotAuthorized>
+        <RadzenAlert AlertStyle="AlertStyle.Warning" Title="Acceso restringido">
+            Solo los usuarios con el rol de Administrador pueden ver los parques solares.
+        </RadzenAlert>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    private IReadOnlyList<ParqueListadoDto> _parques = new List<ParqueListadoDto>();
+    private bool _cargando = true;
+
+    protected override void OnInitialized()
+    {
+        try
+        {
+            _parques = ParqueService.ObtenerParquesSync();
+        }
+        catch (System.Exception excepcion)
+        {
+            NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Error,
+                Summary = "No se pudieron obtener los parques",
+                Detail = excepcion.Message
+            });
+        }
+        finally
+        {
+            _cargando = false;
+        }
+    }
+}

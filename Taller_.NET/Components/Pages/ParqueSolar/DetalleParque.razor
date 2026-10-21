@@ -1,0 +1,92 @@
+@page "/parques/{ParqueId:int}"
+@attribute [Authorize(Roles = "Administrador")]
+@rendermode InteractiveServer
+@inject IParqueService ParqueService
+@inject NavigationManager NavigationManager
+@inject NotificationService NotificationService
+
+<PageTitle>Detalle del Parque Solar</PageTitle>
+
+<h1>Detalle del Parque Solar</h1>
+
+<AuthorizeView Roles="Administrador" Context="autorizacion">
+    <Authorized>
+        @if (_parque is not null)
+        {
+            <RadzenStack Gap="1rem">
+                <RadzenCard>
+                    <RadzenStack Gap="0.5rem">
+                        <RadzenText TextStyle="TextStyle.H6">Informacion del parque</RadzenText>
+                        <RadzenLabel Text="Nombre" />
+                        <RadzenText>@_parque.Nombre</RadzenText>
+                        <RadzenLabel Text="Ubicacion" />
+                        <RadzenText>@_parque.Ubicacion</RadzenText>
+                        <RadzenLabel Text="Cantidad maxima de nodos" />
+                        <RadzenText>@_parque.CantMaxNodos</RadzenText>
+                        <RadzenLabel Text="Cantidad de nodos actuales" />
+                        <RadzenText>@_parque.CantidadNodosActuales</RadzenText>
+                        <RadzenLabel Text="Fecha de creacion" />
+                        <RadzenText>@_parque.FechaCreacion.ToLocalTime().ToString("g")</RadzenText>
+                    </RadzenStack>
+                </RadzenCard>
+
+                <RadzenText TextStyle="TextStyle.H6">Nodos del parque</RadzenText>
+                <RadzenDataGrid Data="@_parque.ListaNodos" TItem="NodoResumenDto">
+                    <Columns>
+                        <RadzenDataGridColumn TItem="NodoResumenDto" Property="Nombre" Title="Nombre" />
+                        <RadzenDataGridColumn TItem="NodoResumenDto" Property="UbicacionParque" Title="Ubicacion" />
+                        <RadzenDataGridColumn TItem="NodoResumenDto" Property="EnergiaGenerada" Title="Energia generada" />
+                        <RadzenDataGridColumn TItem="NodoResumenDto" Property="FechaCreacion" Title="Fecha de creacion" FormatString="{0:g}" />
+                    </Columns>
+                </RadzenDataGrid>
+
+                <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem">
+                    <RadzenButton Text="Volver al listado" Icon="arrow_back" ButtonStyle="ButtonStyle.Secondary"
+                                  Click="@(() => NavigationManager.NavigateTo("/parques"))" />
+                    <RadzenButton Text="Editar" Icon="edit" ButtonStyle="ButtonStyle.Primary"
+                                  Click="@(() => NavigationManager.NavigateTo($"/parques/modificar/{ParqueId}"))" />
+                    <RadzenButton Text="Eliminar" Icon="delete" ButtonStyle="ButtonStyle.Danger"
+                                  Click="@(() => NavigationManager.NavigateTo($"/parques/{ParqueId}/eliminar"))" />
+                </RadzenStack>
+            </RadzenStack>
+        }
+    </Authorized>
+    <NotAuthorized>
+        <RadzenAlert AlertStyle="AlertStyle.Warning" Title="Acceso restringido">
+            Solo los usuarios con el rol de Administrador pueden ver los parques solares.
+        </RadzenAlert>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    [Parameter]
+    public int ParqueId { get; set; }
+
+    private ParqueDetalleDto? _parque;
+
+    protected override void OnParametersSet()
+    {
+        try
+        {
+            _parque = ParqueService.ObtenerParqueSync(ParqueId);
+        }
+        catch (ParqueNoEncontradoException excepcion)
+        {
+            NotificarError(excepcion.Message);
+        }
+        catch (System.Exception excepcion)
+        {
+            NotificarError(excepcion.Message);
+        }
+    }
+
+    private void NotificarError(string detalle)
+    {
+        NotificationService.Notify(new NotificationMessage
+        {
+            Severity = NotificationSeverity.Error,
+            Summary = "No se pudo obtener el parque",
+            Detail = detalle
+        });
+    }
+}

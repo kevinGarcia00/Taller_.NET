@@ -15,4 +15,4 @@ Como Administrador del sistema SolarUY, quiero registrar un parque solar para in
 5. Seguridad: Solo los usuarios con el rol de "Administrador" están autorizados a registrar parques solares.
 
 ## Reglas de Negocio
-- No pueden existir dos parques con el mismo nombre dentro del mismo nodo.
+- No pueden existir dos parques con el mismo nombre.
