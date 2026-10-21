@@ -22,4 +22,5 @@
 
 - [ ] **5. Verificación de Calidad (Guardarraíles)**
   - [ ] 5.1 Validar mediante pruebas de arquitectura que la relación con Inversor respete los límites modulares a través del mediador.
-  - [ ] 5.2 Ejecutar la suite completa de pruebas unitarias y de integración.
+  - [ ] 5.2 Ejecutar el análisis estático con SonarQube para detectar code smells, bugs y vulnerabilidades en el módulo.
+  - [ ] 5.3 Ejecutar la suite completa de pruebas unitarias y de integración.

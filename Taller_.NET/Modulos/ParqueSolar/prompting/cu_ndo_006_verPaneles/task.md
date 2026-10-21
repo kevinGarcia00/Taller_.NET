@@ -29,7 +29,8 @@
 
 - [ ] **5. Verificación de Calidad (Guardarraíles)**
   - [ ] 5.1 Ejecutar suite de pruebas  para validar que no existan violaciones de Clean Architecture.
-  - [ ] 5.2 Ejecutar inspección de código para asegurar que no hay code smells.
-  - [ ] 5.3 Validar que un nodo ajeno al parque no pueda devolver paneles del contexto incorrecto.
-  - [ ] 5.4 Confirmar que un usuario sin rol `Administrador` no pueda acceder a la funcionalidad.
+  - [ ] 5.2 Ejecutar el análisis estático con SonarQube para comprobar code smells, riesgos de seguridad y cumplimiento de calidad.
+  - [ ] 5.3 Ejecutar inspección de código para asegurar que no hay code smells.
+  - [ ] 5.4 Validar que un nodo ajeno al parque no pueda devolver paneles del contexto incorrecto.
+  - [ ] 5.5 Confirmar que un usuario sin rol `Administrador` no pueda acceder a la funcionalidad.
 

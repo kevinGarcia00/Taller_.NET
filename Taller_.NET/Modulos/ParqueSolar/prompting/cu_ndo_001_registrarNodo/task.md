@@ -31,4 +31,5 @@
 
 - [ ] **5. Verificación de Calidad (Guardarraíles)**
   - [ ] 5.1 Ejecutar pruebas de arquitectura para confirmar que `Modules.Nodo` mantiene el aislamiento con otros módulos mediante mediadores.
-  - [ ] 5.2 Ejecutar análisis estático de código para garantizar cero code smells y cumplimiento de estándares.
+  - [ ] 5.2 Ejecutar el análisis estático con SonarQube para validar code smells, bugs, vulnerabilidades y cumplimiento de estándares del módulo.
+  - [ ] 5.3 Ejecutar inspección adicional del código para comprobar que no queden issues no resueltas antes de cerrar la tarea.
