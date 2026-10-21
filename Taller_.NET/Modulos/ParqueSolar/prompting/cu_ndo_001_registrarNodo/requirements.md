@@ -13,7 +13,7 @@ Como Administrador del sistema SolarUY, una vez seleccionado el parque solar e i
    - Fecha de creación (`fechaCreacion`):** Se asigna automáticamente al confirmar el alta y no se ingresa en el formulario.
    - Energía generada (`energiaGenerada`):** No se ingresa de forma manual. El sistema la inicializa en 0.
 4. Confirmación: Al confirmar la acción, el sistema valida las reglas de negocio, persiste el nuevo nodo y muestra un mensaje de éxito.
-5. Seguridad: Solo los usuarios con el rol de "Administrador" están autorizados a ejecutar este caso de uso.
+5. Seguridad: Solo los usuarios autenticados mediante Auth0 y con el rol de "Administrador" están autorizados a ejecutar este caso de uso.
 
 ## Reglas de Negocio
 - Todo nodo pertenece al parque solar previamente seleccionado. No se puede dar de alta un nodo sin parque solar asociado.

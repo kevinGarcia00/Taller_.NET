@@ -5,7 +5,7 @@ Como Administrador del sistema SolarUY, quiero consultar la lista general de usu
 
 ## Criterios de Aceptación
 1. Visualización de Datos: El sistema debe presentar un listado tabular que incluya los campos clave de los usuarios: Nombre, Apellido, Correo, Teléfono, Rol(es) asignado(s).
-4. Seguridad: El acceso al listado general debe estar restringido exclusivamente a usuarios con el rol "Administrador".
+4. Seguridad: El acceso al listado general debe estar restringido exclusivamente a usuarios autenticados mediante Auth0 con el rol "Administrador".
 5. Navegación a Acciones: Cada registro de la tabla debe incluir accesos directos para realizar las acciones asociadas sobre el usuario seleccionado (ej. Editar, Eliminar).
 
 ## Reglas de Negocio

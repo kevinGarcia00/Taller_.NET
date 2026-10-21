@@ -13,7 +13,7 @@ Como Administrador del sistema SolarUY, ingreso a la sección de nodos (de un pa
    - Inversor asignado.
 3. Navegación y acciones: Desde la interfaz del listado se debe permitir el acceso a las demás acciones del caso de uso de nodos (Registrar, Modificar y Eliminar).
 4. Sin datos: Si el parque solar no posee nodos registrados, la interfaz debe mostrar un mensaje descriptivo advirtiendo que no existen registros asociados.
-5. Seguridad: Solo los usuarios autenticados con el rol de "Administrador" están autorizados a visualizar el listado de nodos.
+5. Seguridad: Solo los usuarios autenticados mediante Auth0 y con el rol de "Administrador" están autorizados a visualizar el listado de nodos.
 
 ## Reglas de Negocio
 - La consulta debe delimitarse exclusivamente a los nodos que pertenecen al parque solar actualmente seleccionado.

@@ -51,12 +51,21 @@ string nombre
         decimal energiaTotal
     }
 
+    HistoricoMantenibilidad {
+        bigint id PK
+        date fecha
+        string observaciones
+        enum estadoInicial
+        enum estadoResultante
+    }
+
     %% Relaciones
     Rol }|--|{ Usuario : "Tiene (N:N)"
     Usuario }|--|{ ParqueSolar : "Gestiona (N:N)"
     ParqueSolar ||--|{ Nodo : "Tiene (1:1..N)"
     Nodo ||--|| Inversor : "Contiene (1:1)"
     Nodo ||--|{ Panel : "Dispone (1:N)"
-    Usuario }|--|{ Panel : "Mantiene (N:N - attrs: Fecha, Observaciones)"
+    Usuario ||--o{ HistoricoMantenibilidad : "Registra (1:N)"
+    Panel ||--o{ HistoricoMantenibilidad : "Recibe (1:N)"
     Panel ||--|{ Historico : "Genera (1:N)"
 ```

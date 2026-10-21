@@ -7,7 +7,7 @@ Como Administrador del sistema SolarUY, ingreso a la sección de nodos de un par
 1. Contexto previo: La visualización del inversor solo está disponible cuando el Administrador ya seleccionó un parque solar e ingresó a su correspondiente sección de nodos.
 2. Visualización de datos: Al presionar la opción para ver el inversor sobre un nodo seleccionado, el sistema despliega una vista o modal informativo presentando los datos del inversor asociado.
 3. Nodo sin inversor: Si el nodo seleccionado no cuenta con un inversor asignado, el sistema debe mostrar un mensaje o indicador claro de que dicho nodo no posee un inversor asociado.
-4. Seguridad: Solo los usuarios con el rol de "Administrador" están autorizados a consultar los datos del inversor del nodo.
+4. Seguridad: Solo los usuarios autenticados mediante Auth0 y con el rol de "Administrador" están autorizados a consultar los datos del inversor del nodo.
 
 ## Reglas de Negocio
 - Solo es posible consultar los inversores de los nodos pertenecientes al parque solar actualmente seleccionado.

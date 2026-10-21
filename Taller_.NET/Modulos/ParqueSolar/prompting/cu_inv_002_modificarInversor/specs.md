@@ -1,15 +1,15 @@
 # Especificaciones Técnicas: Modificar Inversor
 
 ## Arquitectura y Patrones
-- **Estilo:** Monolito Modular con Clean Architecture por Módulo (Modules.Inversor).
-- **Patrones:** Application Services. Se reutilizan la entidad, el repositorio y el mediador `IMediadorNodoInversor` definidos en el alta.
+- **Estilo:** Monolito Modular con Clean Architecture por Módulo (Modules.ParqueSolar).
+- **Patrones:** Application Services. Se reutilizan `Inversor`, `Nodo` y los repositorios del mismo módulo.
 
 ## Detalles de Implementación por Capa
 
-### 1. Capa Domain (Modules.Inversor.Domain)
+### 1. Capa Domain (Modules.ParqueSolar.Domain)
 - **Comportamiento para modificación:**
     - Método de dominio `ActualizarNombre(string nombre)`, con la misma validación del constructor: el nombre no puede ser nulo ni espacios en blanco.
-    - `Id` y `FechaCreacion` no se modifican en este método.
+    - `Id` y `FechaCreacion` no se modifican en este método. El nodo al que pertenece tampoco cambia.
 
 ### 2. Capa Application (Servicios)
 - **DTO de Entrada:** `ModificarInversorDto`
@@ -17,21 +17,21 @@
 - **Validador:** `ModificarInversorDtoValidator` (usando FluentValidation)
   - Reglas: `Id`, `NodoId` y `ParqueSolarId` requeridos; `Nombre` requerido (max 100).
 - **Servicio:** `InversorService` (implementa la interfaz `IInversorService`)
+  - Dependencias: `IInversorRepository` e `INodoRepository`.
   - Métodos:
     - `Task<ModificarInversorDto> ObtenerParaEdicionAsync(int nodoId, int parqueSolarId)`
     - `Task ModificarInversorAsync(ModificarInversorDto dto)`
   - Lógica de `ModificarInversorAsync(dto)`:
-    1. Confirmar mediante `IMediadorNodoInversor` que el nodo existe y pertenece al parque seleccionado.
-    2. Obtener por el mediador el `InversorId` de ese nodo. Si el nodo no tiene inversor, o el id no coincide con el del DTO, lanzar excepción.
-    3. Cargar el inversor por ese `Id`. Si no existe, lanzar excepción.
-    4. Invocar `ActualizarNombre` sobre la entidad.
-    5. Persistir con el repositorio.
+    1. Cargar el nodo y comprobar que pertenece al parque seleccionado.
+    2. Obtener el inversor asignado a ese nodo. Si no tiene, o el id no coincide con el del DTO, lanzar excepción.
+    3. Invocar `ActualizarNombre` sobre la entidad.
+    4. Persistir con el repositorio.
 
 ### 3. Capa Infrastructure (Persistencia)
 - **Configuración de Entity Framework:**
-    - Se reutilizan `InversorConfiguration`, `IInversorDbContext` e `InversorRepository` creados en el alta.
+    - Se reutilizan `InversorConfiguration`, `IParqueDbContext` e `InversorRepository`.
 - **Consulta de modificación:**
-    - La lectura para edición obtiene el inversor por el `Id` que el mediador indica para ese nodo. No se carga un inversor ajeno al nodo seleccionado.
+    - La lectura para edición obtiene el inversor a través del nodo seleccionado. No se carga un inversor ajeno a ese nodo.
 
 ### 4. Capa Presentation (Blazor Server con Radzen)
 - **Componente:** `EditarInversor.razor`

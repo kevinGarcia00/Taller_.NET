@@ -8,7 +8,7 @@ Como Administrador del sistema SolarUY, ingreso a la sección de nodos de un par
 2. Diálogo de confirmación: Al presionar la opción de eliminar sobre un nodo seleccionado, el sistema debe desplegar una ventana o modal de confirmación advirtiendo sobre la acción.
 3. Confirmación y resultado: Al realizar la confirmación explícita por parte del Administrador, el sistema procesa la eliminación del nodo, actualiza la lista de nodos del parque solar y muestra un mensaje de éxito.
 4. Cancelación: Si el Administrador cancela el diálogo de confirmación, la operación se interrumpe sin aplicar ningún cambio sobre la base de datos ni sobre la entidad.
-5. Seguridad: Solo los usuarios con el rol de "Administrador" están autorizados a eliminar nodos.
+5. Seguridad: Solo los usuarios autenticados mediante Auth0 y con el rol de "Administrador" están autorizados a eliminar nodos.
 
 ## Reglas de Negocio
 - Solo es posible eliminar nodos pertenecientes al parque solar actualmente seleccionado.

@@ -5,7 +5,7 @@ Como Administrador del sistema SolarUY, quiero poder eliminar un usuario registr
 
 ## Criterios de Aceptación
 1. Confirmación de Acción: Al seleccionar la opción de eliminar un usuario desde la interfaz, el sistema debe mostrar un diálogo modal de confirmación (ej. «¿Está seguro de que desea eliminar al usuario [Nombre Apellido]?»).
-2. Seguridad: Solo los usuarios con el rol de "Administrador" están autorizados a realizar la eliminación de usuarios.
+2. Seguridad: Solo los usuarios autenticados mediante Auth0 y con el rol de "Administrador" están autorizados a realizar la eliminación de usuarios.
 3. Notificación y Actualización: Tras una eliminación exitosa, el sistema debe mostrar una notificación mediante el `NotificationService` y refrescar el listado general de usuarios de forma inmediata.
 4. Manejo de Errores: Si la eliminación falla por reglas de negocio o problemas del servidor, se debe notificar al Administrador sin romper la interfaz.
 

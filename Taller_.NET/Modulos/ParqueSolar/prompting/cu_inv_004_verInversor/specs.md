@@ -1,34 +1,33 @@
 # Especificaciones Técnicas: Ver Inversor
 
 ## Arquitectura y Patrones
-- **Estilo:** Monolito Modular con Clean Architecture por Módulo (Modules.Inversor).
-- **Patrones:** Application Services. La lectura reutiliza `Inversor` e `IInversorRepository`. La comprobación del nodo y la obtención del `InversorId` usan `IMediadorNodoInversor`, sin referencia directa al módulo Nodo.
+- **Estilo:** Monolito Modular con Clean Architecture por Módulo (Modules.ParqueSolar).
+- **Patrones:** Application Services. La lectura reutiliza `Inversor`, `Nodo` e `IInversorRepository` dentro del mismo módulo.
 
 ## Detalles de Implementación por Capa
 
-### 1. Capa Domain (Modules.Inversor.Domain)
+### 1. Capa Domain (Modules.ParqueSolar.Domain)
 - **Entidades:**
-    - Reutilizar `Inversor`.
+    - Reutilizar `Inversor` y la navegación desde `Nodo`.
 - **Comportamiento:**
-    - La consulta expone `Nombre` y `FechaCreacion`. Este caso de uso no agrega métodos que cambien el estado del inversor.
+    - La consulta expone `Nombre` y `FechaCreacion`. Este caso de uso no agrega métodos que cambien el inversor.
 
 ### 2. Capa Application (Servicios)
 - **DTO de salida:** `InversorDetalleDto`
   - Propiedades: `Id` (int), `Nombre` (string), `FechaCreacion` (DateTime), `NodoId` (int), `ParqueSolarId` (int).
 - **Servicio:** `InversorService` (implementa la interfaz `IInversorService`)
-  - Dependencias: `IInversorRepository` e `IMediadorNodoInversor`.
+  - Dependencias: `IInversorRepository` e `INodoRepository`.
   - Método: `ObtenerInversorDelNodoAsync(int nodoId, int parqueSolarId)`
   - Lógica:
-    1. Confirmar mediante el mediador que el nodo existe y pertenece al parque seleccionado. Si no, lanzar excepción.
-    2. Obtener el `InversorId` de ese nodo. Si no tiene inversor, retornar un resultado vacío, sin lanzar excepción.
-    3. Si tiene `InversorId`, cargar el inversor y proyectarlo a `InversorDetalleDto` sin modificarlo.
-    4. Si el id figura en el nodo pero el inversor no existe, lanzar excepción.
+    1. Cargar el nodo y comprobar que pertenece al parque seleccionado. Si no, lanzar excepción.
+    2. Si el nodo no tiene inversor, retornar un resultado vacío, sin lanzar excepción.
+    3. Si tiene inversor, proyectarlo a `InversorDetalleDto` sin modificarlo.
 
 ### 3. Capa Infrastructure (Persistencia)
 - **Configuración de Entity Framework:**
-    - Reutilizar `InversorConfiguration` y `DbSet<Inversor> Inversores`.
+    - Reutilizar `InversorConfiguration` y `DbSet<Inversor> Inversores` en `IParqueDbContext`.
 - **Repositorio:**
-    - La consulta del detalle obtiene el inversor por `Id` y proyecta `Id`, `Nombre` y `FechaCreacion`.
+    - La consulta del detalle obtiene el inversor asignado al nodo y proyecta `Id`, `Nombre` y `FechaCreacion`.
 
 ### 4. Capa Presentation (Blazor Server con Radzen)
 - **Componente:** `DetalleInversor.razor`

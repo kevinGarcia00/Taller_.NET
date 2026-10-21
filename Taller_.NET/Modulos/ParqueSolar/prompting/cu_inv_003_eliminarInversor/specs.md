@@ -1,33 +1,31 @@
 # Especificaciones Técnicas: Eliminar Inversor
 
 ## Arquitectura y Patrones
-- **Estilo:** Monolito Modular con Clean Architecture por Módulo (Modules.Inversor).
-- **Patrones:** Application Services. Se reutilizan la entidad, el repositorio y el mediador `IMediadorNodoInversor`. Inversor no referencia al módulo Nodo.
+- **Estilo:** Monolito Modular con Clean Architecture por Módulo (Modules.ParqueSolar).
+- **Patrones:** Application Services. Se reutilizan `Inversor`, `Nodo` y los repositorios del mismo módulo.
 
 ## Detalles de Implementación por Capa
 
-### 1. Capa Domain (Modules.Inversor.Domain)
+### 1. Capa Domain (Modules.ParqueSolar.Domain)
 - **Entidades:**
-    - Reutilizar `Inversor`.
+    - Reutilizar `Inversor` y la navegación desde `Nodo`.
 - **Comportamiento:**
-    - La eliminación no agrega comportamiento de negocio sobre la entidad. La regla de pertenencia se resuelve al obtener, mediante el mediador, el inversor del nodo seleccionado.
+    - Método de dominio `QuitarInversor()` en `Nodo`, que deja vacía la relación 1:1.
 
 ### 2. Capa Application (Servicios)
 - **Parámetros de entrada:** `int nodoId`, `int parqueSolarId`.
 - **Servicio:** `InversorService` (implementa la interfaz `IInversorService`)
-  - Dependencias: `IInversorRepository` e `IMediadorNodoInversor`.
+  - Dependencias: `IInversorRepository` e `INodoRepository`.
   - Método: `EliminarInversorAsync(int nodoId, int parqueSolarId)`
   - Lógica:
-    1. Confirmar mediante el mediador que el nodo existe y pertenece al parque seleccionado. Si no, lanzar excepción.
-    2. Obtener el `InversorId` de ese nodo. Si el nodo no tiene inversor, lanzar excepción.
-    3. Cargar el inversor. Si no existe, lanzar excepción.
+    1. Cargar el nodo y comprobar que pertenece al parque seleccionado. Si no, lanzar excepción.
+    2. Obtener el inversor de ese nodo. Si no tiene, lanzar excepción.
+    3. Invocar `QuitarInversor()` sobre el nodo.
     4. Remover el inversor mediante el repositorio y confirmar la persistencia.
-    5. Pedir al mediador que deje el `InversorId` del nodo en vacío, para liberar la relación 1:1.
 
 ### 3. Capa Infrastructure (Persistencia)
 - **Configuración de Entity Framework:**
-    - Reutilizar `InversorConfiguration`. El inversor no mantiene colecciones propias que exijan un borrado en cascada adicional.
-- **DbContext:** Reutilizar `DbSet<Inversor> Inversores` en `IInversorDbContext`.
+    - Reutilizar `InversorConfiguration` y `DbSet<Inversor> Inversores` en `IParqueDbContext`.
 - **Repositorio:** `InversorRepository` expone la baja del inversor ya cargado y la confirmación de cambios.
 
 ### 4. Capa Presentation (Blazor Server con Radzen)

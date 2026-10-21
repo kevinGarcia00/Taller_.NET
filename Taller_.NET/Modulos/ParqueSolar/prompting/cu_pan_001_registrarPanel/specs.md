@@ -1,12 +1,12 @@
 # Especificaciones Técnicas: Registrar Panel
 
 ## Arquitectura y Patrones
-- **Estilo:** Monolito Modular con Clean Architecture por Módulo (Modules.Panel).
-- **Patrones:** Application Services. El módulo Panel no referencia a Nodo ni a ParqueSolar. La comprobación del nodo seleccionado se hace por un mediador exclusivo entre Panel y Nodo.
+- **Estilo:** Monolito Modular con Clean Architecture por Módulo (Modules.ParqueSolar).
+- **Patrones:** Application Services. Panel, Nodo y Parque pertenecen al mismo módulo. El panel referencia la entidad `Nodo` de forma directa. No hay mediador interno. La persistencia usa el `IParqueDbContext` del módulo.
 
 ## Detalles de Implementación por Capa
 
-### 1. Capa Domain (Modules.Panel.Domain)
+### 1. Capa Domain (Modules.ParqueSolar.Domain)
 - **Entidades:**
     - **Panel**
         - **Propiedades:**
@@ -16,14 +16,12 @@
             - `Estado` (EstadoPanel)
             - `Potencia` (decimal)
             - `VidaUtil` (string, max 50 caracteres)
-            - `ContextoNodo` (objeto de valor propio del módulo, no la entidad `Nodo`)
+            - `Nodo` (entidad del mismo módulo)
     - **EstadoPanel**
         - Valores: `Sucio`, `Roto`, `Encendido`, `Deteriorado`, `Apagado`.
-    - **ContextoNodo**
-        - **Propiedades:** `NodoId` (int), `ParqueSolarId` (int).
 - **Comportamiento:**
     - Constructor que exige nombre, estado, potencia y vida útil, asigna `FechaCreacion` y valida que la potencia sea mayor a cero y que el nombre no sea vacío.
-    - Método de dominio `AsignarContexto(ContextoNodo contexto)` para vincular el panel al nodo ya seleccionado.
+    - Método de dominio `AsignarNodo(Nodo nodo)` para vincular el panel al nodo ya seleccionado.
 
 ### 2. Capa Application (Servicios)
 - **DTO de Entrada:** `CrearPanelDto`
@@ -31,14 +29,13 @@
 - **Validador:** `CrearPanelDtoValidator` (usando FluentValidation)
   - Reglas: `Nombre` requerido (max 100), `Estado` requerido y dentro del enum, `Potencia` requerida y mayor a cero, `VidaUtil` requerida (max 50), `NodoId` y `ParqueSolarId` requeridos.
 - **Servicio:** `PanelService` (implementa la interfaz `IPanelService`)
-  - Dependencias: `IPanelRepository` y `IMediadorPanelNodo`, inyectadas por constructor.
+  - Dependencias: `IPanelRepository` e `INodoRepository`, inyectadas por constructor.
   - Método: `CrearPanelAsync(CrearPanelDto dto)`
   - Lógica:
-    1. Consultar al mediador Panel–Nodo para confirmar que el nodo existe y pertenece al parque seleccionado. Si no, lanzar excepción.
+    1. Cargar el nodo y comprobar que pertenece al parque seleccionado. Si no, lanzar excepción.
     2. Validar que no exista otro panel con el mismo nombre en ese nodo.
-    3. Instanciar `Panel`, asignar `ContextoNodo` y persistir mediante el repositorio.
+    3. Instanciar `Panel`, asignar el `Nodo` y persistir mediante el repositorio.
     4. Retornar el Id generado.
-- **Mediador:** `IMediadorPanelNodo` es el único canal entre Panel y Nodo. Ninguna capa de Panel referencia tipos del módulo Nodo.
 
 ### 3. Capa Infrastructure (Persistencia)
 - **Repositorio:** `PanelRepository` implementa `IPanelRepository`.
@@ -47,11 +44,10 @@
   - Definir la tabla y la longitud máxima de columnas.
   - Configurar `Id` como clave primaria de tipo int.
   - Persistir `EstadoPanel` como string.
-  - Mapear `ContextoNodo` como columnas `NodoId` y `ParqueSolarId` pertenecientes a Panel, sin navegación hacia la entidad de otro módulo.
-  - Crear un índice único compuesto por `Nombre` y `NodoId`.
-- **DbContext:** Exponer en `IPanelDbContext` el conjunto:
+  - Configurar la relación con `Nodo` y el índice único compuesto por `Nombre` y `NodoId`.
+- **DbContext:** Exponer en `IParqueDbContext` el conjunto:
     - `DbSet<Panel> Paneles { get; set; }`
-- **Migraciones:** Generar y aplicar una migración para reflejar la tabla de paneles.
+- **Migraciones:** Generar y aplicar una migración del módulo ParqueSolar para reflejar la tabla de paneles.
 
 ### 4. Capa Presentation (Blazor Server con Radzen)
 - **Componente:** `AltaPanel.razor`
