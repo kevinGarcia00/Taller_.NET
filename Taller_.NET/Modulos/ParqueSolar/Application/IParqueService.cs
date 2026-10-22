@@ -11,6 +11,8 @@ namespace Taller_.NET.Modulos.ParqueSolar.Application
 
         Task<int> ModificarParqueAsync(int parqueSolarId, ModificarParqueDto dto, CancellationToken cancellationToken = default);
 
+        Task EliminarParqueAsync(int parqueSolarId, CancellationToken cancellationToken = default);
+
         IReadOnlyList<ParqueListadoDto> ObtenerParquesSync();
 
         ParqueDetalleDto ObtenerParqueSync(int parqueSolarId);

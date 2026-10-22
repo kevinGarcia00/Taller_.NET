@@ -39,6 +39,12 @@ namespace Taller_.NET.Modulos.ParqueSolar.Infrastructure.Repositorios
             await _contexto.SaveChangesAsync(cancellationToken);
         }
 
+        public async Task EliminarAsync(Parque parque, CancellationToken cancellationToken = default)
+        {
+            _contexto.Parques.Remove(parque);
+            await _contexto.SaveChangesAsync(cancellationToken);
+        }
+
         public Parque? ObtenerPorId(int parqueSolarId)
         {
             return _contexto.Parques

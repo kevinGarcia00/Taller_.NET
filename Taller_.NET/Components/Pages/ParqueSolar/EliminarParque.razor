@@ -1,0 +1,161 @@
+@page "/parques/eliminar/{ParqueId:int}"
+@attribute [Authorize(Roles = "Administrador")]
+@rendermode InteractiveServer
+@inject IParqueService ParqueService
+@inject NotificationService NotificationService
+@inject NavigationManager NavigationManager
+@inject DialogService DialogService
+
+<PageTitle>Eliminar Parque Solar</PageTitle>
+
+<h1>Eliminar Parque Solar</h1>
+
+<AuthorizeView Roles="Administrador" Context="autorizacion">
+    <Authorized>
+        @if (_cargando)
+        {
+            <RadzenText TextStyle="TextStyle.Body2">Cargando el parque solar...</RadzenText>
+        }
+        else if (_parque is null)
+        {
+            <RadzenAlert AlertStyle="AlertStyle.Warning" Title="Parque no encontrado">
+                No se encontro el parque solar solicitado.
+            </RadzenAlert>
+        }
+        else
+        {
+            <RadzenCard>
+                <RadzenStack Gap="0.5rem">
+                    <RadzenText TextStyle="TextStyle.H6">Informacion del parque</RadzenText>
+                    <RadzenLabel Text="Nombre" />
+                    <RadzenText>@_parque.Nombre</RadzenText>
+                    <RadzenLabel Text="Ubicacion" />
+                    <RadzenText>@_parque.Ubicacion</RadzenText>
+                    <RadzenLabel Text="Cantidad de nodos actuales" />
+                    <RadzenText>@_parque.CantidadNodosActuales</RadzenText>
+                </RadzenStack>
+            </RadzenCard>
+
+            <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem">
+                <RadzenButton Text="Eliminar" Icon="delete" ButtonStyle="ButtonStyle.Danger"
+                              Disabled="@_eliminando" Click="@ConfirmarEliminacion" />
+                <RadzenButton Text="Cancelar" Icon="close" ButtonStyle="ButtonStyle.Secondary"
+                              Click="@(() => NavigationManager.NavigateTo("/parques"))" />
+            </RadzenStack>
+        }
+    </Authorized>
+    <NotAuthorized>
+        <RadzenAlert AlertStyle="AlertStyle.Warning" Title="Acceso restringido">
+            Solo los usuarios con el rol de Administrador pueden eliminar parques solares.
+        </RadzenAlert>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    [Parameter]
+    public int ParqueId { get; set; }
+
+    private ParqueDetalleDto? _parque;
+    private bool _cargando = true;
+    private bool _eliminando;
+
+    protected override void OnParametersSet()
+    {
+        _cargando = true;
+        _parque = null;
+
+        try
+        {
+            _parque = ParqueService.ObtenerParqueSync(ParqueId);
+        }
+        catch (ParqueNoEncontradoException excepcion)
+        {
+            NotificarAdvertencia(excepcion.Message);
+        }
+        catch (System.Exception excepcion)
+        {
+            NotificarError(excepcion.Message);
+        }
+        finally
+        {
+            _cargando = false;
+        }
+    }
+
+    private async Task ConfirmarEliminacion()
+    {
+        if (_parque is null)
+        {
+            return;
+        }
+
+        var confirmado = await DialogService.Confirm(
+            $"¿Está seguro de que desea eliminar el parque solar {_parque.Nombre}?",
+            "Eliminar parque solar",
+            new ConfirmOptions
+            {
+                OkButtonText = "Eliminar",
+                CancelButtonText = "Cancelar"
+            });
+
+        if (confirmado != true)
+        {
+            return;
+        }
+
+        try
+        {
+            _eliminando = true;
+            await ParqueService.EliminarParqueAsync(_parque.Id);
+
+            NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Success,
+                Summary = "Parque eliminado",
+                Detail = $"El parque '{_parque.Nombre}' se eliminó correctamente."
+            });
+
+            NavigationManager.NavigateTo("/parques");
+        }
+        catch (ParqueNoEncontradoException excepcion)
+        {
+            NotificarAdvertencia(excepcion.Message);
+        }
+        catch (ParqueConNodosAsociadosException excepcion)
+        {
+            NotificarAdvertencia(excepcion.Message);
+        }
+        catch (UsuarioNoAutorizadoException excepcion)
+        {
+            NotificarAdvertencia(excepcion.Message);
+        }
+        catch (System.Exception excepcion)
+        {
+            NotificarError(excepcion.Message);
+        }
+        finally
+        {
+            _eliminando = false;
+        }
+    }
+
+    private void NotificarAdvertencia(string detalle)
+    {
+        NotificationService.Notify(new NotificationMessage
+        {
+            Severity = NotificationSeverity.Warning,
+            Summary = "No se pudo eliminar el parque",
+            Detail = detalle
+        });
+    }
+
+    private void NotificarError(string detalle)
+    {
+        NotificationService.Notify(new NotificationMessage
+        {
+            Severity = NotificationSeverity.Error,
+            Summary = "No se pudo eliminar el parque",
+            Detail = detalle
+        });
+    }
+}

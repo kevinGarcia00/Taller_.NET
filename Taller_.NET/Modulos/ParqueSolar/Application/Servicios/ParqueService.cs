@@ -82,6 +82,24 @@ namespace Taller_.NET.Modulos.ParqueSolar.Application.Servicios
             return parque.Id;
         }
 
+        public async Task EliminarParqueAsync(int parqueSolarId, CancellationToken cancellationToken = default)
+        {
+            if (!await _usuarioActualProvider.EsAdministradorAsync(cancellationToken))
+            {
+                throw new UsuarioNoAutorizadoException("Solo un administrador puede eliminar parques solares.");
+            }
+
+            var parque = _parqueRepository.ObtenerPorId(parqueSolarId)
+                ?? throw new ParqueNoEncontradoException(parqueSolarId);
+
+            if (_mediadorParqueNodo.ObtenerNodosPorParque(parque.Id).Count > 0)
+            {
+                throw new ParqueConNodosAsociadosException(parqueSolarId);
+            }
+
+            await _parqueRepository.EliminarAsync(parque, cancellationToken);
+        }
+
         public IReadOnlyList<ParqueListadoDto> ObtenerParquesSync()
         {
             return _parqueRepository.ObtenerTodos()

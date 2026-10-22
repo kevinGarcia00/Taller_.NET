@@ -14,6 +14,8 @@ namespace Taller_.NET.Modulos.ParqueSolar.Domain
 
         Task ActualizarAsync(Parque parque, CancellationToken cancellationToken = default);
 
+        Task EliminarAsync(Parque parque, CancellationToken cancellationToken = default);
+
         Parque? ObtenerPorId(int parqueSolarId);
 
         IReadOnlyList<Parque> ObtenerTodos();

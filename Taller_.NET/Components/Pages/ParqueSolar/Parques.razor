@@ -4,6 +4,7 @@
 @inject IParqueService ParqueService
 @inject NavigationManager NavigationManager
 @inject NotificationService NotificationService
+@inject DialogService DialogService
 
 <PageTitle>Parques Solares</PageTitle>
 
@@ -26,6 +27,8 @@
                                           Click="@(() => NavigationManager.NavigateTo($"/parques/{parque.Id}"))" />
                             <RadzenButton Text="Modificar" Icon="edit" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary"
                                           Click="@(() => NavigationManager.NavigateTo($"/parques/modificar/{parque.Id}"))" />
+                            <RadzenButton Text="Eliminar" Icon="delete" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Danger"
+                                          Click="@(() => ConfirmarEliminacion(parque))" />
                         </Template>
                     </RadzenDataGridColumn>
                 </Columns>
@@ -45,6 +48,12 @@
 
     protected override void OnInitialized()
     {
+        CargarParques();
+        _cargando = false;
+    }
+
+    private void CargarParques()
+    {
         try
         {
             _parques = ParqueService.ObtenerParquesSync();
@@ -58,9 +67,68 @@
                 Detail = excepcion.Message
             });
         }
-        finally
+    }
+
+    private async Task ConfirmarEliminacion(ParqueListadoDto parque)
+    {
+        var confirmado = await DialogService.Confirm(
+            $"¿Está seguro de que desea eliminar el parque solar {parque.Nombre}?",
+            "Eliminar parque solar",
+            new ConfirmOptions
+            {
+                OkButtonText = "Eliminar",
+                CancelButtonText = "Cancelar"
+            });
+
+        if (confirmado != true)
         {
-            _cargando = false;
+            return;
         }
+
+        try
+        {
+            await ParqueService.EliminarParqueAsync(parque.Id);
+
+            NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Success,
+                Summary = "Parque eliminado",
+                Detail = $"El parque '{parque.Nombre}' se eliminó correctamente."
+            });
+
+            CargarParques();
+        }
+        catch (ParqueNoEncontradoException excepcion)
+        {
+            NotificarAdvertencia(excepcion.Message);
+            CargarParques();
+        }
+        catch (ParqueConNodosAsociadosException excepcion)
+        {
+            NotificarAdvertencia(excepcion.Message);
+        }
+        catch (UsuarioNoAutorizadoException excepcion)
+        {
+            NotificarAdvertencia(excepcion.Message);
+        }
+        catch (System.Exception excepcion)
+        {
+            NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Error,
+                Summary = "No se pudo eliminar el parque",
+                Detail = excepcion.Message
+            });
+        }
+    }
+
+    private void NotificarAdvertencia(string detalle)
+    {
+        NotificationService.Notify(new NotificationMessage
+        {
+            Severity = NotificationSeverity.Warning,
+            Summary = "No se pudo eliminar el parque",
+            Detail = detalle
+        });
     }
 }
