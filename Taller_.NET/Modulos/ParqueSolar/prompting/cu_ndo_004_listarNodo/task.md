@@ -23,4 +23,5 @@
 
 - [ ] **5. Verificación de Calidad (Guardarraíles)**
   - [ ] 5.1 Ejecutar suite de pruebas para validar que no existan violaciones de Clean Architecture.
-  - [ ] 5.2 Ejecutar inspección de código para asegurar que no hay code smells.
+  - [ ] 5.2 Ejecutar el análisis estático con SonarQube para validar code smells, bugs, vulnerabilidades y deuda técnica.
+  - [ ] 5.3 Ejecutar inspección de código para asegurar que no hay code smells.
