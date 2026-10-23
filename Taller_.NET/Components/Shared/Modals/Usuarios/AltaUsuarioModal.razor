@@ -1,0 +1,10 @@
+@inject DialogService DialogService
+
+<AltaUsuarioForm OnRegistrado="ConfirmarRegistro" />
+
+@code {
+    private void ConfirmarRegistro(Guid id)
+    {
+        DialogService.Close(id);
+    }
+}

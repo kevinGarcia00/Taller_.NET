@@ -8,7 +8,7 @@ Como Administrador del sistema SolarUY, quiero modificar los datos generales y l
 2. Precarga de datos: Al seleccionar un usuario válido, el sistema debe presentar un formulario precargado con sus datos actuales (Nombre, Apellido, Correo, Rol y Telefono).
 3. Campos editables: El Administrador podrá modificar el Nombre, Apellido, Correo, Rol asignado y el Telefono del usuario.
 4. Confirmación y guardado: Al confirmar los cambios, el sistema valida las reglas de negocio, actualiza la base de datos y despliega un mensaje de éxito.
-5. Seguridad: Solo los usuarios autenticados mediante Auth0 y con el rol de "Administrador" están autorizados a realizar esta acción.
+5. Seguridad: Solo los usuarios autenticados mediante Auth0 (pending implementation) y con el rol de "Administrador" están autorizados a realizar esta acción.
 
 ## Reglas de Negocio
 - Si se habilita la edición del correo electrónico, el nuevo valor no debe coincidir con el correo de ningún otro usuario registrado.

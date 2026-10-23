@@ -27,18 +27,19 @@
 
 ### 2. Capa Application (Servicios)
 - **DTO de Entrada:** `CrearUsuarioDto`
-  - Propiedades: `Nombre`, `Apellido`, `Correo`, `Telefono`, `RolesIds (List<long>)`.
+  - Propiedades: `Nombre`, `Apellido`, `Correo`, `Telefono`, `Contrasena`, `RolesIds (List<long>)`.
 - **Validador:** `CrearUsuarioDtoValidator` (usando FluentValidation)
-  - Reglas: `Nombre` requerido (max 100), `Apellido` requerida (max 100), `Correo` requerido (max 100) y formato valido, `RolesIds` requerido (al menos 1 ID de rol).
+  - Reglas: `Nombre` requerido (max 100), `Apellido` requerida (max 100), `Correo` requerido (max 100) y formato valido, `Contrasena` requerida (min 8, max 128, letras y numeros), `RolesIds` requerido (al menos 1 ID de rol).
 - **Servicio:** `UsuarioService` (implementa la interfaz `IUsuarioService`)
-  - Dependencias: `IUsersDbContext` (para acceso a BD).
+  - Dependencias: `IUsuarioRepository`, `IUsuarioActualProvider`, `IAuth0AdministracionProvider` (Management API de Auth0, **pending implementation**).
   - Método: `CrearUsuarioAsync(CrearUsuarioDto dto)`
   - Lógica: 
     1. Validar que no exista un Usuario registrado con el mismo Correo.
     2. Consultar la base de datos para verificar que todos los RolesIds enviados existan. Si alguno no existe, lanzar excepción.
-    3. Instanciar la entidad Usuario y asociar las entidades Rol correspondientes.
-    4. Agregar la entidad al DbSet y hacer SaveChangesAsync().
-    5. Retornar el Id generado.
+    3. Crear el usuario en Auth0 con la contraseña informada y los roles seleccionados (Management API, `POST /api/v2/users`).
+    4. Instanciar la entidad Usuario, vincularla con el `auth0_user_id` y asociar las entidades Rol correspondientes.
+    5. Agregar la entidad al DbSet y hacer SaveChangesAsync().
+    6. Retornar el Id generado.
 
 ### 3. Capa Infrastructure (Persistencia)
 - **Configuración de Entity Framework:** 
@@ -50,9 +51,10 @@
 - `RolConfiguration : IEntityTypeConfiguration<Rol>`
   - Definir la tabla y longitud maxima de columnas.
   - Configurar Id como clave primaria de tipo long (bigint)
-- **DbContext:** Asegurarse de exponer en `IUsersSbConxtext` los conjuntos:
-    - `DbSet<Usuario> Usuario { get; set;} `
+- **DbContext:** Asegurarse de exponer en `IUsuarioDbContext` los conjuntos:
+    - `DbSet<Usuario> Usuarios { get; set;} `
     - `DbSet<Rol> Roles { get; set;} `
+  - La entidad `Usuario` expone `Auth0UserId` (columna `auth0_user_id`, indice unico) como vinculo con el proveedor de identidad.
 - **Migraciones:** Se deberá generar y aplicar una migración para reflejar estos cambios en la base de datos.
 
 ### 4. Capa Presentation (Blazor Server con Radzen)

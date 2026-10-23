@@ -1,0 +1,36 @@
+@page "/usuarios/alta"
+@attribute [Authorize(Roles = "Administrador")]
+@rendermode InteractiveServer
+@inject NavigationManager NavigationManager
+
+<PageTitle>Alta de Usuario</PageTitle>
+
+<h1>Alta de Usuario</h1>
+
+<AuthorizeView Roles="Administrador" Context="autorizacion">
+    <Authorized>
+        <RadzenCard>
+            <AltaUsuarioForm OnRegistrado="IrAlInicio" />
+        </RadzenCard>
+    </Authorized>
+    <NotAuthorized>
+        <RadzenAlert AlertStyle="AlertStyle.Warning" Title="Acceso restringido">
+            Solo los usuarios con el rol de Administrador pueden registrar usuarios.
+        </RadzenAlert>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    private const int EsperaAntesDeNavegar = 2000;
+
+    private async Task IrAlInicio()
+    {
+        // Se espera un momento para que el usuario vea el aviso de registro exitoso
+        // antes de cambiar de pagina.
+        await Task.Delay(EsperaAntesDeNavegar);
+
+        // El listado de usuarios (caso de uso CU-004) todavia no esta implementado,
+        // por lo que el usuario registrado vuelve al inicio.
+        NavigationManager.NavigateTo("/usuarios");
+    }
+}

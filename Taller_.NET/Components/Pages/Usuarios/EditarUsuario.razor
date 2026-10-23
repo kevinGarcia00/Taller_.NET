@@ -1,0 +1,125 @@
+@page "/usuarios/editar"
+@page "/usuarios/editar/{Id:guid}"
+@attribute [Authorize(Roles = "Administrador")]
+@rendermode InteractiveServer
+@using Taller_.NET.Modulos.Usuario.Application.Excepciones
+@inject IUsuarioService UsuarioService
+@inject NotificationService NotificationService
+@inject NavigationManager NavigationManager
+
+<PageTitle>Edicion de Usuario</PageTitle>
+
+<h1>Edicion de Usuario</h1>
+
+<AuthorizeView Roles="Administrador" Context="autorizacion">
+    <Authorized>
+        @if (_cargando)
+        {
+            <RadzenProgressBar Mode="ProgressBarMode.Indeterminate" Style="height: 2rem" />
+        }
+        else if (_modelo is not null)
+        {
+            <RadzenCard>
+                <ModificarUsuarioForm Modelo="_modelo" OnModificado="IrAlInicio" OnCancelar="IrAlInicio" />
+            </RadzenCard>
+        }
+        else
+        {
+            <RadzenCard>
+                <RadzenStack Gap="1rem">
+                    <RadzenText TextStyle="TextStyle.Body1">
+                        Ingrese el identificador del usuario que desea modificar.
+                    </RadzenText>
+
+                    <RadzenFormField Text="Identificador del usuario" Variant="Variant.Outlined">
+                        <ChildContent>
+                            <RadzenTextBox @bind-Value="_identificador" Placeholder="00000000-0000-0000-0000-000000000000" />
+                        </ChildContent>
+                    </RadzenFormField>
+
+                    <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0.5rem">
+                        <RadzenButton Text="Cancelar" ButtonStyle="ButtonStyle.Light" Click="@IrAlInicio" />
+                        <RadzenButton Text="Buscar" Icon="search" Click="@Buscar" />
+                    </RadzenStack>
+                </RadzenStack>
+            </RadzenCard>
+        }
+    </Authorized>
+    <NotAuthorized>
+        <RadzenAlert AlertStyle="AlertStyle.Warning" Title="Acceso restringido">
+            Solo los usuarios con el rol de Administrador pueden modificar usuarios.
+        </RadzenAlert>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    private const int DuracionAvisoError = 8000;
+    private const int EsperaAntesDeNavegar = 2000;
+
+    [Parameter]
+    public Guid? Id { get; set; }
+
+    private ModificarUsuarioDto? _modelo;
+    private string _identificador = string.Empty;
+    private bool _cargando = true;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _cargando = true;
+        _modelo = null;
+
+        if (Id is null)
+        {
+            _cargando = false;
+            return;
+        }
+
+        try
+        {
+            _modelo = await UsuarioService.ObtenerParaEdicionAsync(Id.Value);
+        }
+        catch (UsuarioNoEncontradoException excepcion)
+        {
+            NotificarError("No se pudo cargar el usuario.", excepcion.Message);
+        }
+        catch (Exception excepcion)
+        {
+            NotificarError("No se pudo cargar el usuario.", excepcion.Message);
+        }
+        finally
+        {
+            _cargando = false;
+        }
+    }
+
+    private void Buscar()
+    {
+        if (!Guid.TryParse(_identificador, out var id))
+        {
+            NotificarError("El identificador del usuario no es valido.", "Debe ser un identificador con formato GUID.");
+            return;
+        }
+
+        NavigationManager.NavigateTo($"/usuarios/editar/{id}");
+    }
+
+    private async Task IrAlInicio()
+    {
+        // Se espera un momento para que el usuario vea el aviso de actualizacion
+        // antes de cambiar de pagina.
+        await Task.Delay(EsperaAntesDeNavegar);
+
+        NavigationManager.NavigateTo("/usuarios");
+    }
+
+    private void NotificarError(string titulo, string detalle)
+    {
+        NotificationService.Notify(new NotificationMessage
+        {
+            Severity = NotificationSeverity.Error,
+            Summary = titulo,
+            Detail = detalle,
+            Duration = DuracionAvisoError
+        });
+    }
+}

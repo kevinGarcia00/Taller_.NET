@@ -1,0 +1,134 @@
+@page "/usuarios"
+@attribute [Authorize(Roles = "Administrador")]
+@rendermode InteractiveServer
+@inject IUsuarioService UsuarioService
+@inject NotificationService NotificationService
+@inject NavigationManager NavigationManager
+@inject DialogService DialogService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@using Taller_.NET.Modulos.Usuario.Application.Excepciones
+@using System.Security.Claims
+
+<PageTitle>Usuarios</PageTitle>
+
+<AuthorizeView Roles="Administrador" Context="autorizacion">
+    <Authorized>
+        <RadzenStack Gap="1rem">
+            <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End">
+                <RadzenButton Text="Nuevo Usuario" Icon="person_add" Click="@IrAlAlta" />
+            </RadzenStack>
+
+            <RadzenDataGrid TItem="UsuarioListadoDto" Data="@_usuarios" AllowPaging="true" AllowSorting="true"
+                            EmptyText="No hay usuarios registrados.">
+                <Columns>
+                    <RadzenDataGridColumn TItem="UsuarioListadoDto" Property="Nombre" Title="Nombre" />
+                    <RadzenDataGridColumn TItem="UsuarioListadoDto" Property="Apellido" Title="Apellido" />
+                    <RadzenDataGridColumn TItem="UsuarioListadoDto" Property="Correo" Title="Correo" />
+                    <RadzenDataGridColumn TItem="UsuarioListadoDto" Property="Telefono" Title="Telefono" />
+                    <RadzenDataGridColumn TItem="UsuarioListadoDto" Property="Roles" Title="Roles" Sortable="false" Filterable="false">
+                        <Template Context="usuario">
+                            <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem" Wrap="FlexWrap.Wrap">
+                                @foreach (var rol in usuario.Roles)
+                                {
+                                    <RadzenBadge Text="@rol" BadgeStyle="BadgeStyle.Info" />
+                                }
+                            </RadzenStack>
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="UsuarioListadoDto" Title="Acciones" Sortable="false" Filterable="false" Width="150px">
+                        <Template Context="usuario">
+                            <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem">
+                                <RadzenButton Icon="edit" Title="Editar" Click="@(() => IrAEditar(usuario))" />
+                                <RadzenButton Icon="delete" Title="Eliminar" Click="@(() => ConfirmarEliminar(usuario))" ButtonStyle="ButtonStyle.Danger" />
+                            </RadzenStack>
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </RadzenDataGrid>
+        </RadzenStack>
+    </Authorized>
+    <NotAuthorized>
+        <RadzenAlert AlertStyle="AlertStyle.Warning" Title="Acceso restringido">
+            Solo los usuarios con el rol de Administrador pueden consultar el directorio de usuarios.
+        </RadzenAlert>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    private const int DuracionAvisoError = 8000;
+    private const int DuracionAvisoExito = 3000;
+
+    private List<UsuarioListadoDto> _usuarios = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarUsuariosAsync();
+    }
+
+    private async Task CargarUsuariosAsync()
+    {
+        try
+        {
+            _usuarios = await UsuarioService.ObtenerUsuariosAsync();
+        }
+        catch (Exception excepcion)
+        {
+            NotificarError("No se pudo consultar el listado de usuarios.", excepcion.Message);
+        }
+    }
+
+    private void IrAlAlta()
+    {
+        NavigationManager.NavigateTo("/usuarios/alta");
+    }
+
+    private void IrAEditar(UsuarioListadoDto usuario)
+    {
+        NavigationManager.NavigateTo($"/usuarios/editar/{usuario.Id}");
+    }
+
+    private async Task ConfirmarEliminar(UsuarioListadoDto usuario)
+    {
+        var resultado = await DialogService.Confirm(
+            $"¿Está seguro de que desea eliminar al usuario {usuario.Nombre} {usuario.Apellido}?",
+            "Confirmación");
+
+        if (resultado != true)
+        {
+            return;
+        }
+
+        try
+        {
+            await UsuarioService.EliminarUsuarioAsync(usuario.Id);
+            NotificarExito("Usuario eliminado", $"Se eliminó correctamente a {usuario.Nombre} {usuario.Apellido}.");
+            await CargarUsuariosAsync();
+        }
+        catch (Exception excepcion)
+        {
+            NotificarError("No se pudo eliminar el usuario.", excepcion.Message);
+        }
+    }
+
+    private void NotificarError(string titulo, string detalle)
+    {
+        NotificationService.Notify(new NotificationMessage
+        {
+            Severity = NotificationSeverity.Error,
+            Summary = titulo,
+            Detail = detalle,
+            Duration = DuracionAvisoError
+        });
+    }
+
+    private void NotificarExito(string titulo, string detalle)
+    {
+        NotificationService.Notify(new NotificationMessage
+        {
+            Severity = NotificationSeverity.Success,
+            Summary = titulo,
+            Detail = detalle,
+            Duration = DuracionAvisoExito
+        });
+    }
+}

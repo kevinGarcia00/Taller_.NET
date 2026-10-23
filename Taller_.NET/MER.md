@@ -11,6 +11,7 @@ string nombre
         string apellido
         string telefono
         string correo
+        string auth0_user_id
     }
 
     ParqueSolar {
@@ -69,3 +70,8 @@ string nombre
     Panel ||--o{ HistoricoMantenibilidad : "Recibe (1:N)"
     Panel ||--|{ Historico : "Genera (1:N)"
 ```
+
+## Notas
+
+- `Usuario.auth0_user_id` es el identificador del usuario en Auth0 (`user_id`, con formato `auth0|xxxx`). Es el vinculo con el proveedor de identidad: la contrasena **no** se guarda en esta base, la administra Auth0.
+- Los roles se replican tambien en Auth0 (rol `Administrador`, `Mantenimiento`) para que el claim `https://solaryu.com/roles` del token permita autorizar las operaciones.

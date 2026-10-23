@@ -1,9 +1,5 @@
 # Especificaciones Técnicas: Eliminar de Usuario
 
-## Arquitectura y Patrones
-- **Estilo:** Monolito Modular con Clean Architecture por Módulo (Modules.User).
-- **Patrones:** Application Services (Arquitectura en capas clásica o CQRS mediante Servicios).
-
 ## Detalles de Implementación por Capa
 
 ### 1. Capa Domain (Modules.User.Domain)
@@ -12,12 +8,12 @@
     - `Rol`
 
 ### 2. Capa Application (Servicios)
-- **Parametros de Entrada:** `long id`, `long idUsuarioAutenticado` (IdAdministrador)
+- **Parametros de Entrada:** `long id`, `Guid idUsuarioAutenticado = default` (IdAdministrador, opcional en development, se reintegrará con Auth0)
 - **Servicio:** `UsuarioService` (implementa la interfaz `IUsuarioService`)
   - Dependencias: `IUsersDbContext` (para acceso a BD).
   - Método: `EliminarUsuarioAsync(long id, long idUsuarioAutenticado)`
   - Lógica: 
-        1. Si un usuario intenta eliminarse a sí mismo, lanzar excepción.
+        1.  Si se proporciona un ID de usuario autenticado y el usuario intenta eliminarse a sí mismo, lanzar excepción **(omite en development)**.
         2. Consultar el usuario en la BD por `Id` incluyendo sus roles. Si no existe, lanzar excepción.
         3. Remover la entidad del DbSet: `Usuarios.Remove(usuario)`.
         4. Confirmar la operación con `SaveChangesAsync()`.
@@ -43,6 +39,6 @@
   - **Flujo:** 
     1. El Administrador hace clic en el botón de eliminar de una fila en la grilla.
     2. Se ejecuta un diálogo de confirmación mediante `DialogService`.
-    3. Si se confirma la acción, se obtiene el ID del usuario en sesión desde `AuthenticationStateProvider` y se invoca `IUsuarioService.EliminarUsuarioAsync(id, idUsuarioAutenticado)`.
+    3. Si se confirma la acción, se invoca `IUsuarioService.EliminarUsuarioAsync(id)` sin necesidad de obtener el ID del usuario autenticado en development **(se reintegrará con Auth0 después)**.
     4. Tras el éxito, se muestra una notificación con `NotificationService` de Radzen y se recarga el listado de la grilla.
     5. En caso de error de negocio , se captura la excepción y se despliega una notificación de advertencia con `NotificationService`.

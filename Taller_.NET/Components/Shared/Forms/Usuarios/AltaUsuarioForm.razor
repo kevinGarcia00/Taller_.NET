@@ -1,0 +1,192 @@
+@using FluentValidation
+@using FluentValidation.Results
+@using Taller_.NET.Modulos.Usuario.Application.Excepciones
+@inject IUsuarioService UsuarioService
+@inject IValidator<CrearUsuarioDto> Validador
+@inject NotificationService NotificationService
+
+@* El modulo ParqueSolar declara una excepcion con el mismo nombre, por lo que se
+   usa un alias para referenciar la del modulo Usuario. *@
+@using UsuarioNoAutorizadoException = Taller_.NET.Modulos.Usuario.Application.Excepciones.UsuarioNoAutorizadoException
+
+<RadzenTemplateForm TItem="CrearUsuarioDto" Data="@_modelo" Submit="OnValidSubmit" InvalidSubmit="OnInvalidSubmit">
+    <ChildContent Context="editContext">
+        @{ _validacion.Configurar(editContext); }
+
+        <RadzenStack Gap="1rem">
+            <RadzenFormField Text="Nombre" Variant="Variant.Outlined">
+                <ChildContent>
+                    <RadzenTextBox @bind-Value="_modelo.Nombre" MaxLength="@Usuario.LongitudMaximaNombre" />
+                </ChildContent>
+                <Helper>
+                    <ValidationMessage For="@(() => _modelo.Nombre)" />
+                </Helper>
+            </RadzenFormField>
+
+            <RadzenFormField Text="Apellido" Variant="Variant.Outlined">
+                <ChildContent>
+                    <RadzenTextBox @bind-Value="_modelo.Apellido" MaxLength="@Usuario.LongitudMaximaApellido" />
+                </ChildContent>
+                <Helper>
+                    <ValidationMessage For="@(() => _modelo.Apellido)" />
+                </Helper>
+            </RadzenFormField>
+
+            <RadzenFormField Text="Correo" Variant="Variant.Outlined">
+                <ChildContent>
+                    <RadzenTextBox @bind-Value="_modelo.Correo" MaxLength="@Usuario.LongitudMaximaCorreo" />
+                </ChildContent>
+                <Helper>
+                    <ValidationMessage For="@(() => _modelo.Correo)" />
+                </Helper>
+            </RadzenFormField>
+
+            <RadzenFormField Text="Telefono" Variant="Variant.Outlined">
+                <ChildContent>
+                    <RadzenTextBox @bind-Value="_modelo.Telefono" MaxLength="@Usuario.LongitudMaximaTelefono" />
+                </ChildContent>
+                <Helper>
+                    <ValidationMessage For="@(() => _modelo.Telefono)" />
+                </Helper>
+            </RadzenFormField>
+
+            <RadzenFormField Text="Roles" Variant="Variant.Outlined">
+                <ChildContent>
+                    <RadzenDropDown TValue="IEnumerable<long>"
+                                    Value="@_modelo.RolesIds"
+                                    ValueChanged="@OnRolesIdsChanged"
+                                    Multiple="true"
+                                    Data="@_roles"
+                                    TextProperty="Nombre"
+                                    ValueProperty="Id"
+                                    Placeholder="Seleccione los roles" />
+                </ChildContent>
+                <Helper>
+                    <ValidationMessage For="@(() => _modelo.RolesIds)" />
+                </Helper>
+            </RadzenFormField>
+
+            <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0.5rem">
+                <RadzenButton Text="Registrar usuario" ButtonType="ButtonType.Submit" Icon="person_add" />
+            </RadzenStack>
+        </RadzenStack>
+    </ChildContent>
+</RadzenTemplateForm>
+
+@code {
+    private const int DuracionAvisoError = 8000;
+
+    [Parameter]
+    public EventCallback<Guid> OnRegistrado { get; set; }
+
+    private readonly ValidacionFormulario _validacion = new();
+    private CrearUsuarioDto _modelo = new();
+    private List<RolDto> _roles = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _roles = await UsuarioService.ObtenerRolesAsync();
+        }
+        catch (Exception excepcion)
+        {
+            NotificarError("No se pudieron cargar los roles disponibles.", excepcion.Message);
+        }
+    }
+
+    private async Task OnValidSubmit()
+    {
+        await ProcesarEnvioAsync();
+    }
+
+    private async Task OnInvalidSubmit(FormInvalidSubmitEventArgs args)
+    {
+        // El EditContext conserva los mensajes de la validacion anterior, por lo que
+        // Radzen bloquea el envio. Se vuelve a validar para informar al usuario.
+        await ProcesarEnvioAsync();
+    }
+
+    private async Task ProcesarEnvioAsync()
+    {
+        var errores = await _validacion.ValidarAsync(Validador, _modelo, ObtenerCamposDelFormulario());
+
+        if (errores.Count > 0)
+        {
+            NotificarErrores(errores.Select(error => error.ErrorMessage));
+            return;
+        }
+
+        try
+        {
+            var id = await UsuarioService.CrearUsuarioAsync(_modelo);
+
+            NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Success,
+                Summary = "Usuario registrado",
+                Detail = $"El usuario '{_modelo.Nombre} {_modelo.Apellido}' se registro correctamente."
+            });
+
+            _modelo = new CrearUsuarioDto();
+
+            await OnRegistrado.InvokeAsync(id);
+        }
+        catch (ValidationException excepcion)
+        {
+            NotificarErrores(excepcion.Errors.Select(error => error.ErrorMessage));
+        }
+        catch (CorreoUsuarioDuplicadoException excepcion)
+        {
+            NotificarError("No se pudo registrar el usuario.", excepcion.Message);
+        }
+        catch (RolNoEncontradoException excepcion)
+        {
+            NotificarError("No se pudo registrar el usuario.", excepcion.Message);
+        }
+        catch (UsuarioNoAutorizadoException excepcion)
+        {
+            NotificarError("No se pudo registrar el usuario.", excepcion.Message);
+        }
+    }
+
+    private Dictionary<string, FieldIdentifier> ObtenerCamposDelFormulario()
+    {
+        return new Dictionary<string, FieldIdentifier>
+        {
+            [nameof(CrearUsuarioDto.Nombre)] = FieldIdentifier.Create<string>(() => _modelo.Nombre),
+            [nameof(CrearUsuarioDto.Apellido)] = FieldIdentifier.Create<string>(() => _modelo.Apellido),
+            [nameof(CrearUsuarioDto.Correo)] = FieldIdentifier.Create<string>(() => _modelo.Correo),
+            [nameof(CrearUsuarioDto.RolesIds)] = FieldIdentifier.Create<List<long>>(() => _modelo.RolesIds)
+        };
+    }
+
+    private void OnRolesIdsChanged(IEnumerable<long> rolesIds)
+    {
+        _modelo.RolesIds = rolesIds?.ToList() ?? new List<long>();
+
+        _validacion.NotificarCampoModificado(FieldIdentifier.Create<List<long>>(() => _modelo.RolesIds));
+    }
+
+    private void NotificarErrores(IEnumerable<string> errores)
+    {
+        NotificationService.Notify(new NotificationMessage
+        {
+            Severity = NotificationSeverity.Error,
+            Summary = "Revise los datos ingresados",
+            Detail = string.Join(" | ", errores),
+            Duration = DuracionAvisoError
+        });
+    }
+
+    private void NotificarError(string titulo, string detalle)
+    {
+        NotificationService.Notify(new NotificationMessage
+        {
+            Severity = NotificationSeverity.Error,
+            Summary = titulo,
+            Detail = detalle,
+            Duration = DuracionAvisoError
+        });
+    }
+}
