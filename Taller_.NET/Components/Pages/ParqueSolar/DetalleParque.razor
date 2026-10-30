@@ -30,7 +30,14 @@
                     </RadzenStack>
                 </RadzenCard>
 
-                <RadzenText TextStyle="TextStyle.H6">Nodos del parque</RadzenText>
+                <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center">
+                    <RadzenText TextStyle="TextStyle.H6">Nodos del parque</RadzenText>
+                    <RadzenButton Text="Ver listado" Icon="list" ButtonStyle="ButtonStyle.Secondary"
+                                  Click="@(() => NavigationManager.NavigateTo($"/parques/{ParqueId}/nodos"))" />
+                    <RadzenButton Text="Registrar nodo" Icon="add_circle_outline" ButtonStyle="ButtonStyle.Primary"
+                                  Click="@(() => NavigationManager.NavigateTo($"/parques/{ParqueId}/nodos/alta"))" />
+                </RadzenStack>
+
                 <RadzenDataGrid Data="@_parque.ListaNodos" TItem="NodoResumenDto">
                     <Columns>
                         <RadzenDataGridColumn TItem="NodoResumenDto" Property="Nombre" Title="Nombre" />

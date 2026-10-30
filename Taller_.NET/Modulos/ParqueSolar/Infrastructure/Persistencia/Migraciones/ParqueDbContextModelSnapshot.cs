@@ -17,6 +17,78 @@ namespace Taller_.NET.Modulos.ParqueSolar.Infrastructure.Persistencia.Migracione
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.13");
 
+            modelBuilder.Entity("Taller_.NET.Modulos.ParqueSolar.Domain.Inversor", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("FechaCreacion")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("fecha_creacion");
+
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("nombre");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Inversores", (string)null);
+                });
+
+            modelBuilder.Entity("Taller_.NET.Modulos.ParqueSolar.Domain.Nodo", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("id");
+
+                    b.Property<decimal>("EnergiaGenerada")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("energia_generada");
+
+                    b.Property<DateTime>("FechaCreacion")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("fecha_creacion");
+
+                    b.Property<int?>("InversorId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("inversor_id");
+
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("nombre");
+
+                    b.Property<int>("ParqueSolarId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("parque_solar_id");
+
+                    b.Property<string>("UbicacionParque")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("ubicacion_parque");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("InversorId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_nodos_inversor_id")
+                        .HasFilter("inversor_id IS NOT NULL");
+
+                    b.HasIndex("Nombre", "ParqueSolarId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_nodos_nombre_parque");
+
+                    b.ToTable("Nodos", (string)null);
+                });
+
             modelBuilder.Entity("Taller_.NET.Modulos.ParqueSolar.Domain.Parque", b =>
                 {
                     b.Property<int>("Id")
@@ -51,6 +123,16 @@ namespace Taller_.NET.Modulos.ParqueSolar.Infrastructure.Persistencia.Migracione
                         .HasDatabaseName("ux_parques_nombre");
 
                     b.ToTable("Parques", (string)null);
+                });
+
+            modelBuilder.Entity("Taller_.NET.Modulos.ParqueSolar.Domain.Nodo", b =>
+                {
+                    b.HasOne("Taller_.NET.Modulos.ParqueSolar.Domain.Inversor", "Inversor")
+                        .WithOne()
+                        .HasForeignKey("Taller_.NET.Modulos.ParqueSolar.Domain.Nodo", "InversorId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Inversor");
                 });
 #pragma warning restore 612, 618
         }

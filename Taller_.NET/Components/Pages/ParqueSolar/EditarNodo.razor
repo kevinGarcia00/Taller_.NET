@@ -1,0 +1,184 @@
+@page "/parques/{ParqueId:int}/nodos/{NodoId:int}/editar"
+@attribute [Authorize(Roles = "Administrador")]
+@rendermode InteractiveServer
+@using FluentValidation
+@using Taller_.NET.Modulos.ParqueSolar.Domain.Excepciones
+@inject INodoService NodoService
+@inject IParqueService ParqueService
+@inject NotificationService NotificationService
+@inject NavigationManager NavigationManager
+
+<PageTitle>Modificar Nodo</PageTitle>
+
+<h1>Modificar Nodo</h1>
+
+<AuthorizeView Roles="Administrador" Context="autorizacion">
+    <Authorized>
+        @if (_cargando)
+        {
+            <RadzenText TextStyle="TextStyle.Body2">Cargando el nodo...</RadzenText>
+        }
+        else if (!_nodoEncontrado)
+        {
+            <RadzenAlert AlertStyle="AlertStyle.Warning" Title="Nodo no encontrado">
+                No se encontro el nodo solicitado para este parque solar.
+            </RadzenAlert>
+        }
+        else
+        {
+            <RadzenCard>
+                <RadzenStack Gap="1rem">
+                    <RadzenFormField Text="Parque solar" Variant="Variant.Outlined">
+                        <RadzenTextBox Value="@_nombreParque" ReadOnly="true" />
+                    </RadzenFormField>
+
+                    <RadzenTemplateForm TItem="EditarNodoDto" Data="@_modelo" Submit="OnValidSubmit">
+                        <RadzenStack Gap="1rem">
+                            <RadzenFormField Text="Nombre" Variant="Variant.Outlined">
+                                <RadzenTextBox @bind-Value="_modelo.Nombre" MaxLength="@Nodo.LongitudMaximaNombre" />
+                            </RadzenFormField>
+
+                            <RadzenFormField Text="Ubicacion en el parque" Variant="Variant.Outlined">
+                                <RadzenTextBox @bind-Value="_modelo.UbicacionParque" MaxLength="@Nodo.LongitudMaximaUbicacionParque" />
+                            </RadzenFormField>
+
+                            <RadzenFormField Text="Inversor (opcional)" Variant="Variant.Outlined">
+                                <RadzenDropDown TValue="int?" Data="@_inversores" @bind-Value="_modelo.InversorId"
+                                                TextProperty="Nombre" ValueProperty="Id" AllowClear="true"
+                                                Placeholder="Sin inversor asignado" />
+                            </RadzenFormField>
+
+                            <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem">
+                                <RadzenButton Text="Guardar cambios" ButtonType="ButtonType.Submit" Icon="save" />
+                                <RadzenButton Text="Cancelar" ButtonStyle="ButtonStyle.Secondary" Icon="close"
+                                              Click="@Cancelar" />
+                            </RadzenStack>
+                        </RadzenStack>
+                    </RadzenTemplateForm>
+                </RadzenStack>
+            </RadzenCard>
+        }
+    </Authorized>
+    <NotAuthorized>
+        <RadzenAlert AlertStyle="AlertStyle.Warning" Title="Acceso restringido">
+            Solo los usuarios con el rol de Administrador pueden modificar nodos.
+        </RadzenAlert>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    [Parameter]
+    public int ParqueId { get; set; }
+
+    [Parameter]
+    public int NodoId { get; set; }
+
+    private EditarNodoDto _modelo = new();
+    private IReadOnlyList<InversorOpcionDto> _inversores = new List<InversorOpcionDto>();
+    private string _nombreParque = string.Empty;
+    private bool _nodoEncontrado;
+    private bool _cargando = true;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _cargando = true;
+        _nodoEncontrado = false;
+        _modelo = new EditarNodoDto();
+
+        try
+        {
+            _nombreParque = ParqueService.ObtenerParqueSync(ParqueId).Nombre;
+            _modelo = await NodoService.ObtenerNodoParaEdicionAsync(NodoId, ParqueId);
+            _inversores = await NodoService.ObtenerInversoresParaEdicionAsync(NodoId, ParqueId);
+            _nodoEncontrado = true;
+        }
+        catch (ParqueNoEncontradoException excepcion)
+        {
+            NotificarAdvertencia("Parque no encontrado", excepcion.Message);
+        }
+        catch (NodoNoEncontradoException excepcion)
+        {
+            NotificarAdvertencia("Nodo no encontrado", excepcion.Message);
+        }
+        catch (System.Exception excepcion)
+        {
+            NotificarError("No se pudo cargar el nodo", excepcion.Message);
+        }
+        finally
+        {
+            _cargando = false;
+        }
+    }
+
+    private void Cancelar()
+    {
+        NavigationManager.NavigateTo($"/parques/{ParqueId}/nodos");
+    }
+
+    private async Task OnValidSubmit()
+    {
+        try
+        {
+            await NodoService.ModificarNodoAsync(_modelo);
+
+            NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Success,
+                Summary = "Nodo modificado",
+                Detail = $"El nodo '{_modelo.Nombre}' se modifico correctamente."
+            });
+
+            NavigationManager.NavigateTo($"/parques/{ParqueId}/nodos");
+        }
+        catch (NodoNoEncontradoException excepcion)
+        {
+            NotificarAdvertencia("Nodo no encontrado", excepcion.Message);
+        }
+        catch (NodoNombreDuplicadoException excepcion)
+        {
+            NotificarError("No se pudo modificar el nodo", excepcion.Message);
+        }
+        catch (InversorNoEncontradoException excepcion)
+        {
+            NotificarError("No se pudo modificar el nodo", excepcion.Message);
+        }
+        catch (InversorYaAsignadoException excepcion)
+        {
+            NotificarError("No se pudo modificar el nodo", excepcion.Message);
+        }
+        catch (NodoInvalidoException excepcion)
+        {
+            NotificarError("No se pudo modificar el nodo", excepcion.Message);
+        }
+        catch (UsuarioNoAutorizadoException excepcion)
+        {
+            NotificarError("No se pudo modificar el nodo", excepcion.Message);
+        }
+        catch (ValidationException excepcion)
+        {
+            NotificarError(
+                "No se pudo modificar el nodo",
+                string.Join(" ", excepcion.Errors.Select(error => error.ErrorMessage)));
+        }
+    }
+
+    private void NotificarAdvertencia(string resumen, string detalle)
+    {
+        NotificationService.Notify(new NotificationMessage
+        {
+            Severity = NotificationSeverity.Warning,
+            Summary = resumen,
+            Detail = detalle
+        });
+    }
+
+    private void NotificarError(string resumen, string detalle)
+    {
+        NotificationService.Notify(new NotificationMessage
+        {
+            Severity = NotificationSeverity.Error,
+            Summary = resumen,
+            Detail = detalle
+        });
+    }
+}

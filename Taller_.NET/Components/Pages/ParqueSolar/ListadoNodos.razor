@@ -1,0 +1,245 @@
+@page "/parques/{ParqueId:int}/nodos"
+@page "/nodos"
+@attribute [Authorize(Roles = "Administrador")]
+@rendermode InteractiveServer
+@inject INodoService NodoService
+@inject IParqueService ParqueService
+@inject NavigationManager NavigationManager
+@inject NotificationService NotificationService
+@inject DialogService DialogService
+
+<PageTitle>Nodos del Parque Solar</PageTitle>
+
+<h1>Nodos del Parque Solar</h1>
+
+<AuthorizeView Roles="Administrador" Context="autorizacion">
+    <Authorized>
+        <RadzenStack Gap="1rem">
+            @if (!EsContextoParque)
+            {
+                <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.End">
+                    <RadzenFormField Text="Parque solar" Variant="Variant.Outlined">
+                        <RadzenDropDown TValue="int?" Data="@_parques" @bind-Value="_parqueSeleccionadoId"
+                                        TextProperty="Nombre" ValueProperty="Id"
+                                        Placeholder="Seleccione un parque" />
+                    </RadzenFormField>
+                    <RadzenButton Text="Ver nodos" Icon="visibility" ButtonType="ButtonType.Button"
+                                  Disabled="@(!_parqueSeleccionadoId.HasValue)"
+                                  Click="@CargarParqueSeleccionado" />
+                </RadzenStack>
+            }
+
+            @if (ParqueActualId > 0)
+            {
+                <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center">
+                    <RadzenText TextStyle="TextStyle.H6">@_nombreParque</RadzenText>
+                    <RadzenButton Text="Nuevo Nodo" Icon="add_circle_outline" ButtonStyle="ButtonStyle.Primary"
+                                  Click="@(() => NavigationManager.NavigateTo($"/parques/{ParqueActualId}/nodos/alta"))" />
+                </RadzenStack>
+
+                <RadzenDataGrid Data="@_nodos" TItem="NodoListadoDto" AllowSorting="true" IsLoading="@_cargando"
+                                EmptyText="No hay nodos registrados para este parque solar.">
+                    <Columns>
+                        <RadzenDataGridColumn TItem="NodoListadoDto" Property="Nombre" Title="Nombre" />
+                        <RadzenDataGridColumn TItem="NodoListadoDto" Property="UbicacionParque" Title="Ubicacion en el parque" />
+                        <RadzenDataGridColumn TItem="NodoListadoDto" Property="EnergiaGenerada" Title="Energia generada" FormatString="{0:N2}" />
+                        <RadzenDataGridColumn TItem="NodoListadoDto" Property="FechaCreacion" Title="Fecha de creacion" FormatString="{0:g}" />
+                        <RadzenDataGridColumn TItem="NodoListadoDto" Property="NombreInversor" Title="Inversor" Sortable="false" Filterable="false">
+                            <Template Context="nodo">
+                                @if (string.IsNullOrWhiteSpace(nodo.NombreInversor))
+                                {
+                                    <RadzenBadge Text="Sin Inversor" BadgeStyle="BadgeStyle.Light" />
+                                }
+                                else
+                                {
+                                    <RadzenText>@nodo.NombreInversor</RadzenText>
+                                }
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn TItem="NodoListadoDto" Title="Acciones" Sortable="false" Filterable="false">
+                            <Template Context="nodo">
+                                <RadzenButton Text="Modificar" Icon="edit" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary"
+                                              Click="@(() => NavigationManager.NavigateTo($"/parques/{ParqueActualId}/nodos/{nodo.Id}/editar"))" />
+                                <RadzenButton Text="Eliminar" Icon="delete" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Danger"
+                                              Click="@(() => ConfirmarEliminacion(nodo))" />
+                            </Template>
+                        </RadzenDataGridColumn>
+                    </Columns>
+                </RadzenDataGrid>
+            }
+            else
+            {
+                <RadzenAlert AlertStyle="AlertStyle.Info" Title="Seleccione un parque solar">
+                    Elija un parque solar para consultar sus nodos registrados.
+                </RadzenAlert>
+            }
+
+            <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem">
+                <RadzenButton Text="@(EsContextoParque ? "Volver al parque" : "Volver a parques")" Icon="arrow_back"
+                              ButtonStyle="ButtonStyle.Secondary" Click="@Volver" />
+            </RadzenStack>
+        </RadzenStack>
+    </Authorized>
+    <NotAuthorized>
+        <RadzenAlert AlertStyle="AlertStyle.Warning" Title="Acceso restringido">
+            Solo los usuarios con el rol de Administrador pueden ver el listado de nodos.
+        </RadzenAlert>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    [Parameter]
+    public int ParqueId { get; set; }
+
+    private IReadOnlyList<NodoListadoDto> _nodos = new List<NodoListadoDto>();
+    private IReadOnlyList<ParqueListadoDto> _parques = new List<ParqueListadoDto>();
+    private int? _parqueSeleccionadoId;
+    private string _nombreParque = string.Empty;
+    private bool _cargando = true;
+
+    private bool EsContextoParque => ParqueId > 0;
+
+    private int ParqueActualId => _parqueSeleccionadoId ?? 0;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _cargando = true;
+
+        if (EsContextoParque)
+        {
+            _parqueSeleccionadoId = ParqueId;
+            _nombreParque = ObtenerNombreParque();
+            await CargarNodosAsync(ParqueId);
+        }
+        else
+        {
+            CargarParques();
+        }
+
+        _cargando = false;
+    }
+
+    private void CargarParques()
+    {
+        try
+        {
+            _parques = ParqueService.ObtenerParquesSync();
+        }
+        catch (System.Exception excepcion)
+        {
+            NotificarError("No se pudieron obtener los parques", excepcion.Message);
+        }
+    }
+
+    private async Task CargarParqueSeleccionado()
+    {
+        if (!_parqueSeleccionadoId.HasValue)
+        {
+            return;
+        }
+
+        _cargando = true;
+        _nombreParque = _parques.FirstOrDefault(parque => parque.Id == _parqueSeleccionadoId.Value)?.Nombre ?? string.Empty;
+        await CargarNodosAsync(_parqueSeleccionadoId.Value);
+        _cargando = false;
+    }
+
+    private string ObtenerNombreParque()
+    {
+        try
+        {
+            return ParqueService.ObtenerParqueSync(ParqueId).Nombre;
+        }
+        catch (ParqueNoEncontradoException)
+        {
+            return string.Empty;
+        }
+    }
+
+    private async Task CargarNodosAsync(int parqueSolarId)
+    {
+        try
+        {
+            _nodos = await NodoService.ObtenerNodosPorParqueAsync(parqueSolarId);
+        }
+        catch (ParqueNoEncontradoException excepcion)
+        {
+            _nodos = new List<NodoListadoDto>();
+            NotificarError("No se pudo obtener el listado de nodos", excepcion.Message);
+        }
+        catch (System.Exception excepcion)
+        {
+            _nodos = new List<NodoListadoDto>();
+            NotificarError("No se pudo obtener el listado de nodos", excepcion.Message);
+        }
+    }
+
+    private void Volver()
+    {
+        NavigationManager.NavigateTo(EsContextoParque ? $"/parques/{ParqueId}" : "/parques");
+    }
+
+    private async Task ConfirmarEliminacion(NodoListadoDto nodo)
+    {
+        var confirmado = await DialogService.Confirm(
+            $"¿Esta seguro de que desea eliminar el nodo {nodo.Nombre}?",
+            "Eliminar nodo",
+            new ConfirmOptions
+            {
+                OkButtonText = "Eliminar",
+                CancelButtonText = "Cancelar"
+            });
+
+        if (confirmado != true)
+        {
+            return;
+        }
+
+        try
+        {
+            await NodoService.EliminarNodoAsync(nodo.Id, ParqueActualId);
+
+            NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Success,
+                Summary = "Nodo eliminado",
+                Detail = $"El nodo '{nodo.Nombre}' se elimino correctamente."
+            });
+
+            await CargarNodosAsync(ParqueActualId);
+        }
+        catch (NodoNoEncontradoException excepcion)
+        {
+            NotificarAdvertencia(excepcion.Message);
+            await CargarNodosAsync(ParqueActualId);
+        }
+        catch (UsuarioNoAutorizadoException excepcion)
+        {
+            NotificarAdvertencia(excepcion.Message);
+        }
+        catch (System.Exception excepcion)
+        {
+            NotificarError("No se pudo eliminar el nodo", excepcion.Message);
+        }
+    }
+
+    private void NotificarAdvertencia(string detalle)
+    {
+        NotificationService.Notify(new NotificationMessage
+        {
+            Severity = NotificationSeverity.Warning,
+            Summary = "No se pudo eliminar el nodo",
+            Detail = detalle
+        });
+    }
+
+    private void NotificarError(string resumen, string detalle)
+    {
+        NotificationService.Notify(new NotificationMessage
+        {
+            Severity = NotificationSeverity.Error,
+            Summary = resumen,
+            Detail = detalle
+        });
+    }
+}

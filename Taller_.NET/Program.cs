@@ -183,9 +183,15 @@ builder.Services.AddScoped<IParqueDbContext>(proveedor => proveedor.GetRequiredS
 builder.Services.AddScoped<IParqueRepository, ParqueRepository>();
 builder.Services.AddScoped<IParqueService, ParqueService>();
 builder.Services.AddScoped<IMediadorParqueNodo, MediadorParqueNodo>();
+builder.Services.AddScoped<INodoRepository, NodoRepository>();
+builder.Services.AddScoped<INodoService, NodoService>();
+builder.Services.AddScoped<IMediadorNodoParque, MediadorNodoParque>();
+builder.Services.AddScoped<IMediadorNodoInversor, MediadorNodoInversor>();
 builder.Services.AddScoped<IUsuarioActualProvider, UsuarioActualProvider>();
 builder.Services.AddScoped<IValidator<CrearParqueDto>, CrearParqueDtoValidator>();
 builder.Services.AddScoped<IValidator<ModificarParqueDto>, ModificarParqueDtoValidator>();
+builder.Services.AddScoped<IValidator<CrearNodoDto>, CrearNodoDtoValidator>();
+builder.Services.AddScoped<IValidator<EditarNodoDto>, EditarNodoDtoValidator>();
 
 builder.Services.AddDbContext<UsuarioDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("Usuario")));
