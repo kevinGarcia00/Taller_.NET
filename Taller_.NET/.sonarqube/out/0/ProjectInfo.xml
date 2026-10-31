@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ProjectInfo xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.sonarsource.com/msbuild/integration/2015/1">
+  <ProjectName>Taller_.NET</ProjectName>
+  <ProjectLanguage>C#</ProjectLanguage>
+  <ProjectType>Test</ProjectType>
+  <ProjectGuid>a38aef85-d689-4c95-8dca-8dad044e33ab</ProjectGuid>
+  <FullPath>/home/void/Projects/Taller_.NET/Taller_.NET/Taller_.NET.csproj</FullPath>
+  <IsExcluded>false</IsExcluded>
+  <AnalysisResultFiles>
+    <AnalysisResultFile Id="FilesToAnalyze" Location="/home/void/Projects/Taller_.NET/Taller_.NET/.sonarqube/conf/0/FilesToAnalyze.txt" />
+  </AnalysisResultFiles>
+  <AnalysisSettings>
+    <Property Name="sonar.cs.roslyn.reportFilePaths">/home/void/Projects/Taller_.NET/Taller_.NET/.sonarqube/out/0/Issues.json</Property>
+    <Property Name="sonar.cs.analyzer.projectOutPaths">/home/void/Projects/Taller_.NET/Taller_.NET/.sonarqube/out/0</Property>
+    <Property Name="sonar.cs.scanner.telemetry">/home/void/Projects/Taller_.NET/Taller_.NET/.sonarqube/out/0/Telemetry.json</Property>
+  </AnalysisSettings>
+  <Configuration>Debug</Configuration>
+  <Platform>AnyCPU</Platform>
+  <TargetFramework>net10.0</TargetFramework>
+</ProjectInfo>

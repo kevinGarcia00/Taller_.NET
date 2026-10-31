@@ -1,0 +1,6 @@
+projectKey=Taller.NET
+serverUrl=http://localhost:9000
+serverVersion=26.10.0.133078
+dashboardUrl=http://localhost:9000/dashboard?id=Taller.NET
+ceTaskId=93cc9df2-3cb3-49e8-8fff-94a898814074
+ceTaskUrl=http://localhost:9000/api/ce/task?id=93cc9df2-3cb3-49e8-8fff-94a898814074
