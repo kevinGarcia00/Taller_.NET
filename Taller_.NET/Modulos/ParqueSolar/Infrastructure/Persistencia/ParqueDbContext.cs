@@ -3,6 +3,7 @@ using Taller_.NET.Modulos.ParqueSolar.Domain;
 using Taller_.NET.Modulos.ParqueSolar.Infrastructure.Persistencia.Configuraciones;
 using NodoDomain = Taller_.NET.Modulos.ParqueSolar.Domain.Nodo;
 using InversorDomain = Taller_.NET.Modulos.ParqueSolar.Domain.Inversor;
+using PanelDomain = Taller_.NET.Modulos.ParqueSolar.Domain.Panel;
 
 namespace Taller_.NET.Modulos.ParqueSolar.Infrastructure.Persistencia
 {
@@ -18,11 +19,14 @@ namespace Taller_.NET.Modulos.ParqueSolar.Infrastructure.Persistencia
 
         public DbSet<InversorDomain> Inversores { get; set; } = null!;
 
+        public DbSet<PanelDomain> Paneles { get; set; } = null!;
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfiguration(new ParqueConfiguration());
             modelBuilder.ApplyConfiguration(new NodoConfiguration());
             modelBuilder.ApplyConfiguration(new InversorConfiguration());
+            modelBuilder.ApplyConfiguration(new PanelConfiguration());
 
             base.OnModelCreating(modelBuilder);
         }

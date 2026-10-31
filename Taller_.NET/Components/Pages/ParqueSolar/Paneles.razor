@@ -1,0 +1,189 @@
+@page "/parques/{ParqueId:int}/nodos/{NodoId:int}/paneles"
+@attribute [Authorize(Roles = "Administrador")]
+@rendermode InteractiveServer
+@inject IPanelService PanelService
+@inject INodoService NodoService
+@inject IParqueService ParqueService
+@inject NavigationManager NavigationManager
+@inject NotificationService NotificationService
+@inject DialogService DialogService
+
+<PageTitle>Paneles del Nodo</PageTitle>
+
+<h1>Paneles del Nodo</h1>
+
+<AuthorizeView Roles="Administrador" Context="autorizacion">
+    <Authorized>
+        <RadzenStack Gap="1rem">
+            <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center">
+                <RadzenText TextStyle="TextStyle.H6">@_nombreParque</RadzenText>
+                <RadzenText TextStyle="TextStyle.Body1">@_nombreNodo</RadzenText>
+                <RadzenButton Text="Registrar panel" Icon="add_circle_outline" ButtonStyle="ButtonStyle.Primary"
+                              Click="@(() => NavigationManager.NavigateTo($"/parques/{ParqueId}/nodos/{NodoId}/paneles/alta"))" />
+            </RadzenStack>
+
+            <RadzenDataGrid Data="@_paneles" TItem="PanelListadoDto" AllowSorting="true" IsLoading="@_cargando"
+                            EmptyText="Este nodo no tiene paneles asociados.">
+                <Columns>
+                    <RadzenDataGridColumn TItem="PanelListadoDto" Property="Nombre" Title="Nombre" />
+                    <RadzenDataGridColumn TItem="PanelListadoDto" Property="Estado" Title="Estado" />
+                    <RadzenDataGridColumn TItem="PanelListadoDto" Property="Potencia" Title="Potencia" FormatString="{0:N2}" />
+                    <RadzenDataGridColumn TItem="PanelListadoDto" Title="Acciones" Sortable="false" Filterable="false" Width="160px" CssClass="columna-acciones">
+                        <Template Context="panel">
+                            <RadzenStack Orientation="Orientation.Vertical" Gap="0.35rem" AlignItems="AlignItems.Start">
+                                <RadzenButton Text="Ver" Icon="visibility" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Secondary"
+                                              Click="@(() => NavigationManager.NavigateTo($"/parques/{ParqueId}/nodos/{NodoId}/paneles/{panel.Id}"))" />
+                                <RadzenButton Text="Editar" Icon="edit" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary"
+                                              Click="@(() => NavigationManager.NavigateTo($"/parques/{ParqueId}/nodos/{NodoId}/paneles/editar/{panel.Id}"))" />
+                                <RadzenButton Text="Eliminar" Icon="delete" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Danger"
+                                              Click="@(() => ConfirmarEliminacion(panel))" />
+                            </RadzenStack>
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </RadzenDataGrid>
+
+            <RadzenButton Text="Volver a nodos" Icon="arrow_back" ButtonStyle="ButtonStyle.Secondary"
+                          Click="@(() => NavigationManager.NavigateTo($"/parques/{ParqueId}/nodos"))" />
+        </RadzenStack>
+    </Authorized>
+    <NotAuthorized>
+        <RadzenAlert AlertStyle="AlertStyle.Warning" Title="Acceso restringido">
+            Solo los usuarios con el rol de Administrador pueden ver los paneles.
+        </RadzenAlert>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    [Parameter]
+    public int ParqueId { get; set; }
+
+    [Parameter]
+    public int NodoId { get; set; }
+
+    private IReadOnlyList<PanelListadoDto> _paneles = new List<PanelListadoDto>();
+    private string _nombreParque = string.Empty;
+    private string _nombreNodo = string.Empty;
+    private bool _cargando = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _nombreParque = ObtenerNombreParque();
+        _nombreNodo = await ObtenerNombreNodoAsync();
+        await CargarPanelesAsync();
+        _cargando = false;
+    }
+
+    private async Task CargarPanelesAsync()
+    {
+        try
+        {
+            _paneles = await PanelService.ObtenerPanelesPorNodoAsync(NodoId, ParqueId);
+        }
+        catch (NodoNoEncontradoException excepcion)
+        {
+            _paneles = new List<PanelListadoDto>();
+            NotificarError("No se pudo obtener el listado de paneles", excepcion.Message);
+        }
+        catch (UsuarioNoAutorizadoException excepcion)
+        {
+            _paneles = new List<PanelListadoDto>();
+            NotificarError("No se pudo obtener el listado de paneles", excepcion.Message);
+        }
+    }
+
+    private string ObtenerNombreParque()
+    {
+        try
+        {
+            return ParqueService.ObtenerParqueSync(ParqueId).Nombre;
+        }
+        catch (ParqueNoEncontradoException excepcion)
+        {
+            NotificarError("No se pudo obtener el parque", excepcion.Message);
+            return string.Empty;
+        }
+    }
+
+    private async Task<string> ObtenerNombreNodoAsync()
+    {
+        try
+        {
+            var nodo = await NodoService.ObtenerNodoParaEdicionAsync(NodoId, ParqueId);
+            return nodo.Nombre;
+        }
+        catch (NodoNoEncontradoException excepcion)
+        {
+            NotificarError("No se pudo obtener el nodo", excepcion.Message);
+            return string.Empty;
+        }
+    }
+
+    private async Task ConfirmarEliminacion(PanelListadoDto panel)
+    {
+        var confirmado = await DialogService.Confirm(
+            $"¿Esta seguro de que desea eliminar el panel {panel.Nombre}?",
+            "Eliminar panel",
+            new ConfirmOptions
+            {
+                OkButtonText = "Eliminar",
+                CancelButtonText = "Cancelar"
+            });
+
+        if (confirmado != true)
+        {
+            return;
+        }
+
+        try
+        {
+            await PanelService.EliminarPanelAsync(panel.Id, NodoId, ParqueId);
+
+            NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Success,
+                Summary = "Panel eliminado",
+                Detail = $"El panel '{panel.Nombre}' se elimino correctamente."
+            });
+
+            await CargarPanelesAsync();
+        }
+        catch (PanelNoEncontradoException excepcion)
+        {
+            NotificarAdvertencia(excepcion.Message);
+            await CargarPanelesAsync();
+        }
+        catch (NodoNoEncontradoException excepcion)
+        {
+            NotificarAdvertencia(excepcion.Message);
+        }
+        catch (UsuarioNoAutorizadoException excepcion)
+        {
+            NotificarAdvertencia(excepcion.Message);
+        }
+        catch (System.Exception excepcion)
+        {
+            NotificarAdvertencia(excepcion.Message);
+        }
+    }
+
+    private void NotificarAdvertencia(string detalle)
+    {
+        NotificationService.Notify(new NotificationMessage
+        {
+            Severity = NotificationSeverity.Warning,
+            Summary = "No se pudo eliminar el panel",
+            Detail = detalle
+        });
+    }
+
+    private void NotificarError(string resumen, string detalle)
+    {
+        NotificationService.Notify(new NotificationMessage
+        {
+            Severity = NotificationSeverity.Error,
+            Summary = resumen,
+            Detail = detalle
+        });
+    }
+}

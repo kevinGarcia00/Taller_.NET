@@ -89,6 +89,55 @@ namespace Taller_.NET.Modulos.ParqueSolar.Infrastructure.Persistencia.Migracione
                     b.ToTable("Nodos", (string)null);
                 });
 
+            modelBuilder.Entity("Taller_.NET.Modulos.ParqueSolar.Domain.Panel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Estado")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("estado");
+
+                    b.Property<DateTime>("FechaCreacion")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("fecha_creacion");
+
+                    b.Property<int>("NodoId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("nodo_id");
+
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("nombre");
+
+                    b.Property<decimal>("Potencia")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("potencia");
+
+                    b.Property<string>("VidaUtil")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("vida_util");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NodoId");
+
+                    b.HasIndex("Nombre", "NodoId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_paneles_nombre_nodo");
+
+                    b.ToTable("Paneles", (string)null);
+                });
+
             modelBuilder.Entity("Taller_.NET.Modulos.ParqueSolar.Domain.Parque", b =>
                 {
                     b.Property<int>("Id")
@@ -133,6 +182,17 @@ namespace Taller_.NET.Modulos.ParqueSolar.Infrastructure.Persistencia.Migracione
                         .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Inversor");
+                });
+
+            modelBuilder.Entity("Taller_.NET.Modulos.ParqueSolar.Domain.Panel", b =>
+                {
+                    b.HasOne("Taller_.NET.Modulos.ParqueSolar.Domain.Nodo", "Nodo")
+                        .WithMany()
+                        .HasForeignKey("NodoId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Nodo");
                 });
 #pragma warning restore 612, 618
         }

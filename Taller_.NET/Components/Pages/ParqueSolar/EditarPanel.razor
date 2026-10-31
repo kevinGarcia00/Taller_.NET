@@ -1,0 +1,225 @@
+@page "/parques/{ParqueId:int}/nodos/{NodoId:int}/paneles/editar/{Id:int}"
+@attribute [Authorize(Roles = "Administrador")]
+@rendermode InteractiveServer
+@inject IPanelService PanelService
+@inject INodoService NodoService
+@inject IParqueService ParqueService
+@inject NotificationService NotificationService
+@inject NavigationManager NavigationManager
+
+<PageTitle>Modificar Panel</PageTitle>
+
+<h1>Modificar Panel</h1>
+
+<AuthorizeView Roles="Administrador" Context="autorizacion">
+    <Authorized>
+        @if (_cargando)
+        {
+            <RadzenText TextStyle="TextStyle.Body2">Cargando el panel...</RadzenText>
+        }
+        else if (!_panelEncontrado)
+        {
+            <RadzenAlert AlertStyle="AlertStyle.Warning" Title="Panel no encontrado">
+                No se encontro el panel solicitado para este nodo.
+            </RadzenAlert>
+        }
+        else
+        {
+            <RadzenCard>
+                <RadzenStack Gap="1rem">
+                    <RadzenFormField Text="Parque solar" Variant="Variant.Outlined">
+                        <RadzenTextBox Value="@_nombreParque" ReadOnly="true" />
+                    </RadzenFormField>
+
+                    <RadzenFormField Text="Nodo" Variant="Variant.Outlined">
+                        <RadzenTextBox Value="@_nombreNodo" ReadOnly="true" />
+                    </RadzenFormField>
+
+                    <RadzenTemplateForm TItem="ModificarPanelDto" Data="@_modelo" Submit="OnValidSubmit">
+                        <RadzenStack Gap="1rem">
+                            <RadzenFormField Text="Identificador" Variant="Variant.Outlined">
+                                <RadzenNumeric TValue="int" Value="@_modelo.Id" ReadOnly="true" />
+                            </RadzenFormField>
+
+                            <RadzenFormField Text="Fecha de creacion" Variant="Variant.Outlined">
+                                <RadzenTextBox Value="@_fechaCreacion" ReadOnly="true" />
+                            </RadzenFormField>
+
+                            <RadzenFormField Text="Nombre" Variant="Variant.Outlined">
+                                <RadzenTextBox @bind-Value="_modelo.Nombre" MaxLength="@Panel.LongitudMaximaNombre" />
+                            </RadzenFormField>
+
+                            <RadzenFormField Text="Estado" Variant="Variant.Outlined">
+                                <RadzenDropDown TValue="EstadoPanel" Data="@_estados" @bind-Value="_modelo.Estado"
+                                                TextProperty="Nombre" ValueProperty="Valor"
+                                                Placeholder="Seleccione un estado" />
+                            </RadzenFormField>
+
+                            <RadzenFormField Text="Potencia" Variant="Variant.Outlined">
+                                <RadzenNumeric TValue="decimal" @bind-Value="_modelo.Potencia" Min="0" />
+                            </RadzenFormField>
+
+                            <RadzenFormField Text="Vida util" Variant="Variant.Outlined">
+                                <RadzenTextBox @bind-Value="_modelo.VidaUtil" MaxLength="@Panel.LongitudMaximaVidaUtil" />
+                            </RadzenFormField>
+
+                            <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem">
+                                <RadzenButton Text="Guardar cambios" ButtonType="ButtonType.Submit" Icon="save" />
+                                <RadzenButton Text="Cancelar" ButtonStyle="ButtonStyle.Secondary" Icon="close"
+                                              Click="@Cancelar" />
+                            </RadzenStack>
+                        </RadzenStack>
+                    </RadzenTemplateForm>
+                </RadzenStack>
+            </RadzenCard>
+        }
+    </Authorized>
+    <NotAuthorized>
+        <RadzenAlert AlertStyle="AlertStyle.Warning" Title="Acceso restringido">
+            Solo los usuarios con el rol de Administrador pueden modificar paneles.
+        </RadzenAlert>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    [Parameter]
+    public int ParqueId { get; set; }
+
+    [Parameter]
+    public int NodoId { get; set; }
+
+    [Parameter]
+    public int Id { get; set; }
+
+    private readonly IReadOnlyList<OpcionEstado> _estados = Enum.GetValues<EstadoPanel>()
+        .Select(estado => new OpcionEstado { Valor = estado, Nombre = estado.ToString() })
+        .ToList();
+
+    private ModificarPanelDto _modelo = new();
+    private string _nombreParque = string.Empty;
+    private string _nombreNodo = string.Empty;
+    private string _fechaCreacion = string.Empty;
+    private bool _panelEncontrado;
+    private bool _cargando = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _nombreParque = ObtenerNombreParque();
+        _nombreNodo = await ObtenerNombreNodoAsync();
+
+        try
+        {
+            _modelo = await PanelService.ObtenerParaEdicionAsync(Id, NodoId);
+            _panelEncontrado = _modelo.ParqueSolarId == ParqueId;
+            _fechaCreacion = _modelo.FechaCreacion.ToLocalTime().ToString("g");
+        }
+        catch (PanelNoEncontradoException excepcion)
+        {
+            _panelEncontrado = false;
+            NotificarError("Panel no encontrado", excepcion.Message);
+        }
+        catch (NodoNoEncontradoException excepcion)
+        {
+            _panelEncontrado = false;
+            NotificarError("No se pudo obtener el panel", excepcion.Message);
+        }
+        catch (UsuarioNoAutorizadoException excepcion)
+        {
+            _panelEncontrado = false;
+            NotificarError("No se pudo obtener el panel", excepcion.Message);
+        }
+        finally
+        {
+            _cargando = false;
+        }
+    }
+
+    private string ObtenerNombreParque()
+    {
+        try
+        {
+            return ParqueService.ObtenerParqueSync(ParqueId).Nombre;
+        }
+        catch (ParqueNoEncontradoException excepcion)
+        {
+            NotificarError("No se pudo obtener el parque", excepcion.Message);
+            return string.Empty;
+        }
+    }
+
+    private async Task<string> ObtenerNombreNodoAsync()
+    {
+        try
+        {
+            var nodo = await NodoService.ObtenerNodoParaEdicionAsync(NodoId, ParqueId);
+            return nodo.Nombre;
+        }
+        catch (NodoNoEncontradoException excepcion)
+        {
+            NotificarError("No se pudo obtener el nodo", excepcion.Message);
+            return string.Empty;
+        }
+    }
+
+    private void Cancelar()
+    {
+        NavigationManager.NavigateTo($"/parques/{ParqueId}/nodos/{NodoId}/paneles");
+    }
+
+    private async Task OnValidSubmit()
+    {
+        _modelo.Id = Id;
+        _modelo.NodoId = NodoId;
+        _modelo.ParqueSolarId = ParqueId;
+
+        try
+        {
+            await PanelService.ModificarPanelAsync(_modelo);
+
+            NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Success,
+                Summary = "Panel modificado",
+                Detail = $"El panel '{_modelo.Nombre}' se modifico correctamente."
+            });
+
+            NavigationManager.NavigateTo($"/parques/{ParqueId}/nodos/{NodoId}/paneles");
+        }
+        catch (PanelNombreDuplicadoException excepcion)
+        {
+            NotificarError("No se pudo modificar el panel", excepcion.Message);
+        }
+        catch (PanelNoEncontradoException excepcion)
+        {
+            NotificarError("No se pudo modificar el panel", excepcion.Message);
+        }
+        catch (NodoNoEncontradoException excepcion)
+        {
+            NotificarError("No se pudo modificar el panel", excepcion.Message);
+        }
+        catch (UsuarioNoAutorizadoException excepcion)
+        {
+            NotificarError("No se pudo modificar el panel", excepcion.Message);
+        }
+        catch (FluentValidation.ValidationException excepcion)
+        {
+            NotificarError("No se pudo modificar el panel", excepcion.Message);
+        }
+    }
+
+    private void NotificarError(string resumen, string detalle)
+    {
+        NotificationService.Notify(new NotificationMessage
+        {
+            Severity = NotificationSeverity.Error,
+            Summary = resumen,
+            Detail = detalle
+        });
+    }
+
+    private sealed class OpcionEstado
+    {
+        public EstadoPanel Valor { get; init; }
+        public string Nombre { get; init; } = string.Empty;
+    }
+}

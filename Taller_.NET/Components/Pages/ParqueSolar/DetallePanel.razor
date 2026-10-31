@@ -1,0 +1,140 @@
+@page "/parques/{ParqueId:int}/nodos/{NodoId:int}/paneles/{Id:int}"
+@attribute [Authorize(Roles = "Administrador")]
+@rendermode InteractiveServer
+@inject IPanelService PanelService
+@inject INodoService NodoService
+@inject IParqueService ParqueService
+@inject NavigationManager NavigationManager
+@inject NotificationService NotificationService
+
+<PageTitle>Detalle del Panel</PageTitle>
+
+<h1>Detalle del Panel</h1>
+
+<AuthorizeView Roles="Administrador" Context="autorizacion">
+    <Authorized>
+        <RadzenStack Gap="1rem">
+            <RadzenCard>
+                <RadzenStack Gap="1rem">
+                    <RadzenFormField Text="Parque solar" Variant="Variant.Outlined">
+                        <RadzenTextBox Value="@_nombreParque" ReadOnly="true" />
+                    </RadzenFormField>
+
+                    <RadzenFormField Text="Nodo" Variant="Variant.Outlined">
+                        <RadzenTextBox Value="@_nombreNodo" ReadOnly="true" />
+                    </RadzenFormField>
+
+                    @if (_panel is not null)
+                    {
+                        <RadzenFormField Text="Nombre" Variant="Variant.Outlined">
+                            <RadzenTextBox Value="@_panel.Nombre" ReadOnly="true" />
+                        </RadzenFormField>
+
+                        <RadzenFormField Text="Estado" Variant="Variant.Outlined">
+                            <RadzenTextBox Value="@_panel.Estado" ReadOnly="true" />
+                        </RadzenFormField>
+
+                        <RadzenFormField Text="Potencia" Variant="Variant.Outlined">
+                            <RadzenTextBox Value="@_panel.Potencia.ToString("N2")" ReadOnly="true" />
+                        </RadzenFormField>
+
+                        <RadzenFormField Text="Vida util" Variant="Variant.Outlined">
+                            <RadzenTextBox Value="@_panel.VidaUtil" ReadOnly="true" />
+                        </RadzenFormField>
+
+                        <RadzenFormField Text="Fecha de creacion" Variant="Variant.Outlined">
+                            <RadzenTextBox Value="@_panel.FechaCreacion.ToLocalTime().ToString("g")" ReadOnly="true" />
+                        </RadzenFormField>
+                    }
+                </RadzenStack>
+            </RadzenCard>
+
+            <RadzenButton Text="Volver al listado" Icon="arrow_back" ButtonStyle="ButtonStyle.Secondary"
+                          Click="@(() => NavigationManager.NavigateTo($"/parques/{ParqueId}/nodos/{NodoId}/paneles"))" />
+        </RadzenStack>
+    </Authorized>
+    <NotAuthorized>
+        <RadzenAlert AlertStyle="AlertStyle.Warning" Title="Acceso restringido">
+            Solo los usuarios con el rol de Administrador pueden ver los paneles.
+        </RadzenAlert>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    [Parameter]
+    public int ParqueId { get; set; }
+
+    [Parameter]
+    public int NodoId { get; set; }
+
+    [Parameter]
+    public int Id { get; set; }
+
+    private PanelDetalleDto? _panel;
+    private string _nombreParque = string.Empty;
+    private string _nombreNodo = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _nombreParque = ObtenerNombreParque();
+        _nombreNodo = await ObtenerNombreNodoAsync();
+        await CargarPanelAsync();
+    }
+
+    private async Task CargarPanelAsync()
+    {
+        try
+        {
+            _panel = await PanelService.ObtenerPanelAsync(Id, NodoId, ParqueId);
+        }
+        catch (PanelNoEncontradoException excepcion)
+        {
+            NotificarError("No se pudo obtener el panel", excepcion.Message);
+        }
+        catch (NodoNoEncontradoException excepcion)
+        {
+            NotificarError("No se pudo obtener el panel", excepcion.Message);
+        }
+        catch (UsuarioNoAutorizadoException excepcion)
+        {
+            NotificarError("No se pudo obtener el panel", excepcion.Message);
+        }
+    }
+
+    private string ObtenerNombreParque()
+    {
+        try
+        {
+            return ParqueService.ObtenerParqueSync(ParqueId).Nombre;
+        }
+        catch (ParqueNoEncontradoException excepcion)
+        {
+            NotificarError("No se pudo obtener el parque", excepcion.Message);
+            return string.Empty;
+        }
+    }
+
+    private async Task<string> ObtenerNombreNodoAsync()
+    {
+        try
+        {
+            var nodo = await NodoService.ObtenerNodoParaEdicionAsync(NodoId, ParqueId);
+            return nodo.Nombre;
+        }
+        catch (NodoNoEncontradoException excepcion)
+        {
+            NotificarError("No se pudo obtener el nodo", excepcion.Message);
+            return string.Empty;
+        }
+    }
+
+    private void NotificarError(string resumen, string detalle)
+    {
+        NotificationService.Notify(new NotificationMessage
+        {
+            Severity = NotificationSeverity.Error,
+            Summary = resumen,
+            Detail = detalle
+        });
+    }
+}

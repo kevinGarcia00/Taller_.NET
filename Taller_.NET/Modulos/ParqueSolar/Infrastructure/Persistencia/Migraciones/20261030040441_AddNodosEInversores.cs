@@ -8,6 +8,8 @@ namespace Taller_.NET.Modulos.ParqueSolar.Infrastructure.Persistencia.Migracione
     /// <inheritdoc />
     public partial class AddNodosEInversores : Migration
     {
+        private static readonly string[] ColumnasIndiceNombreParque = ["nombre", "parque_solar_id"];
+
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -59,7 +61,7 @@ namespace Taller_.NET.Modulos.ParqueSolar.Infrastructure.Persistencia.Migracione
             migrationBuilder.CreateIndex(
                 name: "ux_nodos_nombre_parque",
                 table: "Nodos",
-                columns: new[] { "nombre", "parque_solar_id" },
+                columns: ColumnasIndiceNombreParque,
                 unique: true);
         }
 

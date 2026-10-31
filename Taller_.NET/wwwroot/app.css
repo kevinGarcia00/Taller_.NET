@@ -20,6 +20,12 @@ a, .btn-link {
     padding-top: 1.1rem;
 }
 
+.rz-grid-table td.columna-acciones .rz-cell-data {
+    overflow: visible;
+    white-space: normal;
+    text-overflow: unset;
+}
+
 h1:focus {
     outline: none;
 }

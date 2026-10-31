@@ -56,12 +56,18 @@
                                 }
                             </Template>
                         </RadzenDataGridColumn>
-                        <RadzenDataGridColumn TItem="NodoListadoDto" Title="Acciones" Sortable="false" Filterable="false">
+                        <RadzenDataGridColumn TItem="NodoListadoDto" Title="Acciones" Sortable="false" Filterable="false" Width="240px" CssClass="columna-acciones">
                             <Template Context="nodo">
-                                <RadzenButton Text="Modificar" Icon="edit" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary"
-                                              Click="@(() => NavigationManager.NavigateTo($"/parques/{ParqueActualId}/nodos/{nodo.Id}/editar"))" />
-                                <RadzenButton Text="Eliminar" Icon="delete" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Danger"
-                                              Click="@(() => ConfirmarEliminacion(nodo))" />
+                                <RadzenStack Orientation="Orientation.Vertical" Gap="0.35rem" AlignItems="AlignItems.Start">
+                                    <RadzenButton Text="Ver paneles" Icon="visibility" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Light"
+                                                  Click="@(() => NavigationManager.NavigateTo($"/parques/{ParqueActualId}/nodos/{nodo.Id}/paneles"))" />
+                                    <RadzenButton Text="Registrar panel" Icon="solar_power" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Secondary"
+                                                  Click="@(() => NavigationManager.NavigateTo($"/parques/{ParqueActualId}/nodos/{nodo.Id}/paneles/alta"))" />
+                                    <RadzenButton Text="Modificar" Icon="edit" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary"
+                                                  Click="@(() => NavigationManager.NavigateTo($"/parques/{ParqueActualId}/nodos/{nodo.Id}/editar"))" />
+                                    <RadzenButton Text="Eliminar" Icon="delete" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Danger"
+                                                  Click="@(() => ConfirmarEliminacion(nodo))" />
+                                </RadzenStack>
                             </Template>
                         </RadzenDataGridColumn>
                     </Columns>

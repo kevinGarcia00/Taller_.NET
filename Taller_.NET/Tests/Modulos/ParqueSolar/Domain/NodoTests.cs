@@ -95,7 +95,10 @@ public class NodoTests
 
         nodo.AsignarContexto(new ContextoParque(5));
 
-        Assert.Equal(5, nodo.ContextoParque.ParqueSolarId);
+        var contexto = nodo.ContextoParque;
+
+        Assert.NotNull(contexto);
+        Assert.Equal(5, contexto.ParqueSolarId);
     }
 
     [Fact]
