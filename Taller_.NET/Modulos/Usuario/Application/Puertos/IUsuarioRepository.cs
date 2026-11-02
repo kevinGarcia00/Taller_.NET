@@ -11,9 +11,7 @@ namespace Taller_.NET.Modulos.Usuario.Application.Puertos
 
         Task<Usuario?> ObtenerPorCorreoAsync(string correo, CancellationToken cancellationToken = default);
 
-        Task<List<Rol>> ObtenerRolesPorIdsAsync(IReadOnlyCollection<long> rolesIds, CancellationToken cancellationToken = default);
-
-        Task<List<Rol>> ObtenerTodosLosRolesAsync(CancellationToken cancellationToken = default);
+        Task<Usuario?> ObtenerPorAuth0UserIdAsync(string auth0UserId, CancellationToken cancellationToken = default);
 
         Task<List<UsuarioListadoDto>> ObtenerListadoAsync(CancellationToken cancellationToken = default);
 
@@ -21,8 +19,8 @@ namespace Taller_.NET.Modulos.Usuario.Application.Puertos
 
         Task ActualizarAsync(Usuario usuario, CancellationToken cancellationToken = default);
 
-        Task Eliminar(Usuario usuario, CancellationToken cancellationToken = default);
+        Task EliminarAsync(Usuario usuario, CancellationToken cancellationToken = default);
 
-        Task<int> ObtenerCantidadAdministradoresAsync(CancellationToken cancellationToken = default);
+        Task GuardarCambiosAsync(CancellationToken cancellationToken = default);
     }
 }

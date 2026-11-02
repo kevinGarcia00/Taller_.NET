@@ -7,6 +7,10 @@ namespace Taller_.NET.Modulos.Usuario.Application.Dtos
         public string Apellido { get; set; } = string.Empty;
         public string Correo { get; set; } = string.Empty;
         public string Telefono { get; set; } = string.Empty;
-        public List<long> RolesIds { get; set; } = new();
+
+        /// <summary>
+        /// Identificadores (role_id) de los roles de Auth0 que tendra el usuario.
+        /// </summary>
+        public List<string> RolesIds { get; set; } = new();
     }
 }

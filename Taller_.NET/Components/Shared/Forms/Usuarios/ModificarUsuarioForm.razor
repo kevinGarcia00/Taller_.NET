@@ -58,14 +58,14 @@
 
             <RadzenFormField Text="Roles" Variant="Variant.Outlined">
                 <ChildContent>
-                    <RadzenDropDown TValue="IEnumerable<long>"
+                    <RadzenDropDown TValue="IEnumerable<string>"
                                     Value="@_modelo.RolesIds"
                                     ValueChanged="@OnRolesIdsChanged"
                                     Multiple="true"
                                     Data="@_roles"
                                     TextProperty="Nombre"
                                     ValueProperty="Id"
-                                    Placeholder="Seleccione los roles" />
+                                    Placeholder="Seleccione los roles de Auth0" />
                 </ChildContent>
                 <Helper>
                     <ValidationMessage For="@(() => _modelo.RolesIds)" />
@@ -167,6 +167,14 @@
         {
             NotificarError("No se pudo actualizar el usuario.", excepcion.Message);
         }
+        catch (Auth0IntegracionException excepcion)
+        {
+            NotificarError("No se pudo actualizar el usuario en Auth0.", excepcion.Message);
+        }
+        catch (Exception excepcion)
+        {
+            NotificarError("No se pudo actualizar el usuario.", excepcion.Message);
+        }
     }
 
     private Dictionary<string, FieldIdentifier> ObtenerCamposDelFormulario()
@@ -177,15 +185,15 @@
             [nameof(ModificarUsuarioDto.Apellido)] = FieldIdentifier.Create<string>(() => _modelo.Apellido),
             [nameof(ModificarUsuarioDto.Correo)] = FieldIdentifier.Create<string>(() => _modelo.Correo),
             [nameof(ModificarUsuarioDto.Telefono)] = FieldIdentifier.Create<string>(() => _modelo.Telefono),
-            [nameof(ModificarUsuarioDto.RolesIds)] = FieldIdentifier.Create<List<long>>(() => _modelo.RolesIds)
+            [nameof(ModificarUsuarioDto.RolesIds)] = FieldIdentifier.Create<List<string>>(() => _modelo.RolesIds)
         };
     }
 
-    private void OnRolesIdsChanged(IEnumerable<long> rolesIds)
+    private void OnRolesIdsChanged(IEnumerable<string> rolesIds)
     {
-        _modelo.RolesIds = rolesIds?.ToList() ?? new List<long>();
+        _modelo.RolesIds = rolesIds?.ToList() ?? new List<string>();
 
-        _validacion.NotificarCampoModificado(FieldIdentifier.Create<List<long>>(() => _modelo.RolesIds));
+        _validacion.NotificarCampoModificado(FieldIdentifier.Create<List<string>>(() => _modelo.RolesIds));
     }
 
     private void Cancelar()

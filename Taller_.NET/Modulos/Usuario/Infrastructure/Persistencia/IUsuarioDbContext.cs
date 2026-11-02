@@ -7,8 +7,6 @@ namespace Taller_.NET.Modulos.Usuario.Infrastructure.Persistencia
     {
         DbSet<Usuario> Usuarios { get; set; }
 
-        DbSet<Rol> Roles { get; set; }
-
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     }
 }

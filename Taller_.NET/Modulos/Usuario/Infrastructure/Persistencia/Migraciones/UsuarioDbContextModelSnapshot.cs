@@ -17,55 +17,6 @@ namespace Taller_.NET.Modulos.Usuario.Infrastructure.Persistencia.Migraciones
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.13");
 
-            modelBuilder.Entity("RolUsuario", b =>
-                {
-                    b.Property<long>("RolesId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<Guid>("UsuarioId")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("RolesId", "UsuarioId");
-
-                    b.HasIndex("UsuarioId");
-
-                    b.ToTable("UsuarioRoles", (string)null);
-                });
-
-            modelBuilder.Entity("Taller_.NET.Modulos.Usuario.Rol", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
-                        .HasColumnName("id");
-
-                    b.Property<string>("Nombre")
-                        .IsRequired()
-                        .HasMaxLength(25)
-                        .HasColumnType("TEXT")
-                        .HasColumnName("nombre");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Nombre")
-                        .IsUnique()
-                        .HasDatabaseName("ux_roles_nombre");
-
-                    b.ToTable("Roles", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1L,
-                            Nombre = "Administrador"
-                        },
-                        new
-                        {
-                            Id = 2L,
-                            Nombre = "Mantenimiento"
-                        });
-                });
-
             modelBuilder.Entity("Taller_.NET.Modulos.Usuario.Usuario", b =>
                 {
                     b.Property<Guid>("Id")
@@ -113,21 +64,6 @@ namespace Taller_.NET.Modulos.Usuario.Infrastructure.Persistencia.Migraciones
                         .HasDatabaseName("ux_usuarios_correo");
 
                     b.ToTable("Usuarios", (string)null);
-                });
-
-            modelBuilder.Entity("RolUsuario", b =>
-                {
-                    b.HasOne("Taller_.NET.Modulos.Usuario.Rol", null)
-                        .WithMany()
-                        .HasForeignKey("RolesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Taller_.NET.Modulos.Usuario.Usuario", null)
-                        .WithMany()
-                        .HasForeignKey("UsuarioId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

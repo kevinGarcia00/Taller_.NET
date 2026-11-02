@@ -48,10 +48,6 @@ namespace Taller_.NET.Modulos.Usuario.Infrastructure.Persistencia.Configuracione
                 .IsUnique()
                 .HasFilter("auth0_user_id IS NOT NULL")
                 .HasDatabaseName("ux_usuarios_auth0_user_id");
-
-            builder.HasMany(usuario => usuario.Roles)
-                .WithMany()
-                .UsingEntity(usuarioRoles => usuarioRoles.ToTable("UsuarioRoles"));
         }
     }
 }

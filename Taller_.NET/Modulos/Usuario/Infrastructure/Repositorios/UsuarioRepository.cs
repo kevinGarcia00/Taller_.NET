@@ -24,30 +24,19 @@ namespace Taller_.NET.Modulos.Usuario.Infrastructure.Repositorios
         public async Task<Usuario?> ObtenerPorIdAsync(Guid id, CancellationToken cancellationToken = default)
         {
             return await _contexto.Usuarios
-                .Include(usuario => usuario.Roles)
                 .FirstOrDefaultAsync(usuario => usuario.Id == id, cancellationToken);
         }
 
         public async Task<Usuario?> ObtenerPorCorreoAsync(string correo, CancellationToken cancellationToken = default)
         {
             return await _contexto.Usuarios
-                .Include(usuario => usuario.Roles)
                 .FirstOrDefaultAsync(usuario => usuario.Correo == correo, cancellationToken);
         }
 
-        public async Task<List<Rol>> ObtenerRolesPorIdsAsync(IReadOnlyCollection<long> rolesIds, CancellationToken cancellationToken = default)
+        public async Task<Usuario?> ObtenerPorAuth0UserIdAsync(string auth0UserId, CancellationToken cancellationToken = default)
         {
-            return await _contexto.Roles
-                .Where(rol => rolesIds.Contains(rol.Id))
-                .OrderBy(rol => rol.Nombre)
-                .ToListAsync(cancellationToken);
-        }
-
-        public async Task<List<Rol>> ObtenerTodosLosRolesAsync(CancellationToken cancellationToken = default)
-        {
-            return await _contexto.Roles
-                .OrderBy(rol => rol.Nombre)
-                .ToListAsync(cancellationToken);
+            return await _contexto.Usuarios
+                .FirstOrDefaultAsync(usuario => usuario.Auth0UserId == auth0UserId, cancellationToken);
         }
 
         public async Task<List<UsuarioListadoDto>> ObtenerListadoAsync(CancellationToken cancellationToken = default)
@@ -62,7 +51,7 @@ namespace Taller_.NET.Modulos.Usuario.Infrastructure.Repositorios
                     Apellido = usuario.Apellido,
                     Correo = usuario.Correo,
                     Telefono = usuario.Telefono,
-                    Roles = usuario.Roles.Select(rol => rol.Nombre).ToList()
+                    Auth0UserId = usuario.Auth0UserId
                 })
                 .ToListAsync(cancellationToken);
         }
@@ -70,30 +59,25 @@ namespace Taller_.NET.Modulos.Usuario.Infrastructure.Repositorios
         public async Task AgregarAsync(Usuario usuario, CancellationToken cancellationToken = default)
         {
             await _contexto.Usuarios.AddAsync(usuario, cancellationToken);
-            await _contexto.SaveChangesAsync(cancellationToken);
         }
 
-        public async Task ActualizarAsync(Usuario usuario, CancellationToken cancellationToken = default)
+        public Task ActualizarAsync(Usuario usuario, CancellationToken cancellationToken = default)
         {
             _contexto.Usuarios.Update(usuario);
-            await _contexto.SaveChangesAsync(cancellationToken);
+
+            return Task.CompletedTask;
         }
 
-        public async Task Eliminar(Usuario usuario, CancellationToken cancellationToken = default)
+        public Task EliminarAsync(Usuario usuario, CancellationToken cancellationToken = default)
         {
             _contexto.Usuarios.Remove(usuario);
-            await _contexto.SaveChangesAsync(cancellationToken);
+
+            return Task.CompletedTask;
         }
 
-        public async Task SaveChangesAsync(CancellationToken cancellationToken = default)
+        public async Task GuardarCambiosAsync(CancellationToken cancellationToken = default)
         {
             await _contexto.SaveChangesAsync(cancellationToken);
-        }
-
-        public async Task<int> ObtenerCantidadAdministradoresAsync(CancellationToken cancellationToken = default)
-        {
-            return await _contexto.Usuarios
-                .CountAsync(usuario => usuario.Roles.Any(rol => rol.Nombre == Taller_.NET.Modulos.Usuario.Rol.NombreAdministrador), cancellationToken);
         }
     }
 }

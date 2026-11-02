@@ -1,5 +1,5 @@
 @page "/usuarios/alta"
-@attribute [Authorize(Roles = "Administrador")]
+@attribute [Authorize(Policy = PermisosUsuarios.PoliticaCrear)]
 @rendermode InteractiveServer
 @inject NavigationManager NavigationManager
 
@@ -7,7 +7,7 @@
 
 <h1>Alta de Usuario</h1>
 
-<AuthorizeView Roles="Administrador" Context="autorizacion">
+<AuthorizeView Policy="@PermisosUsuarios.PoliticaCrear" Context="autorizacion">
     <Authorized>
         <RadzenCard>
             <AltaUsuarioForm OnRegistrado="IrAlInicio" />
@@ -15,7 +15,7 @@
     </Authorized>
     <NotAuthorized>
         <RadzenAlert AlertStyle="AlertStyle.Warning" Title="Acceso restringido">
-            Solo los usuarios con el rol de Administrador pueden registrar usuarios.
+            Solo los usuarios con el permiso users:create pueden registrar usuarios.
         </RadzenAlert>
     </NotAuthorized>
 </AuthorizeView>

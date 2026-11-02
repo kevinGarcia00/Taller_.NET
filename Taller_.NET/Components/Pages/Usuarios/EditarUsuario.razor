@@ -1,6 +1,6 @@
 @page "/usuarios/editar"
 @page "/usuarios/editar/{Id:guid}"
-@attribute [Authorize(Roles = "Administrador")]
+@attribute [Authorize(Policy = PermisosUsuarios.PoliticaActualizar)]
 @rendermode InteractiveServer
 @using Taller_.NET.Modulos.Usuario.Application.Excepciones
 @inject IUsuarioService UsuarioService
@@ -11,7 +11,7 @@
 
 <h1>Edicion de Usuario</h1>
 
-<AuthorizeView Roles="Administrador" Context="autorizacion">
+<AuthorizeView Policy="@PermisosUsuarios.PoliticaActualizar" Context="autorizacion">
     <Authorized>
         @if (_cargando)
         {
@@ -47,7 +47,7 @@
     </Authorized>
     <NotAuthorized>
         <RadzenAlert AlertStyle="AlertStyle.Warning" Title="Acceso restringido">
-            Solo los usuarios con el rol de Administrador pueden modificar usuarios.
+            Solo los usuarios con el permiso users:update pueden modificar usuarios.
         </RadzenAlert>
     </NotAuthorized>
 </AuthorizeView>

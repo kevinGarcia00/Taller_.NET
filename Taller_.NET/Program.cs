@@ -22,19 +22,15 @@ using Taller_.NET.Modulos.ParqueSolar.Infrastructure.Mediadores;
 using Taller_.NET.Modulos.ParqueSolar.Infrastructure.Persistencia;
 using Taller_.NET.Modulos.ParqueSolar.Infrastructure.Repositorios;
 using Taller_.NET.Modulos.ParqueSolar.Infrastructure.Seguridad;
-using Taller_.NET.Modulos.Usuario.Application;
-using Taller_.NET.Modulos.Usuario.Application.Dtos;
-using Taller_.NET.Modulos.Usuario.Application.Servicios;
-using Taller_.NET.Modulos.Usuario.Application.Validadores;
-using Taller_.NET.Modulos.Usuario.Infrastructure.Persistencia;
-using Taller_.NET.Modulos.Usuario.Infrastructure.Repositorios;
-// El modulo ParqueSolar y el modulo Usuario declaran tipos con el mismo nombre,
-// por lo que los del modulo Usuario se referencian con alias.
-using IUsuarioActualProviderUsuario = Taller_.NET.Modulos.Usuario.Application.Puertos.IUsuarioActualProvider;
-using IUsuarioRepositoryUsuario = Taller_.NET.Modulos.Usuario.Application.Puertos.IUsuarioRepository;
-using UsuarioActualProviderUsuario = Taller_.NET.Modulos.Usuario.Infrastructure.Seguridad.UsuarioActualProvider;
+using Taller_.NET.Modulos.Usuario.Application.Seguridad;
+using Taller_.NET.Modulos.Usuario.Infrastructure;
+using IUsuarioAutenticacionService = Taller_.NET.Modulos.Usuario.Application.Puertos.IUsuarioAutenticacionService;
 
 var builder = WebApplication.CreateBuilder(args);
+
+AppContext.SetSwitch(
+    "System.Net.SocketsHttpHandler.PreferIPv4Stack",
+    true);
 
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
@@ -127,11 +123,32 @@ else
 
         options.Events = new OpenIdConnectEvents
         {
+            OnTicketReceived = async context =>
+            {
+                // Auth0 administra roles y permisos. Antes de emitir la cookie se agregan
+                // los roles del usuario y los permisos del Access Token al principal.
+                var usuarioAutenticacionService = context.HttpContext.RequestServices
+                    .GetRequiredService<IUsuarioAutenticacionService>();
+
+                await usuarioAutenticacionService.AgregarDatosDeAutorizacionAsync(
+                    context.Principal!,
+                    context.Properties?.GetTokenValue("access_token"),
+                    context.HttpContext.RequestAborted);
+            },
             OnRedirectToIdentityProvider = context =>
             {
                 if (!string.IsNullOrWhiteSpace(origenPublico))
                 {
                     context.ProtocolMessage.RedirectUri = $"{origenPublico}{options.CallbackPath}";
+                }
+
+                var audiencia = builder.Configuration["Auth0:Audience"];
+
+                if (!string.IsNullOrWhiteSpace(audiencia))
+                {
+                    // Solicita un Access Token JWT para la API, que incluye el claim
+                    // "permissions" administrado por los roles de Auth0.
+                    context.ProtocolMessage.SetParameter("audience", audiencia);
                 }
 
                 return Task.CompletedTask;
@@ -148,8 +165,6 @@ else
             }
         };
 
-        // Auth0 entrega los roles en el claim con namespace (agregado por una Action).
-        options.TokenValidationParameters.RoleClaimType = builder.Configuration["Auth0:RolesClaim"] ?? "https://solaryu.com/roles";
         options.TokenValidationParameters.NameClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier";
     })
     .AddJwtBearer(options =>
@@ -197,17 +212,11 @@ builder.Services.AddScoped<IValidator<EditarNodoDto>, EditarNodoDtoValidator>();
 builder.Services.AddScoped<IValidator<CrearPanelDto>, CrearPanelDtoValidator>();
 builder.Services.AddScoped<IValidator<ModificarPanelDto>, ModificarPanelDtoValidator>();
 
-builder.Services.AddDbContext<UsuarioDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("Usuario")));
-
-builder.Services.AddScoped<IUsuarioDbContext>(proveedor => proveedor.GetRequiredService<UsuarioDbContext>());
-builder.Services.AddScoped<IUsuarioRepositoryUsuario, UsuarioRepository>();
-builder.Services.AddScoped<IUsuarioService, UsuarioService>();
-builder.Services.AddScoped<IUsuarioActualProviderUsuario, UsuarioActualProviderUsuario>();
-builder.Services.AddScoped<IValidator<CrearUsuarioDto>, CrearUsuarioDtoValidator>();
-builder.Services.AddScoped<IValidator<ModificarUsuarioDto>, ModificarUsuarioDtoValidator>();
+builder.Services.AgregarModuloUsuario(builder.Configuration);
 
 var app = builder.Build();
+
+await app.Services.InicializarModuloUsuarioAsync();
 
 if (!app.Environment.IsDevelopment())
 {
@@ -250,13 +259,16 @@ public class AutenticacionAnonimaHandler : AuthenticationHandler<AuthenticationS
 
     protected override Task<AuthenticateResult> HandleAuthenticateAsync()
     {
-        var identidad = new ClaimsIdentity(
-            new[]
-            {
-                new Claim(ClaimTypes.Name, "Usuario de prueba"),
-                new Claim(ClaimTypes.Role, "Administrador")
-            },
-            Scheme.Name);
+        var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.Name, "Usuario de prueba"),
+            new Claim(ClaimTypes.Role, RolesAuth0.Administrador)
+        };
+
+        claims.AddRange(PermisosUsuarios.Todos.Select(permiso =>
+            new Claim(PermisosUsuarios.TipoClaim, permiso)));
+
+        var identidad = new ClaimsIdentity(claims, Scheme.Name);
 
         var principal = new ClaimsPrincipal(identidad);
         var ticket = new AuthenticationTicket(principal, Scheme.Name);

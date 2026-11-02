@@ -1,4 +1,3 @@
-using Taller_.NET.Modulos.Usuario;
 using Taller_.NET.Modulos.Usuario.Excepciones;
 using Xunit;
 
@@ -20,14 +19,6 @@ public class UsuarioTests
         Assert.Equal("Perez", usuario.Apellido);
         Assert.Equal("ana@solaryu.com", usuario.Correo);
         Assert.Equal("099123456", usuario.Telefono);
-    }
-
-    [Fact]
-    public void CrearUsuario_SinRoles_ArrancaSinRolesAsignados()
-    {
-        var usuario = new EntidadUsuario("Ana", "Perez", "ana@solaryu.com", "099123456");
-
-        Assert.Empty(usuario.Roles);
     }
 
     [Fact]
@@ -119,67 +110,6 @@ public class UsuarioTests
     }
 
     [Fact]
-    public void AsignarRol_AgregaElRolAlUsuario()
-    {
-        var usuario = new EntidadUsuario("Ana", "Perez", "ana@solaryu.com", "099123456");
-        var rol = new Rol(1, Rol.NombreAdministrador);
-
-        usuario.AsignarRol(rol);
-
-        Assert.Single(usuario.Roles);
-        Assert.Equal(Rol.NombreAdministrador, usuario.Roles.First().Nombre);
-    }
-
-    [Fact]
-    public void AsignarRol_ConElMismoRol_LoIgnora()
-    {
-        var usuario = new EntidadUsuario("Ana", "Perez", "ana@solaryu.com", "099123456");
-        var rol = new Rol(1, Rol.NombreAdministrador);
-
-        usuario.AsignarRol(rol);
-        usuario.AsignarRol(rol);
-
-        Assert.Single(usuario.Roles);
-    }
-
-    [Fact]
-    public void AsignarRol_SinRol_LanzaExcepcion()
-    {
-        var usuario = new EntidadUsuario("Ana", "Perez", "ana@solaryu.com", "099123456");
-
-        Assert.Throws<UsuarioInvalidoException>(() => usuario.AsignarRol(null!));
-    }
-
-    [Fact]
-    public void AsignarRol_PermiteAsignarVariosRoles()
-    {
-        var usuario = new EntidadUsuario("Ana", "Perez", "ana@solaryu.com", "099123456");
-
-        usuario.AsignarRol(new Rol(1, Rol.NombreAdministrador));
-        usuario.AsignarRol(new Rol(2, Rol.NombreMantenimiento));
-
-        Assert.Equal(2, usuario.Roles.Count);
-    }
-
-    [Fact]
-    public void TieneRol_ConRolAsignado_DevuelveTrue()
-    {
-        var usuario = new EntidadUsuario("Ana", "Perez", "ana@solaryu.com", "099123456");
-        usuario.AsignarRol(new Rol(1, Rol.NombreAdministrador));
-
-        Assert.True(usuario.TieneRol(Rol.NombreAdministrador));
-    }
-
-    [Fact]
-    public void TieneRol_SinRolAsignado_DevuelveFalse()
-    {
-        var usuario = new EntidadUsuario("Ana", "Perez", "ana@solaryu.com", "099123456");
-        usuario.AsignarRol(new Rol(2, Rol.NombreMantenimiento));
-
-        Assert.False(usuario.TieneRol(Rol.NombreAdministrador));
-    }
-
-    [Fact]
     public void ActualizarDatosPersonales_ConDatosValidos_ReemplazaLosDatos()
     {
         var usuario = new EntidadUsuario("Ana", "Perez", "ana@solaryu.com", "099123456");
@@ -267,47 +197,6 @@ public class UsuarioTests
     }
 
     [Fact]
-    public void ActualizarRoles_ReemplazaLosRolesAsignados()
-    {
-        var usuario = new EntidadUsuario("Ana", "Perez", "ana@solaryu.com", "099123456");
-        usuario.AsignarRol(new Rol(1, Rol.NombreAdministrador));
-
-        usuario.ActualizarRoles(new List<Rol> { new Rol(2, Rol.NombreMantenimiento) });
-
-        Assert.Single(usuario.Roles);
-        Assert.Equal(Rol.NombreMantenimiento, usuario.Roles.First().Nombre);
-    }
-
-    [Fact]
-    public void ActualizarRoles_ConVariosRoles_AsignaTodos()
-    {
-        var usuario = new EntidadUsuario("Ana", "Perez", "ana@solaryu.com", "099123456");
-
-        usuario.ActualizarRoles(new List<Rol> { new Rol(1, Rol.NombreAdministrador), new Rol(2, Rol.NombreMantenimiento) });
-
-        Assert.Equal(2, usuario.Roles.Count);
-    }
-
-    [Fact]
-    public void ActualizarRoles_SinRoles_LanzaExcepcion()
-    {
-        var usuario = new EntidadUsuario("Ana", "Perez", "ana@solaryu.com", "099123456");
-        usuario.AsignarRol(new Rol(1, Rol.NombreAdministrador));
-
-        Assert.Throws<UsuarioInvalidoException>(() => usuario.ActualizarRoles(new List<Rol>()));
-    }
-
-    [Fact]
-    public void ActualizarRoles_ConRolesRepetidos_AsignaCadaRolUnaVez()
-    {
-        var usuario = new EntidadUsuario("Ana", "Perez", "ana@solaryu.com", "099123456");
-
-        usuario.ActualizarRoles(new List<Rol> { new Rol(1, Rol.NombreAdministrador), new Rol(1, Rol.NombreAdministrador) });
-
-        Assert.Single(usuario.Roles);
-    }
-
-    [Fact]
     public void VincularConAuth0_ConIdentificadorValido_GuardaElIdentificador()
     {
         var usuario = new EntidadUsuario("Ana", "Perez", "ana@solaryu.com", "099123456");
@@ -318,11 +207,30 @@ public class UsuarioTests
     }
 
     [Fact]
+    public void VincularConAuth0_RecortaLosEspaciosDelIdentificador()
+    {
+        var usuario = new EntidadUsuario("Ana", "Perez", "ana@solaryu.com", "099123456");
+
+        usuario.VincularConAuth0("  auth0|65f1a2b3c4d5e6f7g8  ");
+
+        Assert.Equal("auth0|65f1a2b3c4d5e6f7g8", usuario.Auth0UserId);
+    }
+
+    [Fact]
     public void VincularConAuth0_SinIdentificador_LanzaExcepcion()
     {
         var usuario = new EntidadUsuario("Ana", "Perez", "ana@solaryu.com", "099123456");
 
         Assert.Throws<UsuarioInvalidoException>(() => usuario.VincularConAuth0("   "));
+    }
+
+    [Fact]
+    public void VincularConAuth0_ConIdentificadorDemasiadoLargo_LanzaExcepcion()
+    {
+        var usuario = new EntidadUsuario("Ana", "Perez", "ana@solaryu.com", "099123456");
+        var auth0UserId = new string('a', EntidadUsuario.LongitudMaximaAuth0UserId + 1);
+
+        Assert.Throws<UsuarioInvalidoException>(() => usuario.VincularConAuth0(auth0UserId));
     }
 
     [Fact]

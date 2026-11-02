@@ -12,12 +12,9 @@ namespace Taller_.NET.Modulos.Usuario.Infrastructure.Persistencia
 
         public DbSet<Usuario> Usuarios { get; set; } = null!;
 
-        public DbSet<Rol> Roles { get; set; } = null!;
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfiguration(new UsuarioConfiguration());
-            modelBuilder.ApplyConfiguration(new RolConfiguration());
 
             base.OnModelCreating(modelBuilder);
         }

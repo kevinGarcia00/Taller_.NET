@@ -7,6 +7,7 @@ namespace Taller_.NET.Modulos.Usuario.Application.Dtos
         public string Apellido { get; set; } = string.Empty;
         public string Correo { get; set; } = string.Empty;
         public string Telefono { get; set; } = string.Empty;
+        public string? Auth0UserId { get; set; }
         public List<string> Roles { get; set; } = new();
     }
 }

@@ -1,6 +1,7 @@
 @using FluentValidation
 @using FluentValidation.Results
 @using Taller_.NET.Modulos.Usuario.Application.Excepciones
+@using Taller_.NET.Modulos.Usuario.Application.Validadores
 @inject IUsuarioService UsuarioService
 @inject IValidator<CrearUsuarioDto> Validador
 @inject NotificationService NotificationService
@@ -50,16 +51,27 @@
                 </Helper>
             </RadzenFormField>
 
+            <RadzenFormField Text="Contrasena" Variant="Variant.Outlined">
+                <ChildContent>
+                    <RadzenPassword @bind-Value="_modelo.Contrasena"
+                                    MaxLength="@CrearUsuarioDtoValidator.LongitudMaximaContrasena"
+                                    Placeholder="Minimo 8 caracteres, con letras y numeros" />
+                </ChildContent>
+                <Helper>
+                    <ValidationMessage For="@(() => _modelo.Contrasena)" />
+                </Helper>
+            </RadzenFormField>
+
             <RadzenFormField Text="Roles" Variant="Variant.Outlined">
                 <ChildContent>
-                    <RadzenDropDown TValue="IEnumerable<long>"
+                    <RadzenDropDown TValue="IEnumerable<string>"
                                     Value="@_modelo.RolesIds"
                                     ValueChanged="@OnRolesIdsChanged"
                                     Multiple="true"
                                     Data="@_roles"
                                     TextProperty="Nombre"
                                     ValueProperty="Id"
-                                    Placeholder="Seleccione los roles" />
+                                    Placeholder="Seleccione los roles de Auth0" />
                 </ChildContent>
                 <Helper>
                     <ValidationMessage For="@(() => _modelo.RolesIds)" />
@@ -148,6 +160,18 @@
         {
             NotificarError("No se pudo registrar el usuario.", excepcion.Message);
         }
+        catch (Auth0IntegracionException excepcion)
+        {
+            NotificarError("No se pudo registrar el usuario en Auth0.", excepcion.Message);
+        }
+        catch (UsuarioInvalidoException excepcion)
+        {
+            NotificarError("No se pudo registrar el usuario.", excepcion.Message);
+        }
+        catch (Exception excepcion)
+        {
+            NotificarError("No se pudo registrar el usuario.", excepcion.Message);
+        }
     }
 
     private Dictionary<string, FieldIdentifier> ObtenerCamposDelFormulario()
@@ -157,15 +181,17 @@
             [nameof(CrearUsuarioDto.Nombre)] = FieldIdentifier.Create<string>(() => _modelo.Nombre),
             [nameof(CrearUsuarioDto.Apellido)] = FieldIdentifier.Create<string>(() => _modelo.Apellido),
             [nameof(CrearUsuarioDto.Correo)] = FieldIdentifier.Create<string>(() => _modelo.Correo),
-            [nameof(CrearUsuarioDto.RolesIds)] = FieldIdentifier.Create<List<long>>(() => _modelo.RolesIds)
+            [nameof(CrearUsuarioDto.Telefono)] = FieldIdentifier.Create<string>(() => _modelo.Telefono),
+            [nameof(CrearUsuarioDto.Contrasena)] = FieldIdentifier.Create<string>(() => _modelo.Contrasena),
+            [nameof(CrearUsuarioDto.RolesIds)] = FieldIdentifier.Create<List<string>>(() => _modelo.RolesIds)
         };
     }
 
-    private void OnRolesIdsChanged(IEnumerable<long> rolesIds)
+    private void OnRolesIdsChanged(IEnumerable<string> rolesIds)
     {
-        _modelo.RolesIds = rolesIds?.ToList() ?? new List<long>();
+        _modelo.RolesIds = rolesIds?.ToList() ?? new List<string>();
 
-        _validacion.NotificarCampoModificado(FieldIdentifier.Create<List<long>>(() => _modelo.RolesIds));
+        _validacion.NotificarCampoModificado(FieldIdentifier.Create<List<string>>(() => _modelo.RolesIds));
     }
 
     private void NotificarErrores(IEnumerable<string> errores)

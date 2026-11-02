@@ -25,9 +25,6 @@ namespace Taller_.NET.Modulos.Usuario
         /// </summary>
         public string? Auth0UserId { get; private set; }
 
-        private readonly List<Rol> _roles = new();
-        public IReadOnlyCollection<Rol> Roles => _roles.AsReadOnly();
-
         public Usuario(string nombre, string apellido, string correo, string telefono)
         {
             Id = Guid.NewGuid();
@@ -45,22 +42,12 @@ namespace Taller_.NET.Modulos.Usuario
                 throw new UsuarioInvalidoException("El identificador del usuario en Auth0 es obligatorio.");
             }
 
+            if (auth0UserId.Length > LongitudMaximaAuth0UserId)
+            {
+                throw new UsuarioInvalidoException($"El identificador del usuario en Auth0 no puede superar los {LongitudMaximaAuth0UserId} caracteres.");
+            }
+
             Auth0UserId = auth0UserId.Trim();
-        }
-
-        public void AsignarRol(Rol rol)
-        {
-            if (rol is null)
-            {
-                throw new UsuarioInvalidoException("El rol a asignar es obligatorio.");
-            }
-
-            if (_roles.Any(rolExistente => rolExistente.Id == rol.Id))
-            {
-                return;
-            }
-
-            _roles.Add(rol);
         }
 
         public void ActualizarDatosPersonales(string nombre, string apellido, string correo, string telefono)
@@ -76,34 +63,6 @@ namespace Taller_.NET.Modulos.Usuario
             Apellido = apellidoValidado;
             Correo = correoValidado;
             Telefono = telefonoValidado;
-        }
-
-        public void ActualizarRoles(IEnumerable<Rol> nuevosRoles)
-        {
-            if (nuevosRoles is null)
-            {
-                throw new UsuarioInvalidoException("La coleccion de roles es obligatoria.");
-            }
-
-            var roles = nuevosRoles.Where(rol => rol is not null).DistinctBy(rol => rol.Id).ToList();
-
-            if (roles.Count == 0)
-            {
-                throw new UsuarioInvalidoException("El usuario debe tener al menos un rol asignado.");
-            }
-
-            _roles.Clear();
-            _roles.AddRange(roles);
-        }
-
-        public bool TieneRol(string nombreRol)
-        {
-            if (string.IsNullOrWhiteSpace(nombreRol))
-            {
-                return false;
-            }
-
-            return _roles.Any(rol => string.Equals(rol.Nombre, nombreRol.Trim(), StringComparison.OrdinalIgnoreCase));
         }
 
         private static string ValidarNombre(string nombre)

@@ -1,17 +1,15 @@
 @page "/usuarios"
-@attribute [Authorize(Roles = "Administrador")]
+@attribute [Authorize(Policy = PermisosUsuarios.PoliticaLeer)]
 @rendermode InteractiveServer
 @inject IUsuarioService UsuarioService
 @inject NotificationService NotificationService
 @inject NavigationManager NavigationManager
 @inject DialogService DialogService
-@inject AuthenticationStateProvider AuthenticationStateProvider
 @using Taller_.NET.Modulos.Usuario.Application.Excepciones
-@using System.Security.Claims
 
 <PageTitle>Usuarios</PageTitle>
 
-<AuthorizeView Roles="Administrador" Context="autorizacion">
+<AuthorizeView Policy="@PermisosUsuarios.PoliticaLeer" Context="autorizacion">
     <Authorized>
         <RadzenStack Gap="1rem">
             <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End">
@@ -49,7 +47,7 @@
     </Authorized>
     <NotAuthorized>
         <RadzenAlert AlertStyle="AlertStyle.Warning" Title="Acceso restringido">
-            Solo los usuarios con el rol de Administrador pueden consultar el directorio de usuarios.
+            Solo los usuarios con el permiso users:read pueden consultar el directorio de usuarios.
         </RadzenAlert>
     </NotAuthorized>
 </AuthorizeView>

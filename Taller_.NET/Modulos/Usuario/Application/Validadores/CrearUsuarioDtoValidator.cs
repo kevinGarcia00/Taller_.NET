@@ -31,9 +31,20 @@ namespace Taller_.NET.Modulos.Usuario.Application.Validadores
                 .MaximumLength(Usuario.LongitudMaximaTelefono)
                     .WithMessage($"El telefono del usuario no puede superar los {Usuario.LongitudMaximaTelefono} caracteres.");
 
+            RuleFor(dto => dto.Contrasena)
+                .NotEmpty().WithMessage("La contrasena del usuario es obligatoria.")
+                .MinimumLength(LongitudMinimaContrasena)
+                    .WithMessage($"La contrasena debe tener al menos {LongitudMinimaContrasena} caracteres.")
+                .MaximumLength(LongitudMaximaContrasena)
+                    .WithMessage($"La contrasena no puede superar los {LongitudMaximaContrasena} caracteres.")
+                .Matches("[A-Za-z]").WithMessage("La contrasena debe incluir al menos una letra.")
+                .Matches("[0-9]").WithMessage("La contrasena debe incluir al menos un numero.");
+
             RuleFor(dto => dto.RolesIds)
-                .NotEmpty().WithMessage("Debe asignarse al menos un rol al usuario.")
-                .Must(rolesIds => rolesIds.Distinct().Count() == rolesIds.Count)
+                .NotEmpty().WithMessage("Debe asignarse al menos un rol de Auth0 al usuario.")
+                .Must(rolesIds => rolesIds.All(rolId => !string.IsNullOrWhiteSpace(rolId)))
+                    .WithMessage("Los identificadores de roles no pueden estar vacios.")
+                .Must(rolesIds => rolesIds.Distinct(StringComparer.Ordinal).Count() == rolesIds.Count)
                     .WithMessage("No se pueden asignar roles repetidos al usuario.");
         }
     }

@@ -11,7 +11,7 @@ namespace Taller_.NET.Modulos.Usuario.Application
 
         Task ModificarUsuarioAsync(ModificarUsuarioDto dto, CancellationToken cancellationToken = default);
 
-        Task EliminarUsuarioAsync(Guid id, Guid idUsuarioAutenticado = default, CancellationToken cancellationToken = default);
+        Task EliminarUsuarioAsync(Guid id, CancellationToken cancellationToken = default);
 
         Task<List<RolDto>> ObtenerRolesAsync(CancellationToken cancellationToken = default);
 
