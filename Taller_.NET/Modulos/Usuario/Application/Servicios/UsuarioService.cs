@@ -389,7 +389,7 @@ namespace Taller_.NET.Modulos.Usuario.Application.Servicios
             usuario.ActualizarDatosPersonales(datos.Nombre, datos.Apellido, datos.Correo, datos.Telefono);
         }
 
-        private async Task ValidarDtoAsync<T>(IValidator<T> validador, T dto, CancellationToken cancellationToken)
+        private static async Task ValidarDtoAsync<T>(IValidator<T> validador, T dto, CancellationToken cancellationToken)
         {
             var resultado = await validador.ValidateAsync(dto, cancellationToken);
 

@@ -65,7 +65,7 @@ namespace Taller_.NET.Modulos.Usuario.Infrastructure.Seguridad
         {
             foreach (var claim in usuario.FindAll(PermisosUsuarios.TipoClaim))
             {
-                if (claim.Value.StartsWith("[", StringComparison.Ordinal))
+                if (claim.Value.StartsWith('['))
                 {
                     foreach (var permiso in ObtenerPermisosDeArregloJson(claim.Value))
                     {

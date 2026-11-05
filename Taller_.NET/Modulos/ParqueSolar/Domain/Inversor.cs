@@ -23,6 +23,12 @@ namespace Taller_.NET.Modulos.ParqueSolar.Domain
             FechaCreacion = DateTime.UtcNow;
         }
 
+        public void ActualizarNombre(string nombre)
+        {
+            ValidarNombre(nombre);
+            Nombre = nombre.Trim();
+        }
+
         private static void ValidarNombre(string nombre)
         {
             if (string.IsNullOrWhiteSpace(nombre))

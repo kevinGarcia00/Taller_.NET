@@ -71,32 +71,27 @@ namespace Taller_.NET.Modulos.Usuario.Infrastructure
 
         private static void AgregarPoliticasDeAutorizacion(IServiceCollection servicios)
         {
-            servicios.AddAuthorization(opciones =>
-            {
-                opciones.AddPolicy(
+            servicios.AddAuthorizationBuilder()
+                .AddPolicy(
                     PermisosUsuarios.PoliticaLeer,
                     politica => politica
                         .RequireAuthenticatedUser()
-                        .RequireClaim(PermisosUsuarios.TipoClaim, PermisosUsuarios.Leer));
-
-                opciones.AddPolicy(
+                        .RequireClaim(PermisosUsuarios.TipoClaim, PermisosUsuarios.Leer))
+                .AddPolicy(
                     PermisosUsuarios.PoliticaCrear,
                     politica => politica
                         .RequireAuthenticatedUser()
-                        .RequireClaim(PermisosUsuarios.TipoClaim, PermisosUsuarios.Crear));
-
-                opciones.AddPolicy(
+                        .RequireClaim(PermisosUsuarios.TipoClaim, PermisosUsuarios.Crear))
+                .AddPolicy(
                     PermisosUsuarios.PoliticaActualizar,
                     politica => politica
                         .RequireAuthenticatedUser()
-                        .RequireClaim(PermisosUsuarios.TipoClaim, PermisosUsuarios.Actualizar));
-
-                opciones.AddPolicy(
+                        .RequireClaim(PermisosUsuarios.TipoClaim, PermisosUsuarios.Actualizar))
+                .AddPolicy(
                     PermisosUsuarios.PoliticaEliminar,
                     politica => politica
                         .RequireAuthenticatedUser()
                         .RequireClaim(PermisosUsuarios.TipoClaim, PermisosUsuarios.Eliminar));
-            });
         }
     }
 }

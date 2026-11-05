@@ -50,6 +50,37 @@ namespace Taller_.NET.Modulos.ParqueSolar.Domain
             ParqueSolarId = contexto.ParqueSolarId;
         }
 
+        public bool TieneInversorAsignado()
+        {
+            return Inversor is not null || InversorId.HasValue;
+        }
+
+        public void AsignarInversor(Inversor inversor)
+        {
+            if (inversor is null)
+            {
+                throw new NodoInvalidoException("El inversor es obligatorio.");
+            }
+
+            if (TieneInversorAsignado())
+            {
+                throw new NodoInvalidoException("El nodo ya tiene un inversor asignado.");
+            }
+
+            Inversor = inversor;
+
+            if (inversor.Id > 0)
+            {
+                InversorId = inversor.Id;
+            }
+        }
+
+        public void QuitarInversor()
+        {
+            Inversor = null;
+            InversorId = null;
+        }
+
         public void Actualizar(string nombre, string ubicacionParque, int? inversorId)
         {
             ValidarNombre(nombre);

@@ -9,9 +9,6 @@ namespace Taller_.NET.Modulos.ParqueSolar.Application.Puertos
     {
         Task<bool> ExisteInversorAsync(int inversorId, CancellationToken cancellationToken = default);
 
-        Task<IReadOnlyList<InversorDisponibleDto>> ObtenerDisponiblesAsync(
-            CancellationToken cancellationToken = default);
-
         Task<IReadOnlyDictionary<int, string>> ObtenerNombresPorIdsAsync(
             IReadOnlyCollection<int> inversorIds,
             CancellationToken cancellationToken = default);

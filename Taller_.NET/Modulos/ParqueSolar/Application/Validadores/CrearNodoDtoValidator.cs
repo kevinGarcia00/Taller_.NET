@@ -21,10 +21,6 @@ namespace Taller_.NET.Modulos.ParqueSolar.Application.Validadores
 
             RuleFor(dto => dto.ParqueSolarId)
                 .GreaterThan(0).WithMessage("El parque solar es obligatorio.");
-
-            RuleFor(dto => dto.InversorId)
-                .GreaterThan(0).When(dto => dto.InversorId.HasValue)
-                    .WithMessage("El inversor seleccionado no es valido.");
         }
     }
 }

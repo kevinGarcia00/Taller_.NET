@@ -8,5 +8,10 @@ namespace Taller_.NET.Modulos.ParqueSolar.Application.Excepciones
             : base($"No existe un inversor con el identificador '{inversorId}'.")
         {
         }
+
+        public InversorNoEncontradoException(string mensaje)
+            : base(mensaje)
+        {
+        }
     }
 }

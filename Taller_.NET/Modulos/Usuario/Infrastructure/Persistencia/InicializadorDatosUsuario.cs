@@ -50,10 +50,13 @@ namespace Taller_.NET.Modulos.Usuario.Infrastructure.Persistencia
             await _usuarioRepository.AgregarAsync(administrador, cancellationToken);
             await _usuarioRepository.GuardarCambiosAsync(cancellationToken);
 
-            _logger.LogInformation(
-                "Se creo el usuario administrador inicial {Correo} vinculado a Auth0 con el identificador {Auth0UserId}.",
-                CorreoAdministradorInicial,
-                Auth0UserIdAdministradorInicial);
+            if (_logger.IsEnabled(LogLevel.Information))
+            {
+                _logger.LogInformation(
+                    "Se creo el usuario administrador inicial {Correo} vinculado a Auth0 con el identificador {Auth0UserId}.",
+                    CorreoAdministradorInicial,
+                    Auth0UserIdAdministradorInicial);
+            }
         }
 
         private async Task CompletarAdministradorExistenteAsync(
@@ -67,10 +70,13 @@ namespace Taller_.NET.Modulos.Usuario.Infrastructure.Persistencia
                         Auth0UserIdAdministradorInicial,
                         StringComparison.Ordinal))
                 {
-                    _logger.LogWarning(
-                        "El usuario {Correo} ya existe pero esta vinculado a otro identificador de Auth0 ({Auth0UserIdActual}).",
-                        CorreoAdministradorInicial,
-                        administrador.Auth0UserId);
+                    if (_logger.IsEnabled(LogLevel.Warning))
+                    {
+                        _logger.LogWarning(
+                            "El usuario {Correo} ya existe pero esta vinculado a otro identificador de Auth0 ({Auth0UserIdActual}).",
+                            CorreoAdministradorInicial,
+                            administrador.Auth0UserId);
+                    }
                 }
 
                 return;
@@ -81,9 +87,12 @@ namespace Taller_.NET.Modulos.Usuario.Infrastructure.Persistencia
             await _usuarioRepository.ActualizarAsync(administrador, cancellationToken);
             await _usuarioRepository.GuardarCambiosAsync(cancellationToken);
 
-            _logger.LogInformation(
-                "Se completo el vinculo con Auth0 del usuario administrador inicial {Correo}.",
-                CorreoAdministradorInicial);
+            if (_logger.IsEnabled(LogLevel.Information))
+            {
+                _logger.LogInformation(
+                    "Se completo el vinculo con Auth0 del usuario administrador inicial {Correo}.",
+                    CorreoAdministradorInicial);
+            }
         }
     }
 }

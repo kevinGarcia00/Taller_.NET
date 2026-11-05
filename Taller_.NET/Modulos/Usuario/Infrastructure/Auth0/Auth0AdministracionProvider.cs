@@ -79,9 +79,17 @@ namespace Taller_.NET.Modulos.Usuario.Infrastructure.Auth0
                 throw new Auth0IntegracionException("Auth0 no devolvio el identificador del usuario creado.");
             }
 
-            _logger.LogInformation("Usuario {Correo} creado en Auth0 con el identificador {UserId}", correo, userId.GetString());
+            var identificador = userId.GetString();
 
-            return userId.GetString()!;
+            if (_logger.IsEnabled(LogLevel.Information))
+            {
+                _logger.LogInformation(
+                    "Usuario {Correo} creado en Auth0 con el identificador {UserId}",
+                    correo,
+                    identificador);
+            }
+
+            return identificador!;
         }
 
         public async Task ActualizarUsuarioAsync(
@@ -122,7 +130,10 @@ namespace Taller_.NET.Modulos.Usuario.Infrastructure.Auth0
                 throw new Auth0IntegracionException($"Auth0 no pudo actualizar el usuario: {await LeerDetalleAsync(respuesta, cancellationToken)}");
             }
 
-            _logger.LogInformation("Usuario {UserId} actualizado en Auth0", auth0UserId);
+            if (_logger.IsEnabled(LogLevel.Information))
+            {
+                _logger.LogInformation("Usuario {UserId} actualizado en Auth0", auth0UserId);
+            }
         }
 
         public async Task EliminarUsuarioAsync(string auth0UserId, CancellationToken cancellationToken = default)
@@ -146,7 +157,10 @@ namespace Taller_.NET.Modulos.Usuario.Infrastructure.Auth0
                 throw new Auth0IntegracionException($"Auth0 no pudo eliminar el usuario: {await LeerDetalleAsync(respuesta, cancellationToken)}");
             }
 
-            _logger.LogInformation("Usuario {UserId} eliminado de Auth0", auth0UserId);
+            if (_logger.IsEnabled(LogLevel.Information))
+            {
+                _logger.LogInformation("Usuario {UserId} eliminado de Auth0", auth0UserId);
+            }
         }
 
         public async Task<List<RolDto>> ObtenerRolesAsync(CancellationToken cancellationToken = default)
@@ -222,10 +236,13 @@ namespace Taller_.NET.Modulos.Usuario.Infrastructure.Auth0
 
             await AsegurarRespuestaExitosaAsync(respuestaAsignar, "asignar los roles al usuario", cancellationToken);
 
-            _logger.LogInformation(
-                "Roles del usuario {UserId} reemplazados en Auth0 por {Roles}",
-                auth0UserId,
-                string.Join(", ", idsNuevos));
+            if (_logger.IsEnabled(LogLevel.Information))
+            {
+                _logger.LogInformation(
+                    "Roles del usuario {UserId} reemplazados en Auth0 por {Roles}",
+                    auth0UserId,
+                    string.Join(", ", idsNuevos));
+            }
         }
 
         public async Task<int> ObtenerCantidadUsuariosConRolAsync(

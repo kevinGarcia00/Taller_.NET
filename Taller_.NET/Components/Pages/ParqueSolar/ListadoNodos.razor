@@ -63,6 +63,16 @@
                                                   Click="@(() => NavigationManager.NavigateTo($"/parques/{ParqueActualId}/nodos/{nodo.Id}/paneles"))" />
                                     <RadzenButton Text="Registrar panel" Icon="solar_power" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Secondary"
                                                   Click="@(() => NavigationManager.NavigateTo($"/parques/{ParqueActualId}/nodos/{nodo.Id}/paneles/alta"))" />
+                                    @if (nodo.InversorId.HasValue)
+                                    {
+                                        <RadzenButton Text="Ver inversor" Icon="electrical_services" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Light"
+                                                      Click="@(() => NavigationManager.NavigateTo($"/parques/{ParqueActualId}/nodos/{nodo.Id}/inversor"))" />
+                                    }
+                                    else
+                                    {
+                                        <RadzenButton Text="Registrar inversor" Icon="electrical_services" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Secondary"
+                                                      Click="@(() => NavigationManager.NavigateTo($"/parques/{ParqueActualId}/nodos/{nodo.Id}/inversor/alta"))" />
+                                    }
                                     <RadzenButton Text="Modificar" Icon="edit" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary"
                                                   Click="@(() => NavigationManager.NavigateTo($"/parques/{ParqueActualId}/nodos/{nodo.Id}/editar"))" />
                                     <RadzenButton Text="Eliminar" Icon="delete" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Danger"

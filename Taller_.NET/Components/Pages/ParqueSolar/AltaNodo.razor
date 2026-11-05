@@ -38,12 +38,6 @@
                             <RadzenTextBox @bind-Value="_modelo.UbicacionParque" MaxLength="@Nodo.LongitudMaximaUbicacionParque" />
                         </RadzenFormField>
 
-                        <RadzenFormField Text="Inversor (opcional)" Variant="Variant.Outlined">
-                            <RadzenDropDown TValue="int?" Data="@_inversores" @bind-Value="_modelo.InversorId"
-                                            TextProperty="Nombre" ValueProperty="Id" AllowClear="true"
-                                            Placeholder="Sin inversor asignado" />
-                        </RadzenFormField>
-
                         <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem">
                             <RadzenButton Text="Registrar nodo" ButtonType="ButtonType.Submit" Icon="add_circle_outline" />
                             <RadzenButton Text="Cancelar" ButtonStyle="ButtonStyle.Secondary" Icon="cancel"
@@ -66,14 +60,13 @@
     public int ParqueId { get; set; }
 
     private CrearNodoDto _modelo = new();
-    private IReadOnlyList<InversorDisponibleDto> _inversores = new List<InversorDisponibleDto>();
     private IReadOnlyList<ParqueListadoDto> _parques = new List<ParqueListadoDto>();
     private int? _parqueSeleccionadoId;
     private string _nombreParque = string.Empty;
 
     private bool EsAltaContextual => ParqueId > 0;
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
         if (EsAltaContextual)
         {
@@ -84,8 +77,6 @@
         {
             CargarParques();
         }
-
-        await CargarInversoresAsync();
     }
 
     private void CargarParques()
@@ -97,18 +88,6 @@
         catch (System.Exception excepcion)
         {
             NotificarError("No se pudieron obtener los parques", excepcion.Message);
-        }
-    }
-
-    private async Task CargarInversoresAsync()
-    {
-        try
-        {
-            _inversores = await NodoService.ObtenerInversoresDisponiblesAsync();
-        }
-        catch (System.Exception excepcion)
-        {
-            NotificarError("No se pudieron obtener los inversores disponibles", excepcion.Message);
         }
     }
 
@@ -158,14 +137,6 @@
             NotificarError("No se pudo registrar el nodo", excepcion.Message);
         }
         catch (ParqueNoEncontradoException excepcion)
-        {
-            NotificarError("No se pudo registrar el nodo", excepcion.Message);
-        }
-        catch (InversorNoEncontradoException excepcion)
-        {
-            NotificarError("No se pudo registrar el nodo", excepcion.Message);
-        }
-        catch (InversorYaAsignadoException excepcion)
         {
             NotificarError("No se pudo registrar el nodo", excepcion.Message);
         }

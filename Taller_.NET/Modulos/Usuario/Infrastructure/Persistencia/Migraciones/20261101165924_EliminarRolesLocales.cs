@@ -10,6 +10,8 @@ namespace Taller_.NET.Modulos.Usuario.Infrastructure.Persistencia.Migraciones
     /// <inheritdoc />
     public partial class EliminarRolesLocales : Migration
     {
+        private static readonly string[] ColumnasRol = ["id", "nombre"];
+
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -62,7 +64,7 @@ namespace Taller_.NET.Modulos.Usuario.Infrastructure.Persistencia.Migraciones
 
             migrationBuilder.InsertData(
                 table: "Roles",
-                columns: new[] { "id", "nombre" },
+                columns: ColumnasRol,
                 values: new object[,]
                 {
                     { 1L, "Administrador" },

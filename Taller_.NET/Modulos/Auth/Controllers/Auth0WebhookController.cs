@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 
+namespace Taller_.NET.Modulos.Auth.Controllers;
+
 [ApiController]
 [Route("api/webhooks")]
 public class Auth0WebhookController : ControllerBase
@@ -38,7 +40,7 @@ public class Auth0WebhookController : ControllerBase
 
 public class Auth0UserRegisteredDto
 {
-    public string UserId { get; set; }
-    public string Email { get; set; }
-    public string Username { get; set; }
+    public required string UserId { get; set; }
+    public required string Email { get; set; }
+    public required string Username { get; set; }
 }

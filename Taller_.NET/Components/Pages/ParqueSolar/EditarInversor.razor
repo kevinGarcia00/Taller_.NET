@@ -1,0 +1,202 @@
+@page "/parques/{ParqueId:int}/nodos/{NodoId:int}/inversor/editar"
+@attribute [Authorize(Roles = "Administrador")]
+@rendermode InteractiveServer
+@using Taller_.NET.Modulos.ParqueSolar.Domain.Excepciones
+@inject IInversorService InversorService
+@inject INodoService NodoService
+@inject IParqueService ParqueService
+@inject NotificationService NotificationService
+@inject NavigationManager NavigationManager
+
+<PageTitle>Modificar Inversor</PageTitle>
+
+<h1>Modificar Inversor</h1>
+
+<AuthorizeView Roles="Administrador" Context="autorizacion">
+    <Authorized>
+        @if (_cargando)
+        {
+            <RadzenText TextStyle="TextStyle.Body2">Cargando el inversor...</RadzenText>
+        }
+        else if (!_inversorEncontrado)
+        {
+            <RadzenAlert AlertStyle="AlertStyle.Warning" Title="Inversor no encontrado">
+                @_mensajeError
+            </RadzenAlert>
+        }
+        else
+        {
+            <RadzenCard>
+                <RadzenStack Gap="1rem">
+                    <RadzenFormField Text="Parque solar" Variant="Variant.Outlined">
+                        <RadzenTextBox Value="@_nombreParque" ReadOnly="true" />
+                    </RadzenFormField>
+
+                    <RadzenFormField Text="Nodo" Variant="Variant.Outlined">
+                        <RadzenTextBox Value="@_nombreNodo" ReadOnly="true" />
+                    </RadzenFormField>
+
+                    <RadzenTemplateForm TItem="ModificarInversorDto" Data="@_modelo" Submit="OnValidSubmit">
+                        <RadzenStack Gap="1rem">
+                            <RadzenFormField Text="Identificador" Variant="Variant.Outlined">
+                                <RadzenNumeric TValue="int" Value="@_modelo.Id" ReadOnly="true" />
+                            </RadzenFormField>
+
+                            <RadzenFormField Text="Fecha de creacion" Variant="Variant.Outlined">
+                                <RadzenTextBox Value="@_fechaCreacion" ReadOnly="true" />
+                            </RadzenFormField>
+
+                            <RadzenFormField Text="Nombre" Variant="Variant.Outlined">
+                                <RadzenTextBox @bind-Value="_modelo.Nombre" MaxLength="@Inversor.LongitudMaximaNombre" />
+                            </RadzenFormField>
+
+                            <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem">
+                                <RadzenButton Text="Guardar cambios" ButtonType="ButtonType.Submit" Icon="save" />
+                                <RadzenButton Text="Cancelar" ButtonStyle="ButtonStyle.Secondary" Icon="close"
+                                              Click="@Cancelar" />
+                            </RadzenStack>
+                        </RadzenStack>
+                    </RadzenTemplateForm>
+                </RadzenStack>
+            </RadzenCard>
+        }
+    </Authorized>
+    <NotAuthorized>
+        <RadzenAlert AlertStyle="AlertStyle.Warning" Title="Acceso restringido">
+            Solo los usuarios con el rol de Administrador pueden modificar inversores.
+        </RadzenAlert>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    [Parameter]
+    public int ParqueId { get; set; }
+
+    [Parameter]
+    public int NodoId { get; set; }
+
+    private ModificarInversorDto _modelo = new();
+    private string _nombreParque = string.Empty;
+    private string _nombreNodo = string.Empty;
+    private string _fechaCreacion = string.Empty;
+    private string _mensajeError = "El nodo no tiene un inversor asignado.";
+    private bool _inversorEncontrado;
+    private bool _cargando = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _nombreParque = ObtenerNombreParque();
+        _nombreNodo = await ObtenerNombreNodoAsync();
+
+        try
+        {
+            _modelo = await InversorService.ObtenerParaEdicionAsync(NodoId, ParqueId);
+            _fechaCreacion = _modelo.FechaCreacion.ToLocalTime().ToString("g");
+            _inversorEncontrado = true;
+        }
+        catch (InversorNoEncontradoException excepcion)
+        {
+            _inversorEncontrado = false;
+            _mensajeError = excepcion.Message;
+            NotificarError("Inversor no encontrado", excepcion.Message);
+        }
+        catch (NodoNoEncontradoException excepcion)
+        {
+            _inversorEncontrado = false;
+            _mensajeError = excepcion.Message;
+            NotificarError("No se pudo obtener el inversor", excepcion.Message);
+        }
+        catch (UsuarioNoAutorizadoException excepcion)
+        {
+            _inversorEncontrado = false;
+            _mensajeError = excepcion.Message;
+            NotificarError("No se pudo obtener el inversor", excepcion.Message);
+        }
+        finally
+        {
+            _cargando = false;
+        }
+    }
+
+    private string ObtenerNombreParque()
+    {
+        try
+        {
+            return ParqueService.ObtenerParqueSync(ParqueId).Nombre;
+        }
+        catch (ParqueNoEncontradoException excepcion)
+        {
+            NotificarError("No se pudo obtener el parque", excepcion.Message);
+            return string.Empty;
+        }
+    }
+
+    private async Task<string> ObtenerNombreNodoAsync()
+    {
+        try
+        {
+            var nodo = await NodoService.ObtenerNodoParaEdicionAsync(NodoId, ParqueId);
+            return nodo.Nombre;
+        }
+        catch (NodoNoEncontradoException excepcion)
+        {
+            NotificarError("No se pudo obtener el nodo", excepcion.Message);
+            return string.Empty;
+        }
+    }
+
+    private void Cancelar()
+    {
+        NavigationManager.NavigateTo($"/parques/{ParqueId}/nodos/{NodoId}/inversor");
+    }
+
+    private async Task OnValidSubmit()
+    {
+        _modelo.NodoId = NodoId;
+        _modelo.ParqueSolarId = ParqueId;
+
+        try
+        {
+            await InversorService.ModificarInversorAsync(_modelo);
+
+            NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Success,
+                Summary = "Inversor modificado",
+                Detail = $"El inversor '{_modelo.Nombre}' se modifico correctamente."
+            });
+
+            NavigationManager.NavigateTo($"/parques/{ParqueId}/nodos/{NodoId}/inversor");
+        }
+        catch (InversorNoEncontradoException excepcion)
+        {
+            NotificarError("No se pudo modificar el inversor", excepcion.Message);
+        }
+        catch (NodoNoEncontradoException excepcion)
+        {
+            NotificarError("No se pudo modificar el inversor", excepcion.Message);
+        }
+        catch (UsuarioNoAutorizadoException excepcion)
+        {
+            NotificarError("No se pudo modificar el inversor", excepcion.Message);
+        }
+        catch (InversorInvalidoException excepcion)
+        {
+            NotificarError("No se pudo modificar el inversor", excepcion.Message);
+        }
+        catch (FluentValidation.ValidationException excepcion)
+        {
+            NotificarError("No se pudo modificar el inversor", excepcion.Message);
+        }
+    }
+
+    private void NotificarError(string resumen, string detalle)
+    {
+        NotificationService.Notify(new NotificationMessage
+        {
+            Severity = NotificationSeverity.Error,
+            Summary = resumen,
+            Detail = detalle
+        });
+    }
+}

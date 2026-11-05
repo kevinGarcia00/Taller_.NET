@@ -186,4 +186,78 @@ public class NodoTests
 
         Assert.Throws<NodoInvalidoException>(() => nodo.Actualizar("Nodo Sur", "Sector B", inversorId));
     }
+
+    [Fact]
+    public void AsignarInversor_ConInversorValido_AsignaLaNavegacion()
+    {
+        var nodo = new Nodo("Nodo Norte", "Sector A");
+        var inversor = new Inversor("Inversor Central");
+
+        nodo.AsignarInversor(inversor);
+
+        Assert.Same(inversor, nodo.Inversor);
+        Assert.Null(nodo.InversorId);
+        Assert.True(nodo.TieneInversorAsignado());
+    }
+
+    [Fact]
+    public void AsignarInversor_ConInversorPersistido_GuardaElIdentificador()
+    {
+        var nodo = new Nodo("Nodo Norte", "Sector A");
+        var inversor = new Inversor("Inversor Central");
+        typeof(Inversor).GetProperty(nameof(Inversor.Id))!.SetValue(inversor, 4);
+
+        nodo.AsignarInversor(inversor);
+
+        Assert.Equal(4, nodo.InversorId);
+        Assert.Same(inversor, nodo.Inversor);
+    }
+
+    [Fact]
+    public void AsignarInversor_CuandoElNodoYaTieneInversor_LanzaExcepcion()
+    {
+        var nodo = new Nodo("Nodo Norte", "Sector A", 7);
+
+        var excepcion = Assert.Throws<NodoInvalidoException>(() => nodo.AsignarInversor(new Inversor("Otro")));
+
+        Assert.Equal("El nodo ya tiene un inversor asignado.", excepcion.Message);
+        Assert.Equal(7, nodo.InversorId);
+        Assert.Null(nodo.Inversor);
+    }
+
+    [Fact]
+    public void AsignarInversor_CuandoYaFueAsignado_LanzaExcepcion()
+    {
+        var nodo = new Nodo("Nodo Norte", "Sector A");
+        nodo.AsignarInversor(new Inversor("Primero"));
+
+        var excepcion = Assert.Throws<NodoInvalidoException>(() => nodo.AsignarInversor(new Inversor("Segundo")));
+
+        Assert.Equal("El nodo ya tiene un inversor asignado.", excepcion.Message);
+        Assert.Equal("Primero", nodo.Inversor!.Nombre);
+    }
+
+    [Fact]
+    public void AsignarInversor_ConInversorNulo_LanzaExcepcion()
+    {
+        var nodo = new Nodo("Nodo Norte", "Sector A");
+
+        Assert.Throws<NodoInvalidoException>(() => nodo.AsignarInversor(null!));
+        Assert.False(nodo.TieneInversorAsignado());
+    }
+
+    [Fact]
+    public void QuitarInversor_CuandoTieneInversor_DejaLaRelacionVacia()
+    {
+        var nodo = new Nodo("Nodo Norte", "Sector A");
+        var inversor = new Inversor("Inversor Central");
+        typeof(Inversor).GetProperty(nameof(Inversor.Id))!.SetValue(inversor, 4);
+        nodo.AsignarInversor(inversor);
+
+        nodo.QuitarInversor();
+
+        Assert.Null(nodo.Inversor);
+        Assert.Null(nodo.InversorId);
+        Assert.False(nodo.TieneInversorAsignado());
+    }
 }

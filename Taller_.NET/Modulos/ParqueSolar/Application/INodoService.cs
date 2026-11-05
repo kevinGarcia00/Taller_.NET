@@ -29,8 +29,5 @@ namespace Taller_.NET.Modulos.ParqueSolar.Application
             int nodoId,
             int parqueSolarId,
             CancellationToken cancellationToken = default);
-
-        Task<IReadOnlyList<InversorDisponibleDto>> ObtenerInversoresDisponiblesAsync(
-            CancellationToken cancellationToken = default);
     }
 }

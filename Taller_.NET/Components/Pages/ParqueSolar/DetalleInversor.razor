@@ -1,0 +1,213 @@
+@page "/parques/{ParqueId:int}/nodos/{NodoId:int}/inversor"
+@attribute [Authorize(Roles = "Administrador")]
+@rendermode InteractiveServer
+@inject IInversorService InversorService
+@inject INodoService NodoService
+@inject IParqueService ParqueService
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+@inject NavigationManager NavigationManager
+
+<PageTitle>Detalle del Inversor</PageTitle>
+
+<h1>Detalle del Inversor</h1>
+
+<AuthorizeView Roles="Administrador" Context="autorizacion">
+    <Authorized>
+        <RadzenStack Gap="1rem">
+            <RadzenCard>
+                <RadzenStack Gap="1rem">
+                    <RadzenFormField Text="Parque solar" Variant="Variant.Outlined">
+                        <RadzenTextBox Value="@_nombreParque" ReadOnly="true" />
+                    </RadzenFormField>
+
+                    <RadzenFormField Text="Nodo" Variant="Variant.Outlined">
+                        <RadzenTextBox Value="@_nombreNodo" ReadOnly="true" />
+                    </RadzenFormField>
+
+                    @if (_cargando)
+                    {
+                        <RadzenText TextStyle="TextStyle.Body2">Cargando el inversor...</RadzenText>
+                    }
+                    else if (_inversor is null)
+                    {
+                        <RadzenAlert AlertStyle="AlertStyle.Info" Title="Sin inversor">
+                            Este nodo no tiene un inversor asociado.
+                        </RadzenAlert>
+                        <RadzenButton Text="Registrar inversor" Icon="add_circle_outline" ButtonStyle="ButtonStyle.Primary"
+                                      Click="@(() => NavigationManager.NavigateTo($"/parques/{ParqueId}/nodos/{NodoId}/inversor/alta"))" />
+                    }
+                    else
+                    {
+                        <RadzenFormField Text="Nombre" Variant="Variant.Outlined">
+                            <RadzenTextBox Value="@_inversor.Nombre" ReadOnly="true" />
+                        </RadzenFormField>
+
+                        <RadzenFormField Text="Fecha de creacion" Variant="Variant.Outlined">
+                            <RadzenTextBox Value="@_inversor.FechaCreacion.ToLocalTime().ToString("g")" ReadOnly="true" />
+                        </RadzenFormField>
+
+                        <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem">
+                            <RadzenButton Text="Editar" Icon="edit" ButtonStyle="ButtonStyle.Primary"
+                                          Click="@(() => NavigationManager.NavigateTo($"/parques/{ParqueId}/nodos/{NodoId}/inversor/editar"))" />
+                            <RadzenButton Text="Eliminar" Icon="delete" ButtonStyle="ButtonStyle.Danger"
+                                          Click="@ConfirmarEliminacion" />
+                        </RadzenStack>
+                    }
+                </RadzenStack>
+            </RadzenCard>
+
+            <RadzenButton Text="Volver a nodos" Icon="arrow_back" ButtonStyle="ButtonStyle.Secondary"
+                          Click="@(() => NavigationManager.NavigateTo($"/parques/{ParqueId}/nodos"))" />
+        </RadzenStack>
+    </Authorized>
+    <NotAuthorized>
+        <RadzenAlert AlertStyle="AlertStyle.Warning" Title="Acceso restringido">
+            Solo los usuarios con el rol de Administrador pueden ver el inversor.
+        </RadzenAlert>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    [Parameter]
+    public int ParqueId { get; set; }
+
+    [Parameter]
+    public int NodoId { get; set; }
+
+    private InversorDetalleDto? _inversor;
+    private string _nombreParque = string.Empty;
+    private string _nombreNodo = string.Empty;
+    private bool _cargando = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _nombreParque = ObtenerNombreParque();
+        _nombreNodo = await ObtenerNombreNodoAsync();
+        await CargarInversorAsync();
+    }
+
+    private async Task CargarInversorAsync()
+    {
+        _cargando = true;
+
+        try
+        {
+            _inversor = await InversorService.ObtenerInversorDelNodoAsync(NodoId, ParqueId);
+        }
+        catch (NodoNoEncontradoException excepcion)
+        {
+            _inversor = null;
+            NotificarError("No se pudo obtener el inversor", excepcion.Message);
+        }
+        catch (UsuarioNoAutorizadoException excepcion)
+        {
+            _inversor = null;
+            NotificarError("No se pudo obtener el inversor", excepcion.Message);
+        }
+        finally
+        {
+            _cargando = false;
+        }
+    }
+
+    private async Task ConfirmarEliminacion()
+    {
+        if (_inversor is null)
+        {
+            return;
+        }
+
+        var confirmado = await DialogService.Confirm(
+            $"¿Esta seguro de que desea eliminar el inversor {_inversor.Nombre}?",
+            "Eliminar inversor",
+            new ConfirmOptions
+            {
+                OkButtonText = "Eliminar",
+                CancelButtonText = "Cancelar"
+            });
+
+        if (confirmado != true)
+        {
+            return;
+        }
+
+        try
+        {
+            await InversorService.EliminarInversorAsync(NodoId, ParqueId);
+
+            NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Success,
+                Summary = "Inversor eliminado",
+                Detail = $"El inversor '{_inversor.Nombre}' se elimino correctamente."
+            });
+
+            await CargarInversorAsync();
+        }
+        catch (InversorNoEncontradoException excepcion)
+        {
+            NotificarAdvertencia(excepcion.Message);
+            await CargarInversorAsync();
+        }
+        catch (NodoNoEncontradoException excepcion)
+        {
+            NotificarAdvertencia(excepcion.Message);
+        }
+        catch (UsuarioNoAutorizadoException excepcion)
+        {
+            NotificarAdvertencia(excepcion.Message);
+        }
+        catch (System.Exception excepcion)
+        {
+            NotificarAdvertencia(excepcion.Message);
+        }
+    }
+
+    private string ObtenerNombreParque()
+    {
+        try
+        {
+            return ParqueService.ObtenerParqueSync(ParqueId).Nombre;
+        }
+        catch (ParqueNoEncontradoException excepcion)
+        {
+            NotificarError("No se pudo obtener el parque", excepcion.Message);
+            return string.Empty;
+        }
+    }
+
+    private async Task<string> ObtenerNombreNodoAsync()
+    {
+        try
+        {
+            var nodo = await NodoService.ObtenerNodoParaEdicionAsync(NodoId, ParqueId);
+            return nodo.Nombre;
+        }
+        catch (NodoNoEncontradoException excepcion)
+        {
+            NotificarError("No se pudo obtener el nodo", excepcion.Message);
+            return string.Empty;
+        }
+    }
+
+    private void NotificarAdvertencia(string detalle)
+    {
+        NotificationService.Notify(new NotificationMessage
+        {
+            Severity = NotificationSeverity.Warning,
+            Summary = "No se pudo eliminar el inversor",
+            Detail = detalle
+        });
+    }
+
+    private void NotificarError(string resumen, string detalle)
+    {
+        NotificationService.Notify(new NotificationMessage
+        {
+            Severity = NotificationSeverity.Error,
+            Summary = resumen,
+            Detail = detalle
+        });
+    }
+}

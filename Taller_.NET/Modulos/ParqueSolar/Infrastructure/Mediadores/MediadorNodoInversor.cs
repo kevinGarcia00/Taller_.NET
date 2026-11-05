@@ -24,20 +24,6 @@ namespace Taller_.NET.Modulos.ParqueSolar.Infrastructure.Mediadores
                 .AnyAsync(inversor => inversor.Id == inversorId, cancellationToken);
         }
 
-        public async Task<IReadOnlyList<InversorDisponibleDto>> ObtenerDisponiblesAsync(
-            CancellationToken cancellationToken = default)
-        {
-            return await _contexto.Inversores
-                .Where(inversor => !_contexto.Nodos.Any(nodo => nodo.InversorId == inversor.Id))
-                .OrderBy(inversor => inversor.Nombre)
-                .Select(inversor => new InversorDisponibleDto
-                {
-                    Id = inversor.Id,
-                    Nombre = inversor.Nombre
-                })
-                .ToListAsync(cancellationToken);
-        }
-
         public async Task<IReadOnlyDictionary<int, string>> ObtenerNombresPorIdsAsync(
             IReadOnlyCollection<int> inversorIds,
             CancellationToken cancellationToken = default)

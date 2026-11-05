@@ -50,16 +50,6 @@ namespace Taller_.NET.Modulos.ParqueSolar.Application.Servicios
                 throw new ParqueNoEncontradoException(dto.ParqueSolarId);
             }
 
-            if (dto.InversorId.HasValue && !await _mediadorNodoInversor.ExisteInversorAsync(dto.InversorId.Value, cancellationToken))
-            {
-                throw new InversorNoEncontradoException(dto.InversorId.Value);
-            }
-
-            if (dto.InversorId.HasValue && await _nodoRepository.ExisteInversorEnUsoAsync(dto.InversorId.Value, cancellationToken))
-            {
-                throw new InversorYaAsignadoException(dto.InversorId.Value);
-            }
-
             var nombreNormalizado = dto.Nombre.Trim();
 
             if (await _nodoRepository.ExisteNodoConNombreAsync(nombreNormalizado, dto.ParqueSolarId, cancellationToken))
@@ -67,7 +57,7 @@ namespace Taller_.NET.Modulos.ParqueSolar.Application.Servicios
                 throw new NodoNombreDuplicadoException(nombreNormalizado);
             }
 
-            var nodo = new NodoDomain(dto.Nombre, dto.UbicacionParque, dto.InversorId);
+            var nodo = new NodoDomain(dto.Nombre, dto.UbicacionParque);
             nodo.AsignarContexto(new ContextoParque(dto.ParqueSolarId));
 
             return await _nodoRepository.AgregarAsync(nodo, cancellationToken);
@@ -193,12 +183,6 @@ namespace Taller_.NET.Modulos.ParqueSolar.Application.Servicios
             var nodo = await ObtenerNodoDelParqueAsync(nodoId, parqueSolarId, cancellationToken);
 
             await _nodoRepository.EliminarAsync(nodo, cancellationToken);
-        }
-
-        public Task<IReadOnlyList<InversorDisponibleDto>> ObtenerInversoresDisponiblesAsync(
-            CancellationToken cancellationToken = default)
-        {
-            return _mediadorNodoInversor.ObtenerDisponiblesAsync(cancellationToken);
         }
 
         private async Task ValidarDtoAsync(CrearNodoDto dto, CancellationToken cancellationToken)

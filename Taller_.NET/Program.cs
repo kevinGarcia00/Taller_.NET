@@ -22,6 +22,7 @@ using Taller_.NET.Modulos.ParqueSolar.Infrastructure.Mediadores;
 using Taller_.NET.Modulos.ParqueSolar.Infrastructure.Persistencia;
 using Taller_.NET.Modulos.ParqueSolar.Infrastructure.Repositorios;
 using Taller_.NET.Modulos.ParqueSolar.Infrastructure.Seguridad;
+using Taller_.NET.Modulos.Auth;
 using Taller_.NET.Modulos.Usuario.Application.Seguridad;
 using Taller_.NET.Modulos.Usuario.Infrastructure;
 using IUsuarioAutenticacionService = Taller_.NET.Modulos.Usuario.Application.Puertos.IUsuarioAutenticacionService;
@@ -75,8 +76,8 @@ if (permitirUsuariosAnonimos)
         .AddScheme<AuthenticationSchemeOptions, AutenticacionAnonimaHandler>(
             ModoDesarrolloAnonimo,
             _ => { });
-    builder.Services.AddAuthorization(options =>
-        options.DefaultPolicy = new AuthorizationPolicyBuilder(ModoDesarrolloAnonimo)
+    builder.Services.AddAuthorizationBuilder()
+        .SetDefaultPolicy(new AuthorizationPolicyBuilder(ModoDesarrolloAnonimo)
             .RequireAssertion(_ => true)
             .Build());
 }
@@ -202,6 +203,8 @@ builder.Services.AddScoped<INodoRepository, NodoRepository>();
 builder.Services.AddScoped<INodoService, NodoService>();
 builder.Services.AddScoped<IPanelRepository, PanelRepository>();
 builder.Services.AddScoped<IPanelService, PanelService>();
+builder.Services.AddScoped<IInversorRepository, InversorRepository>();
+builder.Services.AddScoped<IInversorService, InversorService>();
 builder.Services.AddScoped<IMediadorNodoParque, MediadorNodoParque>();
 builder.Services.AddScoped<IMediadorNodoInversor, MediadorNodoInversor>();
 builder.Services.AddScoped<IUsuarioActualProvider, UsuarioActualProvider>();
@@ -211,6 +214,8 @@ builder.Services.AddScoped<IValidator<CrearNodoDto>, CrearNodoDtoValidator>();
 builder.Services.AddScoped<IValidator<EditarNodoDto>, EditarNodoDtoValidator>();
 builder.Services.AddScoped<IValidator<CrearPanelDto>, CrearPanelDtoValidator>();
 builder.Services.AddScoped<IValidator<ModificarPanelDto>, ModificarPanelDtoValidator>();
+builder.Services.AddScoped<IValidator<CrearInversorDto>, CrearInversorDtoValidator>();
+builder.Services.AddScoped<IValidator<ModificarInversorDto>, ModificarInversorDtoValidator>();
 
 builder.Services.AgregarModuloUsuario(builder.Configuration);
 
@@ -247,6 +252,8 @@ public partial class Program
     private const string ModoDesarrolloAnonimo = "DesarrolloAnonimo";
 }
 
+namespace Taller_.NET.Modulos.Auth
+{
 public class AutenticacionAnonimaHandler : AuthenticationHandler<AuthenticationSchemeOptions>
 {
     public AutenticacionAnonimaHandler(
@@ -275,4 +282,5 @@ public class AutenticacionAnonimaHandler : AuthenticationHandler<AuthenticationS
 
         return Task.FromResult(AuthenticateResult.Success(ticket));
     }
+}
 }

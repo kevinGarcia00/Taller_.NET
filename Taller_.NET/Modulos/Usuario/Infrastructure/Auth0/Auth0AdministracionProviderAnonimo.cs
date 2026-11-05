@@ -43,11 +43,14 @@ namespace Taller_.NET.Modulos.Usuario.Infrastructure.Auth0
 
             RolesPorUsuario[auth0UserId] = new List<string>();
 
-            _logger.LogInformation(
-                "Modo anonimo de desarrollo: se genero el identificador local {Auth0UserId} para {Correo}. " +
-                "No se creo ninguna cuenta en Auth0.",
-                auth0UserId,
-                correo);
+            if (_logger.IsEnabled(LogLevel.Information))
+            {
+                _logger.LogInformation(
+                    "Modo anonimo de desarrollo: se genero el identificador local {Auth0UserId} para {Correo}. " +
+                    "No se creo ninguna cuenta en Auth0.",
+                    auth0UserId,
+                    correo);
+            }
 
             return Task.FromResult(auth0UserId);
         }
@@ -59,9 +62,12 @@ namespace Taller_.NET.Modulos.Usuario.Infrastructure.Auth0
             string apellido,
             CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation(
-                "Modo anonimo de desarrollo: se omite la actualizacion en Auth0 del usuario {Auth0UserId}.",
-                auth0UserId);
+            if (_logger.IsEnabled(LogLevel.Information))
+            {
+                _logger.LogInformation(
+                    "Modo anonimo de desarrollo: se omite la actualizacion en Auth0 del usuario {Auth0UserId}.",
+                    auth0UserId);
+            }
 
             return Task.CompletedTask;
         }
@@ -70,9 +76,12 @@ namespace Taller_.NET.Modulos.Usuario.Infrastructure.Auth0
         {
             RolesPorUsuario.TryRemove(auth0UserId, out _);
 
-            _logger.LogInformation(
-                "Modo anonimo de desarrollo: se omite la eliminacion en Auth0 del usuario {Auth0UserId}.",
-                auth0UserId);
+            if (_logger.IsEnabled(LogLevel.Information))
+            {
+                _logger.LogInformation(
+                    "Modo anonimo de desarrollo: se omite la eliminacion en Auth0 del usuario {Auth0UserId}.",
+                    auth0UserId);
+            }
 
             return Task.CompletedTask;
         }

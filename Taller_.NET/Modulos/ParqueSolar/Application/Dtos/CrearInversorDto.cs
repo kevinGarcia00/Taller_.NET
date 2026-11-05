@@ -1,8 +1,9 @@
 namespace Taller_.NET.Modulos.ParqueSolar.Application.Dtos
 {
-    public class InversorDisponibleDto
+    public class CrearInversorDto
     {
-        public int Id { get; set; }
         public string Nombre { get; set; } = string.Empty;
+        public int NodoId { get; set; }
+        public int ParqueSolarId { get; set; }
     }
 }
