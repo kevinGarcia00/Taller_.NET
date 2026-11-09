@@ -10,7 +10,7 @@ namespace Taller_.NET.Modulos.Usuario.Infrastructure.Persistencia
     public class InicializadorDatosUsuario
     {
         public const string CorreoAdministradorInicial = "admin@admin.com";
-        public const string Auth0UserIdAdministradorInicial = "auth0|6ae636752d220ecd31c20d5d";
+        public const string Auth0UserIdAdministradorInicial = "auth0|6af1072b8e303b4d4e7b73f6";
 
         private const string NombreAdministradorInicial = "Administrador";
         private const string ApellidoAdministradorInicial = "Sistema";

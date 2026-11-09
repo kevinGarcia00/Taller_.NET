@@ -6,6 +6,8 @@
 # dotenv files
 .env
 
+/home/void/Projects/Taller_.NET/Taller_.NET/Modulos/Usuario/Infrastructure/Persistencia/InicializadorDatosUsuario.cs
+
 # User-specific files
 *.rsuser
 *.suo
