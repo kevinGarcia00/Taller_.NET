@@ -14,19 +14,21 @@
 
 - [ ] **3. Capa Application**
   - [ ] 3.1 Definir el puerto `IMediadorHistoricoParqueSolar` y el DTO `EnergiaPanelDto` (`PanelId`, `NodoId`, `ParqueSolarId`, `EnergiaTotal`) en Historico.
-  - [ ] 3.2 Definir la interfaz `IHistoricoService` con el método `GenerarRegistrosDiariosAsync`.
+  - [ ] 3.2 Definir la interfaz `IHistoricoService` con el método `GenerarRegistrosDelPeriodoAsync`.
   - [ ] 3.3 Implementar `HistoricoService`, con el repositorio y el mediador inyectados por constructor.
-  - [ ] 3.4 Implementar la generación: obtener los paneles y su energía con el mediador, evitar duplicados por panel y fecha, instanciar `Historico` y persistir los registros.
-  - [ ] 3.5 Crear las pruebas unitarias del servicio: generación con paneles, generación sin paneles y no duplicar el registro del mismo día.
+  - [ ] 3.4 Implementar la generación: obtener los paneles y su energía con el mediador, calcular el período según el intervalo, evitar duplicados por panel y período, instanciar `Historico` y persistir los registros.
+  - [ ] 3.5 Crear las pruebas unitarias del servicio: generación con paneles, generación sin paneles y no duplicar el registro del mismo período.
 
-- [ ] **4. Proceso programado (cada 24 horas)**
-  - [ ] 4.1 Crear `GeneradorHistoricoBackgroundService : BackgroundService` con un `PeriodicTimer` de 24 horas configurables.
-  - [ ] 4.2 Crear un scope por ejecución e invocar `IHistoricoService.GenerarRegistrosDiariosAsync()`, registrando los errores con `ILogger` sin detener el servicio.
+- [ ] **4. Proceso programado (intervalo configurable)**
+  - [ ] 4.1 Crear `GeneradorHistoricoBackgroundService : BackgroundService` con un `PeriodicTimer` de intervalo configurable (`Historico:IntervaloHoras`, por defecto 24 horas).
+  - [ ] 4.2 Crear un scope por ejecución e invocar `IHistoricoService.GenerarRegistrosDelPeriodoAsync()` pasando el intervalo, registrando los errores con `ILogger` sin detener el servicio.
   - [ ] 4.3 Centralizar el registro del módulo en `RegistroModuloHistorico.AgregarModuloHistorico` e invocarlo desde `Program.cs`.
   - [ ] 4.4 Registrar el adaptador `MediadorHistoricoParqueSolar` en el punto de composición, sin crear dependencias entre los módulos Historico y ParqueSolar.
 
 - [ ] **5. Capa Presentation (Blazor Server con Radzen)**
-  - [ ] 5.1 No aplica: el alta es automática. No se crea componente, formulario ni ruta para este caso de uso.
+  - [ ] 5.1 Agregar en la ficha del panel (`DetallePanel.razor`) el botón **"Ver histórico"** (visible para el rol "Administrador").
+  - [ ] 5.2 El botón muestra la tabla con los registros generados (`RadzenDataGrid<HistoricoListadoDto>` con `Id`, `Fecha` y `EnergiaTotal`), mostrando la `Fecha` en la hora local del sistema.
+  - [ ] 5.3 El alta no tiene formulario propio (es automática). La lectura y el filtrado se detallan en `cu_his_002_verHistorico` y `cu_his_003_filtrarHistorico`.
 
 - [ ] **6. Verificación de Calidad (Guardarraíles)**
   - [ ] 6.1 Ejecutar la suite de pruebas para validar que no existan violaciones de Clean Architecture ni comunicación directa entre módulos distintos (ParqueSolar, Historico, Usuario y Auth).

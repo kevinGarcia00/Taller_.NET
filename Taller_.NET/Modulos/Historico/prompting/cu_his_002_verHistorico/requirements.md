@@ -5,10 +5,10 @@ Como Administrador del sistema SolarUY, quiero ver el histórico de energía de 
 
 ## Criterios de Aceptación
 1. Contexto previo: El Administrador ingresa a la sección de nodos de un parque solar ya seleccionado y, dentro del nodo, elige el panel cuyo histórico desea ver.
-2. Acción: El Administrador presiona la opción "Ver histórico" del panel seleccionado.
+2. Acción: En la ficha del panel (apartado de panel) el Administrador presiona el botón "Ver histórico".
 3. Visualización de datos: El sistema presenta un listado de los registros del histórico de ese panel. Cada registro muestra:
    - `Id`.
-   - `Fecha`.
+   - `Fecha` (en la hora local del sistema).
    - `EnergiaTotal`.
 4. Orden: Los registros se muestran del más reciente al más antiguo.
 5. Pertenencia: Solo se listan registros del panel seleccionado. Si el panel no existe en ese nodo o en ese parque solar, se informa con un mensaje de error.

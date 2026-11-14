@@ -17,11 +17,12 @@
   - [ ] 3.6 Preparar el código para que quede conectado con Auth0 y verifique el rol "Administrador".
 
 - [ ] **4. Capa Presentation (Blazor Server con Radzen)**
-  - [ ] 4.1 Crear el componente `HistorialPanel.razor` con la directiva `@page "/parques/{ParqueId:int}/nodos/{NodoId:int}/paneles/{PanelId:int}/historico"`.
-  - [ ] 4.2 Proteger el componente con `<AuthorizeView Roles="Administrador">` o el atributo `[Authorize(Roles = "Administrador")]`.
-  - [ ] 4.3 Configurar el `RadzenDataGrid<HistoricoListadoDto>` con las columnas `Id`, `Fecha` y `EnergiaTotal`, y el mensaje de listado vacío cuando el panel no tiene registros.
-  - [ ] 4.4 Invocar `ObtenerRegistrosPorPanelAsync` en `OnInitializedAsync`.
-  - [ ] 4.5 Si la consulta falla, notificar con `NotificationService` de Radzen y ofrecer el regreso a la ficha del panel.
+  - [ ] 4.1 Agregar en la ficha del panel (`DetallePanel.razor`) el botón **"Ver histórico"** (visible para el rol "Administrador") que abre el listado del panel.
+  - [ ] 4.2 Crear el componente `HistorialPanel.razor` con la directiva `@page "/parques/{ParqueId:int}/nodos/{NodoId:int}/paneles/{PanelId:int}/historico"`.
+  - [ ] 4.3 Proteger el componente con `<AuthorizeView Roles="Administrador">` o el atributo `[Authorize(Roles = "Administrador")]`.
+  - [ ] 4.4 Configurar el `RadzenDataGrid<HistoricoListadoDto>` con las columnas `Id`, `Fecha` y `EnergiaTotal`, y el mensaje de listado vacío cuando el panel no tiene registros.
+  - [ ] 4.5 Invocar `ObtenerRegistrosPorPanelAsync` en `OnInitializedAsync`.
+  - [ ] 4.6 Si la consulta falla, notificar con `NotificationService` de Radzen y ofrecer el regreso a la ficha del panel.
 
 - [ ] **5. Verificación de Calidad (Guardarraíles)**
   - [ ] 5.1 Ejecutar la suite de pruebas para validar que no existan violaciones de Clean Architecture ni comunicación directa entre módulos distintos (ParqueSolar, Historico, Usuario y Auth).

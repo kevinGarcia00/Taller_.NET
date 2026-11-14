@@ -1,0 +1,150 @@
+@page "/parques/{ParqueId:int}/nodos/{NodoId:int}/paneles/{PanelId:int}/historico"
+@attribute [Authorize(Roles = "Administrador")]
+@rendermode InteractiveServer
+@inject IHistoricoService HistoricoService
+@inject NavigationManager NavigationManager
+@inject NotificationService NotificationService
+
+<PageTitle>Histórico del Panel</PageTitle>
+
+<h1>Histórico del Panel</h1>
+
+<AuthorizeView Roles="Administrador" Context="autorizacion">
+    <Authorized>
+        <RadzenStack Gap="1rem">
+            <RadzenText TextStyle="TextStyle.Body1">
+                Evolución de la energía total del panel.
+            </RadzenText>
+
+            <RadzenCard>
+                <RadzenTemplateForm TItem="FiltroHistoricoDto" Data="@_filtro" Submit="OnValidSubmit">
+                    <RadzenStack Orientation="Orientation.Horizontal" Gap="1rem" AlignItems="AlignItems.End">
+                        <RadzenFormField Text="Fecha" Variant="Variant.Outlined">
+                            <RadzenDatePicker TValue="DateTime" @bind-Value="_filtro.Referencia" DateFormat="dd/MM/yyyy" />
+                        </RadzenFormField>
+
+                        <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem">
+                            <RadzenButton Text="Buscar" ButtonType="ButtonType.Submit" Icon="search" />
+                            <RadzenButton Text="Limpiar" ButtonStyle="ButtonStyle.Secondary" Icon="clear"
+                                          Click="@LimpiarFiltro" />
+                        </RadzenStack>
+                    </RadzenStack>
+                </RadzenTemplateForm>
+            </RadzenCard>
+
+            <RadzenDataGrid Data="@_registros" TItem="HistoricoListadoDto" AllowSorting="true" IsLoading="@_cargando"
+                            EmptyText="@_mensajeVacio">
+                <Columns>
+                    <RadzenDataGridColumn TItem="HistoricoListadoDto" Property="Id" Title="Id" Width="80px" />
+                    <RadzenDataGridColumn TItem="HistoricoListadoDto" Property="Fecha" Title="Fecha">
+                        <Template Context="registro">@MostrarEnHoraLocal(registro.Fecha).ToString("dd/MM/yyyy")</Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="HistoricoListadoDto" Property="EnergiaTotal" Title="Energía total" FormatString="{0:N2}" />
+                </Columns>
+            </RadzenDataGrid>
+
+            <RadzenButton Text="Volver al panel" Icon="arrow_back" ButtonStyle="ButtonStyle.Secondary"
+                          Click="@(() => NavigationManager.NavigateTo($"/parques/{ParqueId}/nodos/{NodoId}/paneles/{PanelId}"))" />
+        </RadzenStack>
+    </Authorized>
+    <NotAuthorized>
+        <RadzenAlert AlertStyle="AlertStyle.Warning" Title="Acceso restringido">
+            Solo los usuarios con el rol de Administrador pueden ver el histórico del panel.
+        </RadzenAlert>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    private const string MensajeSinRegistros = "Este panel todavía no tiene registros de histórico.";
+    private const string MensajeSinResultados = "No hay registros para la fecha seleccionada.";
+
+    [Parameter]
+    public int ParqueId { get; set; }
+
+    [Parameter]
+    public int NodoId { get; set; }
+
+    [Parameter]
+    public int PanelId { get; set; }
+
+    private FiltroHistoricoDto _filtro = CrearFiltroPorDefecto();
+    private IReadOnlyList<HistoricoListadoDto> _registros = new List<HistoricoListadoDto>();
+    private bool _cargando = true;
+    private string _mensajeVacio = MensajeSinRegistros;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarRegistrosAsync();
+        _cargando = false;
+    }
+
+    private async Task CargarRegistrosAsync()
+    {
+        try
+        {
+            _registros = await HistoricoService.ObtenerRegistrosPorPanelAsync(PanelId);
+            _mensajeVacio = MensajeSinRegistros;
+        }
+        catch (System.Exception excepcion)
+        {
+            _registros = new List<HistoricoListadoDto>();
+            NotificarError("No se pudo obtener el histórico", excepcion.Message);
+        }
+    }
+
+    private async Task OnValidSubmit()
+    {
+        _cargando = true;
+
+        try
+        {
+            _registros = await HistoricoService.ObtenerRegistrosFiltradosPorPanelAsync(
+                PanelId,
+                NodoId,
+                ParqueId,
+                _filtro);
+
+            _mensajeVacio = MensajeSinResultados;
+        }
+        catch (FluentValidation.ValidationException excepcion)
+        {
+            NotificarError("No se pudo buscar en el histórico", excepcion.Message);
+        }
+        catch (Taller_.NET.Modulos.Historico.Application.Excepciones.PanelNoEncontradoException excepcion)
+        {
+            NotificarError("No se pudo buscar en el histórico", excepcion.Message);
+        }
+        finally
+        {
+            _cargando = false;
+        }
+    }
+
+    private async Task LimpiarFiltro()
+    {
+        _filtro = CrearFiltroPorDefecto();
+        _cargando = true;
+
+        await CargarRegistrosAsync();
+
+        _cargando = false;
+    }
+
+    private void NotificarError(string resumen, string detalle)
+    {
+        NotificationService.Notify(new NotificationMessage
+        {
+            Severity = NotificationSeverity.Error,
+            Summary = resumen,
+            Detail = detalle
+        });
+    }
+
+    private static FiltroHistoricoDto CrearFiltroPorDefecto() => new()
+    {
+        Referencia = DateTime.Today
+    };
+
+    private static DateTime MostrarEnHoraLocal(DateTime fecha) =>
+        DateTime.SpecifyKind(fecha, DateTimeKind.Utc).ToLocalTime();
+}

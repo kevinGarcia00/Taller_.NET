@@ -36,12 +36,13 @@
     - La consulta filtra por `PanelId`, ordena por `Fecha` descendente y proyecta solo `Id`, `Fecha` y `EnergiaTotal`.
 
 ### 4. Capa Presentation (Blazor Server con Radzen)
+- **Punto de entrada (apartado de panel):** en la ficha del panel (`DetallePanel.razor`) se agrega el botón **"Ver histórico"**, visible para el rol "Administrador". Al presionarlo se abre la tabla de registros del panel.
 - **Componente:** `HistorialPanel.razor`
     - **Ruta:** `@page "/parques/{ParqueId:int}/nodos/{NodoId:int}/paneles/{PanelId:int}/historico"`
     - **Seguridad:** Utilizar `<AuthorizeView Roles="Administrador">` o el atributo `[Authorize(Roles = "Administrador")]`. Si el usuario no tiene el rol, se muestra el bloque `NotAuthorized`.
     - **UI (Radzen):**
         - Contexto de parque, nodo y panel en solo lectura, tomados de la ruta.
-        - `RadzenDataGrid<HistoricoListadoDto>` con las columnas `Id`, `Fecha` y `EnergiaTotal`.
+        - `RadzenDataGrid<HistoricoListadoDto>` con las columnas `Id`, `Fecha` y `EnergiaTotal`. La `Fecha` se muestra en la hora local del sistema (se persiste en UTC y se convierte al mostrar).
         - Mensaje de listado vacío cuando el panel no tiene registros.
         - `RadzenButton` para volver a la ficha del panel.
     - **Flujo:**
