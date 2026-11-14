@@ -1,6 +1,6 @@
 @page "/parques/{ParqueId:int}/nodos"
 @page "/nodos"
-@attribute [Authorize(Roles = "Administrador")]
+@attribute [Authorize(Roles = "Administrador,Mantenimiento")]
 @rendermode InteractiveServer
 @inject INodoService NodoService
 @inject IParqueService ParqueService
@@ -12,7 +12,7 @@
 
 <h1>Nodos del Parque Solar</h1>
 
-<AuthorizeView Roles="Administrador" Context="autorizacion">
+<AuthorizeView Roles="Administrador,Mantenimiento" Context="autorizacion">
     <Authorized>
         <RadzenStack Gap="1rem">
             @if (!EsContextoParque)
@@ -33,8 +33,12 @@
             {
                 <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center">
                     <RadzenText TextStyle="TextStyle.H6">@_nombreParque</RadzenText>
-                    <RadzenButton Text="Nuevo Nodo" Icon="add_circle_outline" ButtonStyle="ButtonStyle.Primary"
-                                  Click="@(() => NavigationManager.NavigateTo($"/parques/{ParqueActualId}/nodos/alta"))" />
+                    <AuthorizeView Roles="Administrador">
+                        <Authorized>
+                            <RadzenButton Text="Nuevo Nodo" Icon="add_circle_outline" ButtonStyle="ButtonStyle.Primary"
+                                          Click="@(() => NavigationManager.NavigateTo($"/parques/{ParqueActualId}/nodos/alta"))" />
+                        </Authorized>
+                    </AuthorizeView>
                 </RadzenStack>
 
                 <RadzenDataGrid Data="@_nodos" TItem="NodoListadoDto" AllowSorting="true" IsLoading="@_cargando"
@@ -61,22 +65,26 @@
                                 <RadzenStack Orientation="Orientation.Vertical" Gap="0.35rem" AlignItems="AlignItems.Start">
                                     <RadzenButton Text="Ver paneles" Icon="visibility" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Light"
                                                   Click="@(() => NavigationManager.NavigateTo($"/parques/{ParqueActualId}/nodos/{nodo.Id}/paneles"))" />
-                                    <RadzenButton Text="Registrar panel" Icon="solar_power" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Secondary"
-                                                  Click="@(() => NavigationManager.NavigateTo($"/parques/{ParqueActualId}/nodos/{nodo.Id}/paneles/alta"))" />
-                                    @if (nodo.InversorId.HasValue)
-                                    {
-                                        <RadzenButton Text="Ver inversor" Icon="electrical_services" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Light"
-                                                      Click="@(() => NavigationManager.NavigateTo($"/parques/{ParqueActualId}/nodos/{nodo.Id}/inversor"))" />
-                                    }
-                                    else
-                                    {
-                                        <RadzenButton Text="Registrar inversor" Icon="electrical_services" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Secondary"
-                                                      Click="@(() => NavigationManager.NavigateTo($"/parques/{ParqueActualId}/nodos/{nodo.Id}/inversor/alta"))" />
-                                    }
-                                    <RadzenButton Text="Modificar" Icon="edit" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary"
-                                                  Click="@(() => NavigationManager.NavigateTo($"/parques/{ParqueActualId}/nodos/{nodo.Id}/editar"))" />
-                                    <RadzenButton Text="Eliminar" Icon="delete" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Danger"
-                                                  Click="@(() => ConfirmarEliminacion(nodo))" />
+                                    <AuthorizeView Roles="Administrador">
+                                        <Authorized>
+                                            <RadzenButton Text="Registrar panel" Icon="solar_power" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Secondary"
+                                                          Click="@(() => NavigationManager.NavigateTo($"/parques/{ParqueActualId}/nodos/{nodo.Id}/paneles/alta"))" />
+                                            @if (nodo.InversorId.HasValue)
+                                            {
+                                                <RadzenButton Text="Ver inversor" Icon="electrical_services" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Light"
+                                                              Click="@(() => NavigationManager.NavigateTo($"/parques/{ParqueActualId}/nodos/{nodo.Id}/inversor"))" />
+                                            }
+                                            else
+                                            {
+                                                <RadzenButton Text="Registrar inversor" Icon="electrical_services" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Secondary"
+                                                              Click="@(() => NavigationManager.NavigateTo($"/parques/{ParqueActualId}/nodos/{nodo.Id}/inversor/alta"))" />
+                                            }
+                                            <RadzenButton Text="Modificar" Icon="edit" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary"
+                                                          Click="@(() => NavigationManager.NavigateTo($"/parques/{ParqueActualId}/nodos/{nodo.Id}/editar"))" />
+                                            <RadzenButton Text="Eliminar" Icon="delete" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Danger"
+                                                          Click="@(() => ConfirmarEliminacion(nodo))" />
+                                        </Authorized>
+                                    </AuthorizeView>
                                 </RadzenStack>
                             </Template>
                         </RadzenDataGridColumn>
@@ -98,7 +106,7 @@
     </Authorized>
     <NotAuthorized>
         <RadzenAlert AlertStyle="AlertStyle.Warning" Title="Acceso restringido">
-            Solo los usuarios con el rol de Administrador pueden ver el listado de nodos.
+            Solo los usuarios con rol de Administrador o Mantenimiento pueden ver el listado de nodos.
         </RadzenAlert>
     </NotAuthorized>
 </AuthorizeView>

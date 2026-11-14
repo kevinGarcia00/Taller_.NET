@@ -58,7 +58,7 @@ namespace Taller_.NET.Modulos.ParqueSolar.Application.Servicios
             int parqueSolarId,
             CancellationToken cancellationToken = default)
         {
-            await AsegurarAdministradorAsync("Solo un administrador puede ver los paneles.", cancellationToken);
+            await AsegurarConsultaDePanelesAsync(cancellationToken);
             await ObtenerNodoDelParqueAsync(nodoId, parqueSolarId, cancellationToken);
 
             var paneles = await _panelRepository.ObtenerPorNodoAsync(nodoId, cancellationToken);
@@ -80,7 +80,7 @@ namespace Taller_.NET.Modulos.ParqueSolar.Application.Servicios
             int parqueSolarId,
             CancellationToken cancellationToken = default)
         {
-            await AsegurarAdministradorAsync("Solo un administrador puede ver los paneles.", cancellationToken);
+            await AsegurarConsultaDePanelesAsync(cancellationToken);
             var nodo = await ObtenerNodoDelParqueAsync(nodoId, parqueSolarId, cancellationToken);
             var panel = await _panelRepository.ObtenerPorIdYNodoAsync(panelId, nodoId, cancellationToken);
 
@@ -184,6 +184,18 @@ namespace Taller_.NET.Modulos.ParqueSolar.Application.Servicios
             if (!await _usuarioActualProvider.EsAdministradorAsync(cancellationToken))
             {
                 throw new UsuarioNoAutorizadoException(mensaje);
+            }
+        }
+
+        private async Task AsegurarConsultaDePanelesAsync(CancellationToken cancellationToken)
+        {
+            var esAdministrador = await _usuarioActualProvider.EsAdministradorAsync(cancellationToken);
+            var esMantenimiento = await _usuarioActualProvider.EsMantenimientoAsync(cancellationToken);
+
+            if (!esAdministrador && !esMantenimiento)
+            {
+                throw new UsuarioNoAutorizadoException(
+                    "Solo un administrador o un usuario de mantenimiento puede ver los paneles.");
             }
         }
 

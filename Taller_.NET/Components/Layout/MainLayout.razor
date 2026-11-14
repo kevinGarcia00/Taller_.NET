@@ -1,4 +1,5 @@
 ﻿@inherits LayoutComponentBase
+@using System.Security.Claims
 
 <div class="page">
     <div class="sidebar">
@@ -7,6 +8,17 @@
 
     <main>
         <div class="top-row px-4">
+            <AuthorizeView>
+                <Authorized>
+                    <span class="usuario-sesion">@NombreVisible(context.User)</span>
+                    <button type="submit" class="btn-cerrar-sesion" form="formulario-cerrar-sesion">
+                        Cerrar sesión
+                    </button>
+                </Authorized>
+                <NotAuthorized>
+                    <a href="login">Iniciar sesión</a>
+                </NotAuthorized>
+            </AuthorizeView>
             <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
         </div>
 
@@ -23,3 +35,15 @@
 </div>
 
 <RadzenComponents @rendermode="InteractiveServer" />
+
+@code {
+    private static string NombreVisible(ClaimsPrincipal usuario)
+    {
+        var nombre = usuario.FindFirst("name")?.Value
+            ?? usuario.FindFirst(ClaimTypes.Email)?.Value
+            ?? usuario.FindFirst("email")?.Value
+            ?? usuario.Identity?.Name;
+
+        return string.IsNullOrWhiteSpace(nombre) ? "Sesión iniciada" : nombre;
+    }
+}

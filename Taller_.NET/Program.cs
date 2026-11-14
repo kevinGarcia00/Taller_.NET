@@ -22,7 +22,10 @@ using Taller_.NET.Modulos.ParqueSolar.Infrastructure.Mediadores;
 using Taller_.NET.Modulos.ParqueSolar.Infrastructure.Persistencia;
 using Taller_.NET.Modulos.ParqueSolar.Infrastructure.Repositorios;
 using Taller_.NET.Modulos.ParqueSolar.Infrastructure.Seguridad;
-using Taller_.NET.Modulos.Auth;
+using Taller_.NET.Composicion;
+using Taller_.NET.Composicion.Mediadores;
+using Taller_.NET.Modulos.Historico.Application.Puertos;
+using Taller_.NET.Modulos.Historico.Infrastructure;
 using Taller_.NET.Modulos.Usuario.Application.Seguridad;
 using Taller_.NET.Modulos.Usuario.Infrastructure;
 using IUsuarioAutenticacionService = Taller_.NET.Modulos.Usuario.Application.Puertos.IUsuarioAutenticacionService;
@@ -89,13 +92,17 @@ else
     builder.Services.AddAuthentication(options =>
     {
         options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+        options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+        options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
         options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
+        // Sin esto, un acceso denegado usa el esquema de Auth0 y vuelve a pedir consentimiento.
+        options.DefaultForbidScheme = CookieAuthenticationDefaults.AuthenticationScheme;
     })
     .AddCookie(options =>
     {
         options.LoginPath = "/login";
         options.LogoutPath = "/logout";
-        options.AccessDeniedPath = "/login";
+        options.AccessDeniedPath = "/acceso-denegado";
     })
     .AddOpenIdConnect(options =>
     {
@@ -166,7 +173,8 @@ else
             }
         };
 
-        options.TokenValidationParameters.NameClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier";
+        options.TokenValidationParameters.NameClaimType = ClaimTypes.NameIdentifier;
+        options.TokenValidationParameters.RoleClaimType = ClaimTypes.Role;
     })
     .AddJwtBearer(options =>
     {
@@ -218,6 +226,9 @@ builder.Services.AddScoped<IValidator<CrearInversorDto>, CrearInversorDtoValidat
 builder.Services.AddScoped<IValidator<ModificarInversorDto>, ModificarInversorDtoValidator>();
 
 builder.Services.AgregarModuloUsuario(builder.Configuration);
+builder.Services.AgregarModuloHistorico(builder.Configuration);
+builder.Services.AddScoped<IMediadorHistoricoParqueSolar, MediadorHistoricoParqueSolar>();
+builder.Services.AddScoped<IMediadorHistoricoUsuario, MediadorHistoricoUsuario>();
 
 var app = builder.Build();
 
@@ -245,14 +256,14 @@ app.MapControllers();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
-app.Run();
+await app.RunAsync();
 
 public partial class Program
 {
     private const string ModoDesarrolloAnonimo = "DesarrolloAnonimo";
 }
 
-namespace Taller_.NET.Modulos.Auth
+namespace Taller_.NET.Composicion
 {
 public class AutenticacionAnonimaHandler : AuthenticationHandler<AuthenticationSchemeOptions>
 {
@@ -269,7 +280,8 @@ public class AutenticacionAnonimaHandler : AuthenticationHandler<AuthenticationS
         var claims = new List<Claim>
         {
             new Claim(ClaimTypes.Name, "Usuario de prueba"),
-            new Claim(ClaimTypes.Role, RolesAuth0.Administrador)
+            new Claim(ClaimTypes.Role, RolesAuth0.Administrador),
+            new Claim(ClaimTypes.Role, RolesAuth0.Mantenimiento)
         };
 
         claims.AddRange(PermisosUsuarios.Todos.Select(permiso =>

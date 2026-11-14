@@ -1,5 +1,5 @@
 @page "/parques/{ParqueId:int}"
-@attribute [Authorize(Roles = "Administrador")]
+@attribute [Authorize(Roles = "Administrador,Mantenimiento")]
 @rendermode InteractiveServer
 @inject IParqueService ParqueService
 @inject NavigationManager NavigationManager
@@ -9,7 +9,7 @@
 
 <h1>Detalle del Parque Solar</h1>
 
-<AuthorizeView Roles="Administrador" Context="autorizacion">
+<AuthorizeView Roles="Administrador,Mantenimiento" Context="autorizacion">
     <Authorized>
         @if (_parque is not null)
         {
@@ -34,8 +34,12 @@
                     <RadzenText TextStyle="TextStyle.H6">Nodos del parque</RadzenText>
                     <RadzenButton Text="Ver listado" Icon="list" ButtonStyle="ButtonStyle.Secondary"
                                   Click="@(() => NavigationManager.NavigateTo($"/parques/{ParqueId}/nodos"))" />
-                    <RadzenButton Text="Registrar nodo" Icon="add_circle_outline" ButtonStyle="ButtonStyle.Primary"
-                                  Click="@(() => NavigationManager.NavigateTo($"/parques/{ParqueId}/nodos/alta"))" />
+                    <AuthorizeView Roles="Administrador">
+                        <Authorized>
+                            <RadzenButton Text="Registrar nodo" Icon="add_circle_outline" ButtonStyle="ButtonStyle.Primary"
+                                          Click="@(() => NavigationManager.NavigateTo($"/parques/{ParqueId}/nodos/alta"))" />
+                        </Authorized>
+                    </AuthorizeView>
                 </RadzenStack>
 
                 <RadzenDataGrid Data="@_parque.ListaNodos" TItem="NodoResumenDto">
@@ -50,17 +54,21 @@
                 <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem">
                     <RadzenButton Text="Volver al listado" Icon="arrow_back" ButtonStyle="ButtonStyle.Secondary"
                                   Click="@(() => NavigationManager.NavigateTo("/parques"))" />
-                    <RadzenButton Text="Editar" Icon="edit" ButtonStyle="ButtonStyle.Primary"
-                                  Click="@(() => NavigationManager.NavigateTo($"/parques/modificar/{ParqueId}"))" />
-                    <RadzenButton Text="Eliminar" Icon="delete" ButtonStyle="ButtonStyle.Danger"
-                                  Click="@(() => NavigationManager.NavigateTo($"/parques/eliminar/{ParqueId}"))" />
+                    <AuthorizeView Roles="Administrador">
+                        <Authorized>
+                            <RadzenButton Text="Editar" Icon="edit" ButtonStyle="ButtonStyle.Primary"
+                                          Click="@(() => NavigationManager.NavigateTo($"/parques/modificar/{ParqueId}"))" />
+                            <RadzenButton Text="Eliminar" Icon="delete" ButtonStyle="ButtonStyle.Danger"
+                                          Click="@(() => NavigationManager.NavigateTo($"/parques/eliminar/{ParqueId}"))" />
+                        </Authorized>
+                    </AuthorizeView>
                 </RadzenStack>
             </RadzenStack>
         }
     </Authorized>
     <NotAuthorized>
         <RadzenAlert AlertStyle="AlertStyle.Warning" Title="Acceso restringido">
-            Solo los usuarios con el rol de Administrador pueden ver los parques solares.
+            Solo los usuarios con rol de Administrador o Mantenimiento pueden ver los parques solares.
         </RadzenAlert>
     </NotAuthorized>
 </AuthorizeView>

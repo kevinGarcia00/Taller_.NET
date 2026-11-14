@@ -6,5 +6,7 @@ namespace Taller_.NET.Modulos.ParqueSolar.Application.Puertos
     public interface IUsuarioActualProvider
     {
         Task<bool> EsAdministradorAsync(CancellationToken cancellationToken = default);
+
+        Task<bool> EsMantenimientoAsync(CancellationToken cancellationToken = default);
     }
 }

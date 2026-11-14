@@ -433,5 +433,8 @@ public class InversorServiceTests
 
         public Task<bool> EsAdministradorAsync(CancellationToken cancellationToken = default)
             => Task.FromResult(_esAdministrador);
+
+        public Task<bool> EsMantenimientoAsync(CancellationToken cancellationToken = default)
+            => Task.FromResult(false);
     }
 }

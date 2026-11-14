@@ -16,20 +16,22 @@ public class Auth0WebhookController : ControllerBase
     }
 
     [HttpPost("post-user-registration")]
-    public IActionResult PostUserRegistration([FromBody] Auth0UserRegisteredDto payload)
+    public IActionResult PostUserRegistration(
+        [FromBody] Auth0UserRegisteredDto payload,
+        [FromHeader(Name = "Authorization")] string? authorization)
     {
         var expectedSecret = _configuration["Auth0Webhook:Secret"];
-    
-        if (!Request.Headers.TryGetValue("Authorization", out var authHeader))
+
+        if (string.IsNullOrEmpty(authorization))
         {
             _logger.LogWarning("No llega el header Authorization");
             return Unauthorized(new { message = "Token faltante" });
         }
 
         var expectedToken = $"Bearer {expectedSecret}";
-        if (authHeader != expectedToken)
+        if (authorization != expectedToken)
         {
-            _logger.LogWarning("Token inválido: {Received} | Esperado: {Expected}", authHeader.ToString(), expectedToken);
+            _logger.LogWarning("Token inválido: {Received} | Esperado: {Expected}", authorization, expectedToken);
             return Unauthorized(new { message = "Token inválido" });
         }
 
