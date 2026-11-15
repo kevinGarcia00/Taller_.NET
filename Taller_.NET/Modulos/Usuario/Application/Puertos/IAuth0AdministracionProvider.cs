@@ -40,6 +40,13 @@ namespace Taller_.NET.Modulos.Usuario.Application.Puertos
         Task<List<RolDto>> ObtenerRolesAsync(CancellationToken cancellationToken = default);
 
         /// <summary>
+        /// Obtiene los nombres de rol de Auth0 agrupados por identificador de usuario.
+        /// Sirve para armar el listado sin consultar cada usuario por separado.
+        /// </summary>
+        Task<IReadOnlyDictionary<string, List<string>>> ObtenerNombresDeRolesPorUsuarioAsync(
+            CancellationToken cancellationToken = default);
+
+        /// <summary>
         /// Obtiene los roles asignados a un usuario en Auth0.
         /// </summary>
         Task<List<RolDto>> ObtenerRolesDeUsuarioAsync(

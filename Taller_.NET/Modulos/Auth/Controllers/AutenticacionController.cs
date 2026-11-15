@@ -11,6 +11,11 @@ namespace Taller_.NET.Modulos.Auth.Controllers
         [HttpGet("/login")]
         public IActionResult Login(string? returnUrl = null)
         {
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                return Redirect("/acceso-denegado");
+            }
+
             var propiedades = new AuthenticationProperties
             {
                 RedirectUri = returnUrl ?? "/"

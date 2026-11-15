@@ -215,41 +215,29 @@ namespace Taller_.NET.Modulos.Usuario.Application.Servicios
             await VerificarPermisoAsync(PermisosUsuarios.Leer, cancellationToken);
 
             var usuarios = await _usuarioRepository.ObtenerListadoAsync(cancellationToken);
+            var rolesPorUsuario = await _auth0AdministracionProvider.ObtenerNombresDeRolesPorUsuarioAsync(
+                cancellationToken);
 
             foreach (var usuario in usuarios)
             {
-                usuario.Roles = await ObtenerNombresDeRolesAsync(usuario, cancellationToken);
+                usuario.Roles = ResolverRolesDelListado(usuario.Auth0UserId, rolesPorUsuario);
             }
 
             return usuarios;
         }
 
-        private async Task<List<string>> ObtenerNombresDeRolesAsync(
-            UsuarioListadoDto usuario,
-            CancellationToken cancellationToken)
+        private static List<string> ResolverRolesDelListado(
+            string? auth0UserId,
+            IReadOnlyDictionary<string, List<string>> rolesPorUsuario)
         {
-            if (string.IsNullOrWhiteSpace(usuario.Auth0UserId))
+            if (string.IsNullOrWhiteSpace(auth0UserId))
             {
                 return new List<string>();
             }
 
-            try
-            {
-                var roles = await _auth0AdministracionProvider.ObtenerRolesDeUsuarioAsync(
-                    usuario.Auth0UserId,
-                    cancellationToken);
-
-                return roles.Select(rol => rol.Nombre).ToList();
-            }
-            catch (Exception excepcion)
-            {
-                _logger.LogWarning(
-                    excepcion,
-                    "No se pudieron obtener los roles de Auth0 para el usuario {UsuarioId}.",
-                    usuario.Id);
-
-                return new List<string>();
-            }
+            return rolesPorUsuario.TryGetValue(auth0UserId, out var roles)
+                ? roles
+                : new List<string>();
         }
 
         private async Task<List<RolDto>> ObtenerRolesDelUsuarioAsync(

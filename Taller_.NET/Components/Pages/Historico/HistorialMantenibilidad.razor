@@ -1,0 +1,108 @@
+@page "/parques/{ParqueId:int}/nodos/{NodoId:int}/paneles/{PanelId:int}/mantenibilidad"
+@using Taller_.NET.Modulos.Historico.Application.Excepciones
+@using UsuarioNoAutorizadoException = Taller_.NET.Modulos.Historico.Application.Excepciones.UsuarioNoAutorizadoException
+@attribute [Authorize(Roles = "Administrador")]
+@rendermode InteractiveServer
+@inject IHistoricoMantenibilidadService HistoricoService
+@inject NotificationService NotificationService
+@inject NavigationManager NavigationManager
+
+<PageTitle>Historial de mantenibilidad</PageTitle>
+
+<h1>Historial de mantenibilidad</h1>
+
+<AuthorizeView Roles="Administrador" Context="autorizacion">
+    <Authorized>
+        <RadzenStack Gap="1rem">
+            <RadzenCard>
+                <RadzenStack Gap="1rem">
+                    <RadzenFormField Text="Parque solar" Variant="Variant.Outlined">
+                        <RadzenTextBox Value="@_contexto?.NombreParque" ReadOnly="true" />
+                    </RadzenFormField>
+                    <RadzenFormField Text="Nodo" Variant="Variant.Outlined">
+                        <RadzenTextBox Value="@_contexto?.NombreNodo" ReadOnly="true" />
+                    </RadzenFormField>
+                    <RadzenFormField Text="Panel" Variant="Variant.Outlined">
+                        <RadzenTextBox Value="@_contexto?.NombrePanel" ReadOnly="true" />
+                    </RadzenFormField>
+                </RadzenStack>
+            </RadzenCard>
+
+            <RadzenDataGrid Data="@_registros" TItem="HistoricoMantenibilidadListadoDto" AllowSorting="true" IsLoading="@_cargando"
+                            EmptyText="Este panel no tiene registros de mantenibilidad.">
+                <Columns>
+                    <RadzenDataGridColumn TItem="HistoricoMantenibilidadListadoDto" Property="IdMantenedor" Title="Mantenedor" />
+                    <RadzenDataGridColumn TItem="HistoricoMantenibilidadListadoDto" Property="Fecha" Title="Fecha" FormatString="{0:dd/MM/yyyy}" />
+                    <RadzenDataGridColumn TItem="HistoricoMantenibilidadListadoDto" Property="Observaciones" Title="Observaciones" />
+                    <RadzenDataGridColumn TItem="HistoricoMantenibilidadListadoDto" Property="EstadoInicial" Title="Estado inicial" />
+                    <RadzenDataGridColumn TItem="HistoricoMantenibilidadListadoDto" Property="EstadoResultante" Title="Estado resultante" />
+                </Columns>
+            </RadzenDataGrid>
+
+            <RadzenButton Text="Volver al panel" Icon="arrow_back" ButtonStyle="ButtonStyle.Secondary" Click="@VolverAlPanel" />
+        </RadzenStack>
+    </Authorized>
+    <NotAuthorized>
+        <RadzenAlert AlertStyle="AlertStyle.Warning" Title="Acceso restringido">
+            Solo los usuarios con el rol de Administrador pueden ver el historial.
+        </RadzenAlert>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    [Parameter]
+    public int ParqueId { get; set; }
+
+    [Parameter]
+    public int NodoId { get; set; }
+
+    [Parameter]
+    public int PanelId { get; set; }
+
+    private ContextoPanelLecturaDto? _contexto;
+    private IReadOnlyList<HistoricoMantenibilidadListadoDto> _registros = new List<HistoricoMantenibilidadListadoDto>();
+    private bool _cargando = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _contexto = await HistoricoService.ObtenerContextoPanelAsync(PanelId, NodoId, ParqueId);
+            _registros = await HistoricoService.ObtenerRegistrosPorPanelAsync(PanelId, NodoId, ParqueId);
+        }
+        catch (PanelFueraDeContextoException excepcion)
+        {
+            _registros = new List<HistoricoMantenibilidadListadoDto>();
+            NotificarError("No se pudo obtener el historial", excepcion.Message);
+        }
+        catch (UsuarioNoAutorizadoException excepcion)
+        {
+            _registros = new List<HistoricoMantenibilidadListadoDto>();
+            NotificarError("No se pudo obtener el historial", excepcion.Message);
+        }
+        catch (System.Exception excepcion)
+        {
+            _registros = new List<HistoricoMantenibilidadListadoDto>();
+            NotificarError("No se pudo obtener el historial", excepcion.Message);
+        }
+        finally
+        {
+            _cargando = false;
+        }
+    }
+
+    private void VolverAlPanel()
+    {
+        NavigationManager.NavigateTo($"/parques/{ParqueId}/nodos/{NodoId}/paneles/{PanelId}");
+    }
+
+    private void NotificarError(string resumen, string detalle)
+    {
+        NotificationService.Notify(new NotificationMessage
+        {
+            Severity = NotificationSeverity.Error,
+            Summary = resumen,
+            Detail = detalle
+        });
+    }
+}

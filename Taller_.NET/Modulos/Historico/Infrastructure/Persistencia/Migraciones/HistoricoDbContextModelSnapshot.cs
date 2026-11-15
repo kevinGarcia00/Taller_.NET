@@ -52,6 +52,94 @@ namespace Taller_.NET.Modulos.Historico.Infrastructure.Persistencia.Migraciones
 
                     b.ToTable("Registros", (string)null);
                 });
+
+            modelBuilder.Entity("Taller_.NET.Modulos.Historico.Domain.HistoricoMantenibilidad", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("id");
+
+                    b.Property<string>("EstadoInicial")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("estado_inicial");
+
+                    b.Property<string>("EstadoResultante")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("estado_resultante");
+
+                    b.Property<DateTime>("Fecha")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("fecha");
+
+                    b.Property<string>("Observaciones")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("observaciones");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("HistoricosMantenibilidad", (string)null);
+                });
+
+            modelBuilder.Entity("Taller_.NET.Modulos.Historico.Domain.HistoricoMantenibilidad", b =>
+                {
+                    b.OwnsOne("Taller_.NET.Modulos.Historico.Domain.ContextoPanel", "ContextoPanel", b1 =>
+                        {
+                            b1.Property<int>("HistoricoMantenibilidadId")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("NodoId")
+                                .HasColumnType("INTEGER")
+                                .HasColumnName("nodo_id");
+
+                            b1.Property<int>("PanelId")
+                                .HasColumnType("INTEGER")
+                                .HasColumnName("panel_id");
+
+                            b1.Property<int>("ParqueSolarId")
+                                .HasColumnType("INTEGER")
+                                .HasColumnName("parque_solar_id");
+
+                            b1.HasKey("HistoricoMantenibilidadId");
+
+                            b1.HasIndex("PanelId")
+                                .HasDatabaseName("ix_historicos_mantenibilidad_panel_fecha");
+
+                            b1.ToTable("HistoricosMantenibilidad");
+
+                            b1.WithOwner()
+                                .HasForeignKey("HistoricoMantenibilidadId");
+                        });
+
+                    b.OwnsOne("Taller_.NET.Modulos.Historico.Domain.Mantenedor", "Mantenedor", b1 =>
+                        {
+                            b1.Property<int>("HistoricoMantenibilidadId")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<Guid>("IdMantenedor")
+                                .HasColumnType("TEXT")
+                                .HasColumnName("id_mantenedor");
+
+                            b1.HasKey("HistoricoMantenibilidadId");
+
+                            b1.ToTable("HistoricosMantenibilidad");
+
+                            b1.WithOwner()
+                                .HasForeignKey("HistoricoMantenibilidadId");
+                        });
+
+                    b.Navigation("ContextoPanel")
+                        .IsRequired();
+
+                    b.Navigation("Mantenedor")
+                        .IsRequired();
+                });
 #pragma warning restore 612, 618
         }
     }

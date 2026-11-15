@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using Taller_.NET.Modulos.Historico.Application.Dtos;
 
 namespace Taller_.NET.Modulos.Historico.Application.Puertos
@@ -13,6 +16,12 @@ namespace Taller_.NET.Modulos.Historico.Application.Puertos
             CancellationToken cancellationToken = default);
 
         Task<bool> ExistePanelAsync(
+            int panelId,
+            int nodoId,
+            int parqueSolarId,
+            CancellationToken cancellationToken = default);
+
+        Task<ContextoPanelLecturaDto?> ObtenerContextoAsync(
             int panelId,
             int nodoId,
             int parqueSolarId,

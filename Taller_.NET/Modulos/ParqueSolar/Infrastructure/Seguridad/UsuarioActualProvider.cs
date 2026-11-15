@@ -22,5 +22,13 @@ namespace Taller_.NET.Modulos.ParqueSolar.Infrastructure.Seguridad
 
             return usuario.Identity?.IsAuthenticated == true && usuario.IsInRole("Administrador");
         }
+
+        public async Task<bool> EsMantenimientoAsync(CancellationToken cancellationToken = default)
+        {
+            var estadoAutenticacion = await _authenticationStateProvider.GetAuthenticationStateAsync();
+            var usuario = estadoAutenticacion.User;
+
+            return usuario.Identity?.IsAuthenticated == true && usuario.IsInRole("Mantenimiento");
+        }
     }
 }

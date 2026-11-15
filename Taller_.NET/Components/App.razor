@@ -16,6 +16,9 @@
 </head>
 
 <body>
+    <form id="formulario-cerrar-sesion" action="logout" method="post" data-enhance="false" hidden>
+        <AntiforgeryToken />
+    </form>
     <Routes />
     <ReconnectModal />
     <script src="@Assets["_content/Radzen.Blazor/Radzen.Blazor.js"]"></script>
