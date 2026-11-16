@@ -1,5 +1,5 @@
 @page "/parques/{ParqueId:int}/nodos/{NodoId:int}/paneles"
-@attribute [Authorize(Roles = "Administrador")]
+@attribute [Authorize(Roles = "Administrador,Mantenimiento")]
 @rendermode InteractiveServer
 @inject IPanelService PanelService
 @inject INodoService NodoService
@@ -12,14 +12,18 @@
 
 <h1>Paneles del Nodo</h1>
 
-<AuthorizeView Roles="Administrador" Context="autorizacion">
+<AuthorizeView Roles="Administrador,Mantenimiento" Context="autorizacion">
     <Authorized>
         <RadzenStack Gap="1rem">
             <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center">
                 <RadzenText TextStyle="TextStyle.H6">@_nombreParque</RadzenText>
                 <RadzenText TextStyle="TextStyle.Body1">@_nombreNodo</RadzenText>
-                <RadzenButton Text="Registrar panel" Icon="add_circle_outline" ButtonStyle="ButtonStyle.Primary"
-                              Click="@(() => NavigationManager.NavigateTo($"/parques/{ParqueId}/nodos/{NodoId}/paneles/alta"))" />
+                <AuthorizeView Roles="Administrador">
+                    <Authorized>
+                        <RadzenButton Text="Registrar panel" Icon="add_circle_outline" ButtonStyle="ButtonStyle.Primary"
+                                      Click="@(() => NavigationManager.NavigateTo($"/parques/{ParqueId}/nodos/{NodoId}/paneles/alta"))" />
+                    </Authorized>
+                </AuthorizeView>
             </RadzenStack>
 
             <RadzenDataGrid Data="@_paneles" TItem="PanelListadoDto" AllowSorting="true" IsLoading="@_cargando"
@@ -34,10 +38,22 @@
                             <RadzenStack Orientation="Orientation.Vertical" Gap="0.35rem" AlignItems="AlignItems.Start">
                                 <RadzenButton Text="Ver" Icon="visibility" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Secondary"
                                               Click="@(() => NavigationManager.NavigateTo($"/parques/{ParqueId}/nodos/{NodoId}/paneles/{panel.Id}"))" />
-                                <RadzenButton Text="Editar" Icon="edit" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary"
-                                              Click="@(() => NavigationManager.NavigateTo($"/parques/{ParqueId}/nodos/{NodoId}/paneles/editar/{panel.Id}"))" />
-                                <RadzenButton Text="Eliminar" Icon="delete" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Danger"
-                                              Click="@(() => ConfirmarEliminacion(panel))" />
+                                <AuthorizeView Roles="Mantenimiento">
+                                    <Authorized>
+                                        <RadzenButton Text="Registrar mantenimiento" Icon="build" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary"
+                                                      Click="@(() => NavigationManager.NavigateTo($"/parques/{ParqueId}/nodos/{NodoId}/paneles/{panel.Id}/mantenibilidad/alta"))" />
+                                    </Authorized>
+                                </AuthorizeView>
+                                <AuthorizeView Roles="Administrador">
+                                    <Authorized>
+                                        <RadzenButton Text="Ver historial" Icon="history" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Secondary"
+                                                      Click="@(() => NavigationManager.NavigateTo($"/parques/{ParqueId}/nodos/{NodoId}/paneles/{panel.Id}/mantenibilidad"))" />
+                                        <RadzenButton Text="Editar" Icon="edit" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary"
+                                                      Click="@(() => NavigationManager.NavigateTo($"/parques/{ParqueId}/nodos/{NodoId}/paneles/editar/{panel.Id}"))" />
+                                        <RadzenButton Text="Eliminar" Icon="delete" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Danger"
+                                                      Click="@(() => ConfirmarEliminacion(panel))" />
+                                    </Authorized>
+                                </AuthorizeView>
                             </RadzenStack>
                         </Template>
                     </RadzenDataGridColumn>
@@ -50,7 +66,7 @@
     </Authorized>
     <NotAuthorized>
         <RadzenAlert AlertStyle="AlertStyle.Warning" Title="Acceso restringido">
-            Solo los usuarios con el rol de Administrador pueden ver los paneles.
+            Solo los usuarios con rol de Administrador o Mantenimiento pueden ver los paneles.
         </RadzenAlert>
     </NotAuthorized>
 </AuthorizeView>

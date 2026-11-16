@@ -91,6 +91,22 @@ namespace Taller_.NET.Modulos.Usuario.Infrastructure.Auth0
             return Task.FromResult(Roles.ToList());
         }
 
+        public Task<IReadOnlyDictionary<string, List<string>>> ObtenerNombresDeRolesPorUsuarioAsync(
+            CancellationToken cancellationToken = default)
+        {
+            var rolesPorUsuario = new Dictionary<string, List<string>>(StringComparer.Ordinal);
+
+            foreach (var (auth0UserId, rolesIds) in RolesPorUsuario)
+            {
+                rolesPorUsuario[auth0UserId] = Roles
+                    .Where(rol => rolesIds.Contains(rol.Id))
+                    .Select(rol => rol.Nombre)
+                    .ToList();
+            }
+
+            return Task.FromResult<IReadOnlyDictionary<string, List<string>>>(rolesPorUsuario);
+        }
+
         public Task<List<RolDto>> ObtenerRolesDeUsuarioAsync(
             string auth0UserId,
             CancellationToken cancellationToken = default)

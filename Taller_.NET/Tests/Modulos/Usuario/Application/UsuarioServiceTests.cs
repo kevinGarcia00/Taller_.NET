@@ -140,6 +140,17 @@ public class UsuarioServiceTests
                 new RolDto { Id = RolAdministradorId, Nombre = RolesAuth0.Administrador }
             });
 
+        public Task<IReadOnlyDictionary<string, List<string>>> ObtenerNombresDeRolesPorUsuarioAsync(
+            CancellationToken cancellationToken = default)
+        {
+            IReadOnlyDictionary<string, List<string>> roles = new Dictionary<string, List<string>>
+            {
+                [_auth0UserId] = new List<string> { _nombreRol }
+            };
+
+            return Task.FromResult(roles);
+        }
+
         public Task<List<RolDto>> ObtenerRolesDeUsuarioAsync(
             string auth0UserId,
             CancellationToken cancellationToken = default)

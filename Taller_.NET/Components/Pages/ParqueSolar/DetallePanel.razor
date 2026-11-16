@@ -1,5 +1,5 @@
 @page "/parques/{ParqueId:int}/nodos/{NodoId:int}/paneles/{Id:int}"
-@attribute [Authorize(Roles = "Administrador")]
+@attribute [Authorize(Roles = "Administrador,Mantenimiento")]
 @rendermode InteractiveServer
 @inject IPanelService PanelService
 @inject INodoService NodoService
@@ -11,7 +11,7 @@
 
 <h1>Detalle del Panel</h1>
 
-<AuthorizeView Roles="Administrador" Context="autorizacion">
+<AuthorizeView Roles="Administrador,Mantenimiento" Context="autorizacion">
     <Authorized>
         <RadzenStack Gap="1rem">
             <RadzenCard>
@@ -54,13 +54,33 @@
                 </RadzenStack>
             </RadzenCard>
 
-            <RadzenButton Text="Volver al listado" Icon="arrow_back" ButtonStyle="ButtonStyle.Secondary"
-                          Click="@(() => NavigationManager.NavigateTo($"/parques/{ParqueId}/nodos/{NodoId}/paneles"))" />
+            <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem">
+                <AuthorizeView Roles="Administrador">
+                    <Authorized>
+                        <RadzenButton Text="Ver histórico" Icon="history" ButtonStyle="ButtonStyle.Primary"
+                                      Click="@(() => NavigationManager.NavigateTo($"/parques/{ParqueId}/nodos/{NodoId}/paneles/{Id}/historico"))" />
+                    </Authorized>
+                </AuthorizeView>
+                <AuthorizeView Roles="Administrador">
+                    <Authorized>
+                        <RadzenButton Text="Ver historial" Icon="history" ButtonStyle="ButtonStyle.Secondary"
+                                      Click="@(() => NavigationManager.NavigateTo($"/parques/{ParqueId}/nodos/{NodoId}/paneles/{Id}/mantenibilidad"))" />
+                    </Authorized>
+                </AuthorizeView>
+                <AuthorizeView Roles="Mantenimiento">
+                    <Authorized>
+                        <RadzenButton Text="Registrar mantenimiento" Icon="build"
+                                      Click="@(() => NavigationManager.NavigateTo($"/parques/{ParqueId}/nodos/{NodoId}/paneles/{Id}/mantenibilidad/alta"))" />
+                    </Authorized>
+                </AuthorizeView>
+                <RadzenButton Text="Volver al listado" Icon="arrow_back" ButtonStyle="ButtonStyle.Secondary"
+                              Click="@(() => NavigationManager.NavigateTo($"/parques/{ParqueId}/nodos/{NodoId}/paneles"))" />
+            </RadzenStack>
         </RadzenStack>
     </Authorized>
     <NotAuthorized>
         <RadzenAlert AlertStyle="AlertStyle.Warning" Title="Acceso restringido">
-            Solo los usuarios con el rol de Administrador pueden ver los paneles.
+            Solo los usuarios con rol de Administrador o Mantenimiento pueden ver los paneles.
         </RadzenAlert>
     </NotAuthorized>
 </AuthorizeView>

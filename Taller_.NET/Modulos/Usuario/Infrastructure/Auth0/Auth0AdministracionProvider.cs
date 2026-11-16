@@ -176,6 +176,54 @@ namespace Taller_.NET.Modulos.Usuario.Infrastructure.Auth0
             return await LeerRolesAsync(respuesta, cancellationToken);
         }
 
+        public async Task<IReadOnlyDictionary<string, List<string>>> ObtenerNombresDeRolesPorUsuarioAsync(
+            CancellationToken cancellationToken = default)
+        {
+            var roles = await ObtenerRolesAsync(cancellationToken);
+            var rolesPorUsuario = new Dictionary<string, List<string>>(StringComparer.Ordinal);
+
+            foreach (var rol in roles)
+            {
+                var pagina = 0;
+
+                while (true)
+                {
+                    using var respuesta = await EnviarAsync(
+                        HttpMethod.Get,
+                        $"{RutaRoles}/{Uri.EscapeDataString(rol.Id)}/users?per_page={CantidadMaximaPorPagina}&page={pagina}&include_totals=true",
+                        cuerpo: null,
+                        cancellationToken);
+
+                    await AsegurarRespuestaExitosaAsync(respuesta, "obtener los usuarios del rol", cancellationToken);
+
+                    var (identificadores, hayMasPaginas) = await LeerUsuariosDelRolAsync(respuesta, cancellationToken);
+
+                    foreach (var identificador in identificadores)
+                    {
+                        if (!rolesPorUsuario.TryGetValue(identificador, out var nombres))
+                        {
+                            nombres = new List<string>();
+                            rolesPorUsuario[identificador] = nombres;
+                        }
+
+                        if (!nombres.Contains(rol.Nombre, StringComparer.OrdinalIgnoreCase))
+                        {
+                            nombres.Add(rol.Nombre);
+                        }
+                    }
+
+                    if (!hayMasPaginas)
+                    {
+                        break;
+                    }
+
+                    pagina++;
+                }
+            }
+
+            return rolesPorUsuario;
+        }
+
         public async Task<List<RolDto>> ObtenerRolesDeUsuarioAsync(
             string auth0UserId,
             CancellationToken cancellationToken = default)
@@ -190,7 +238,7 @@ namespace Taller_.NET.Modulos.Usuario.Infrastructure.Auth0
 
             if (respuesta.StatusCode == HttpStatusCode.NotFound)
             {
-                throw new Auth0IntegracionException($"El usuario '{auth0UserId}' no existe en Auth0.");
+                throw new UsuarioAuth0NoEncontradoException(auth0UserId);
             }
 
             await AsegurarRespuestaExitosaAsync(respuesta, "obtener los roles del usuario", cancellationToken);
@@ -309,6 +357,49 @@ namespace Taller_.NET.Modulos.Usuario.Infrastructure.Auth0
             }
 
             return roles;
+        }
+
+        private static async Task<(List<string> Identificadores, bool HayMasPaginas)> LeerUsuariosDelRolAsync(
+            HttpResponseMessage respuesta,
+            CancellationToken cancellationToken)
+        {
+            var contenido = await respuesta.Content.ReadAsStringAsync(cancellationToken);
+
+            using var documento = JsonDocument.Parse(contenido);
+            var raiz = documento.RootElement;
+            var usuarios = raiz.ValueKind == JsonValueKind.Array
+                ? raiz
+                : raiz.TryGetProperty("users", out var listado)
+                    ? listado
+                    : default;
+
+            var identificadores = new List<string>();
+
+            if (usuarios.ValueKind == JsonValueKind.Array)
+            {
+                foreach (var usuario in usuarios.EnumerateArray())
+                {
+                    var identificador = usuario.TryGetProperty("user_id", out var id) ? id.GetString() : null;
+
+                    if (!string.IsNullOrWhiteSpace(identificador))
+                    {
+                        identificadores.Add(identificador);
+                    }
+                }
+            }
+
+            var hayMasPaginas = identificadores.Count == CantidadMaximaPorPagina;
+
+            if (raiz.ValueKind == JsonValueKind.Object &&
+                raiz.TryGetProperty("total", out var total) &&
+                total.TryGetInt32(out var cantidadTotal) &&
+                raiz.TryGetProperty("start", out var inicio) &&
+                inicio.TryGetInt32(out var indiceInicio))
+            {
+                hayMasPaginas = indiceInicio + identificadores.Count < cantidadTotal;
+            }
+
+            return (identificadores, hayMasPaginas);
         }
 
         private static async Task AsegurarRespuestaExitosaAsync(

@@ -21,15 +21,31 @@ main {
     align-items: center;
 }
 
-    .top-row ::deep a, .top-row ::deep .btn-link {
+    .top-row ::deep a, .top-row ::deep .btn-link, .top-row .btn-cerrar-sesion {
         white-space: nowrap;
         margin-left: 1.5rem;
         text-decoration: none;
     }
 
-    .top-row ::deep a:hover, .top-row ::deep .btn-link:hover {
+    .top-row ::deep a:hover, .top-row ::deep .btn-link:hover, .top-row .btn-cerrar-sesion:hover {
         text-decoration: underline;
     }
+
+.usuario-sesion {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 16rem;
+}
+
+.btn-cerrar-sesion {
+    background: none;
+    border: none;
+    padding: 0;
+    color: var(--bs-link-color);
+    cursor: pointer;
+    font: inherit;
+}
 
     .top-row ::deep a:first-child {
         overflow: hidden;
@@ -41,8 +57,8 @@ main {
         justify-content: space-between;
     }
 
-    .top-row ::deep a, .top-row ::deep .btn-link {
-        margin-left: 0;
+    .top-row ::deep a, .top-row ::deep .btn-link, .top-row .btn-cerrar-sesion {
+        margin-left: 0.75rem;
     }
 }
 

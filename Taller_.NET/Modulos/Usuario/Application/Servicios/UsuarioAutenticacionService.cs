@@ -72,10 +72,22 @@ namespace Taller_.NET.Modulos.Usuario.Application.Servicios
 
                 foreach (var rol in roles)
                 {
-                    if (!identidad.HasClaim(identidad.RoleClaimType, rol.Nombre))
+                    if (!identidad.HasClaim(ClaimTypes.Role, rol.Nombre))
                     {
-                        identidad.AddClaim(new Claim(identidad.RoleClaimType, rol.Nombre));
+                        identidad.AddClaim(new Claim(ClaimTypes.Role, rol.Nombre));
                     }
+                }
+
+                if (_logger.IsEnabled(LogLevel.Information))
+                {
+                    var rolesAplicados = roles.Count == 0
+                        ? "(ninguno)"
+                        : string.Join(", ", roles.Select(rol => rol.Nombre));
+
+                    _logger.LogInformation(
+                        "Roles de Auth0 aplicados al usuario {Auth0UserId}: {Roles}",
+                        auth0UserId,
+                        rolesAplicados);
                 }
             }
             catch (Exception excepcion)
