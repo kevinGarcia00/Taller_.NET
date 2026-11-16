@@ -42,6 +42,11 @@
                             <RadzenTextBox Value="@_panel.VidaUtil" ReadOnly="true" />
                         </RadzenFormField>
 
+                        <RadzenFormField Text="Volcado de energia" Variant="Variant.Outlined">
+                            <RadzenTextBox Value="@(_panel.VolcarEnergia ? "Habilitado" : "Deshabilitado")"
+                                           ReadOnly="true" />
+                        </RadzenFormField>
+
                         <RadzenFormField Text="Fecha de creacion" Variant="Variant.Outlined">
                             <RadzenTextBox Value="@_panel.FechaCreacion.ToLocalTime().ToString("g")" ReadOnly="true" />
                         </RadzenFormField>

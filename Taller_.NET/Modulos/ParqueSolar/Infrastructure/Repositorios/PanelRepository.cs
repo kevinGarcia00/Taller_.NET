@@ -80,7 +80,12 @@ namespace Taller_.NET.Modulos.ParqueSolar.Infrastructure.Repositorios
             }
             else if (!ReferenceEquals(rastreado, panel))
             {
-                rastreado.ActualizarDatos(panel.Nombre, panel.Estado, panel.Potencia, panel.VidaUtil);
+                rastreado.ActualizarDatos(
+                    panel.Nombre,
+                    panel.Estado,
+                    panel.Potencia,
+                    panel.VidaUtil,
+                    panel.VolcarEnergia);
             }
 
             await _contexto.SaveChangesAsync(cancellationToken);

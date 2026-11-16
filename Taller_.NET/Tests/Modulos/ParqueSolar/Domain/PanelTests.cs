@@ -18,9 +18,18 @@ public class PanelTests
         var despues = DateTime.UtcNow;
         Assert.Equal("Panel Norte", panel.Nombre);
         Assert.Equal(EstadoPanel.Encendido, panel.Estado);
+        Assert.False(panel.VolcarEnergia);
         Assert.Equal(450.5m, panel.Potencia);
         Assert.Equal("25 anos", panel.VidaUtil);
         Assert.InRange(panel.FechaCreacion, antes, despues);
+    }
+
+    [Fact]
+    public void CrearPanel_ConVolcadoHabilitado_AsignaElValor()
+    {
+        var panel = new Panel("Panel Norte", EstadoPanel.Encendido, 450.5m, "25 anos", true);
+
+        Assert.True(panel.VolcarEnergia);
     }
 
     [Fact]
@@ -117,10 +126,11 @@ public class PanelTests
         panel.AsignarNodo(nodo);
         var fechaCreacion = panel.FechaCreacion;
 
-        panel.ActualizarDatos("Panel Sur", EstadoPanel.Sucio, 510.25m, "20 anos");
+        panel.ActualizarDatos("Panel Sur", EstadoPanel.Sucio, 510.25m, "20 anos", true);
 
         Assert.Equal("Panel Sur", panel.Nombre);
         Assert.Equal(EstadoPanel.Sucio, panel.Estado);
+        Assert.True(panel.VolcarEnergia);
         Assert.Equal(510.25m, panel.Potencia);
         Assert.Equal("20 anos", panel.VidaUtil);
         Assert.Equal(fechaCreacion, panel.FechaCreacion);
@@ -136,7 +146,8 @@ public class PanelTests
     {
         var panel = new Panel("Panel Norte", EstadoPanel.Encendido, 450m, "25 anos");
 
-        Assert.Throws<PanelInvalidoException>(() => panel.ActualizarDatos(nombre!, EstadoPanel.Roto, 10m, "20 anos"));
+        Assert.Throws<PanelInvalidoException>(
+            () => panel.ActualizarDatos(nombre!, EstadoPanel.Roto, 10m, "20 anos", false));
         Assert.Equal("Panel Norte", panel.Nombre);
     }
 
@@ -147,8 +158,79 @@ public class PanelTests
     {
         var panel = new Panel("Panel Norte", EstadoPanel.Encendido, 450m, "25 anos");
 
-        Assert.Throws<PanelInvalidoException>(() => panel.ActualizarDatos("Panel Norte", EstadoPanel.Apagado, potencia, "20 anos"));
+        Assert.Throws<PanelInvalidoException>(
+            () => panel.ActualizarDatos("Panel Norte", EstadoPanel.Apagado, potencia, "20 anos", false));
         Assert.Equal(450m, panel.Potencia);
+    }
+
+    [Fact]
+    public void CambiarEstado_ConAccionEncender_CambiaElPanelAEncendido()
+    {
+        var panel = new Panel("Panel Norte", EstadoPanel.Apagado, 450m, "25 anos");
+
+        panel.CambiarEstado(AccionEstadoPanel.Encender);
+
+        Assert.Equal(EstadoPanel.Encendido, panel.Estado);
+    }
+
+    [Fact]
+    public void CambiarEstado_ConAccionApagar_CambiaElPanelAApagado()
+    {
+        var panel = new Panel("Panel Norte", EstadoPanel.Encendido, 450m, "25 anos");
+
+        panel.CambiarEstado(AccionEstadoPanel.Apagar);
+
+        Assert.Equal(EstadoPanel.Apagado, panel.Estado);
+    }
+
+    [Fact]
+    public void CambiarEstado_ConPanelYaEnElEstadoSolicitado_LanzaExcepcionYConservaElEstado()
+    {
+        var panel = new Panel("Panel Norte", EstadoPanel.Encendido, 450m, "25 anos");
+
+        Assert.Throws<PanelSinCambiosException>(
+            () => panel.CambiarEstado(AccionEstadoPanel.Encender));
+        Assert.Equal(EstadoPanel.Encendido, panel.Estado);
+    }
+
+    [Fact]
+    public void CambiarEstado_ConAccionIndefinida_LanzaExcepcionYConservaElEstado()
+    {
+        var panel = new Panel("Panel Norte", EstadoPanel.Apagado, 450m, "25 anos");
+
+        Assert.Throws<PanelInvalidoException>(
+            () => panel.CambiarEstado((AccionEstadoPanel)99));
+        Assert.Equal(EstadoPanel.Apagado, panel.Estado);
+    }
+
+    [Fact]
+    public void CambiarVolcadoEnergia_ConValorDiferente_CambiaElValor()
+    {
+        var panel = new Panel("Panel Norte", EstadoPanel.Encendido, 450m, "25 anos");
+
+        panel.CambiarVolcadoEnergia(true);
+
+        Assert.True(panel.VolcarEnergia);
+    }
+
+    [Fact]
+    public void CambiarVolcadoEnergia_ConVolcadoHabilitado_CambiaADeshabilitado()
+    {
+        var panel = new Panel("Panel Norte", EstadoPanel.Encendido, 450m, "25 anos", true);
+
+        panel.CambiarVolcadoEnergia(false);
+
+        Assert.False(panel.VolcarEnergia);
+    }
+
+    [Fact]
+    public void CambiarVolcadoEnergia_ConElMismoValor_LanzaExcepcionYConservaElValor()
+    {
+        var panel = new Panel("Panel Norte", EstadoPanel.Encendido, 450m, "25 anos", true);
+
+        Assert.Throws<VolcadoEnergiaSinCambiosException>(
+            () => panel.CambiarVolcadoEnergia(true));
+        Assert.True(panel.VolcarEnergia);
     }
 
     private static Nodo CrearNodoRegistrado(int id)

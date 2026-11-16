@@ -1,0 +1,21 @@
+{
+  "version": 2,
+  "dgSpecHash": "nKI1TGY87Ss=",
+  "success": true,
+  "projectFilePath": "/home/void/Projects/Taller_.NET/sensor/sensor.Tests/sensor.Tests.csproj",
+  "expectedPackageFiles": [
+    "/home/void/.nuget/packages/microsoft.codecoverage/18.11.0/microsoft.codecoverage.18.11.0.nupkg.sha512",
+    "/home/void/.nuget/packages/microsoft.net.test.sdk/18.11.0/microsoft.net.test.sdk.18.11.0.nupkg.sha512",
+    "/home/void/.nuget/packages/microsoft.testplatform.objectmodel/18.11.0/microsoft.testplatform.objectmodel.18.11.0.nupkg.sha512",
+    "/home/void/.nuget/packages/microsoft.testplatform.testhost/18.11.0/microsoft.testplatform.testhost.18.11.0.nupkg.sha512",
+    "/home/void/.nuget/packages/xunit/2.9.3/xunit.2.9.3.nupkg.sha512",
+    "/home/void/.nuget/packages/xunit.abstractions/2.0.3/xunit.abstractions.2.0.3.nupkg.sha512",
+    "/home/void/.nuget/packages/xunit.analyzers/1.18.0/xunit.analyzers.1.18.0.nupkg.sha512",
+    "/home/void/.nuget/packages/xunit.assert/2.9.3/xunit.assert.2.9.3.nupkg.sha512",
+    "/home/void/.nuget/packages/xunit.core/2.9.3/xunit.core.2.9.3.nupkg.sha512",
+    "/home/void/.nuget/packages/xunit.extensibility.core/2.9.3/xunit.extensibility.core.2.9.3.nupkg.sha512",
+    "/home/void/.nuget/packages/xunit.extensibility.execution/2.9.3/xunit.extensibility.execution.2.9.3.nupkg.sha512",
+    "/home/void/.nuget/packages/xunit.runner.visualstudio/4.0.1/xunit.runner.visualstudio.4.0.1.nupkg.sha512"
+  ],
+  "logs": []
+}

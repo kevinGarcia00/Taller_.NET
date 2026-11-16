@@ -47,7 +47,12 @@ namespace Taller_.NET.Modulos.ParqueSolar.Application.Servicios
                 throw new PanelNombreDuplicadoException(nombreNormalizado);
             }
 
-            var panel = new PanelDomain(dto.Nombre, dto.Estado, dto.Potencia, dto.VidaUtil);
+            var panel = new PanelDomain(
+                dto.Nombre,
+                dto.Estado,
+                dto.Potencia,
+                dto.VidaUtil,
+                dto.VolcarEnergia);
             panel.AsignarNodo(nodo);
 
             return await _panelRepository.AgregarAsync(panel, cancellationToken);
@@ -69,6 +74,7 @@ namespace Taller_.NET.Modulos.ParqueSolar.Application.Servicios
                     Id = panel.Id,
                     Nombre = panel.Nombre,
                     Estado = panel.Estado.ToString(),
+                    VolcarEnergia = panel.VolcarEnergia,
                     Potencia = panel.Potencia
                 })
                 .ToList();
@@ -132,6 +138,7 @@ namespace Taller_.NET.Modulos.ParqueSolar.Application.Servicios
                 Id = panel.Id,
                 Nombre = panel.Nombre,
                 Estado = panel.Estado,
+                VolcarEnergia = panel.VolcarEnergia,
                 Potencia = panel.Potencia,
                 VidaUtil = panel.VidaUtil,
                 FechaCreacion = panel.FechaCreacion,
@@ -160,7 +167,12 @@ namespace Taller_.NET.Modulos.ParqueSolar.Application.Servicios
                 throw new PanelNombreDuplicadoException(nombreNormalizado);
             }
 
-            panel.ActualizarDatos(dto.Nombre, dto.Estado, dto.Potencia, dto.VidaUtil);
+            panel.ActualizarDatos(
+                dto.Nombre,
+                dto.Estado,
+                dto.Potencia,
+                dto.VidaUtil,
+                dto.VolcarEnergia);
             await _panelRepository.ActualizarAsync(panel, cancellationToken);
         }
 
@@ -171,6 +183,7 @@ namespace Taller_.NET.Modulos.ParqueSolar.Application.Servicios
                 Id = panel.Id,
                 Nombre = panel.Nombre,
                 Estado = panel.Estado.ToString(),
+                VolcarEnergia = panel.VolcarEnergia,
                 Potencia = panel.Potencia,
                 VidaUtil = panel.VidaUtil,
                 FechaCreacion = panel.FechaCreacion,

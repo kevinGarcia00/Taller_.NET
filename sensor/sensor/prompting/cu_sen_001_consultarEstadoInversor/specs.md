@@ -1,56 +1,41 @@
-# Especificaciones Técnicas: Ver Paneles
+# Especificaciones Técnicas: Consultar Estado de Panel del Inversor
 
 ## Arquitectura y Patrones
-- **Estilo:** Monolito Modular con Clean Architecture por Módulo (Modules.ParqueSolar).
-- **Patrones:** Application Services. La lectura reutiliza `Panel`, `Nodo` e `IPanelRepository` dentro del mismo módulo.
+- **Estilo:** Servicio autónomo con Arquitectura Limpia (Modules.Sensor), ejecutado sobre equipo ARM y .NET 10.
+- **Patrones:** Servicios de aplicación y Puertos y Adaptadores. El dominio modela los datos de consulta, la aplicación orquesta y la infraestructura implementa el cliente HTTP de SolarUY.
+- **Integración:** El sensor expone `/inversor/{idInversor}/nodo/{idNodo}/panel/{idPanel}` y obtiene la información desde la API de SolarUY del inversor. No accede directamente al hardware.
 
 ## Detalles de Implementación por Capa
 
-### 1. Capa Domain (Modules.ParqueSolar.Domain)
-- **Entidades:**
-    - Reutilizar `Panel`, `EstadoPanel` y la navegación `Nodo`.
+### 1. Capa Domain (Modules.Sensor.Domain)
+- **Entidades y modelos de lectura:**
+    - Reutilizar los conceptos `Inversor`, `Nodo`, `Panel` y `EstadoPanel` definidos por SolarUY, adaptados como modelos de consulta.
+    - El panel expone `Id`, `Nombre`, `FechaCreacion`, `EstadoPanel`, `Encendido`, `Potencia` y `VidaUtil`.
 - **Comportamiento:**
-    - La consulta expone los datos ya definidos en la entidad. Este caso de uso no agrega métodos que cambien el estado del panel.
+    - Solo lectura. No se agregan métodos que cambien el estado del panel.
 
 ### 2. Capa Application (Servicios)
 - **DTO de salida:** `PanelDetalleDto`
-  - Propiedades: `Id` (int), `Nombre` (string), `Estado` (string), `Potencia` (decimal), `VidaUtil` (string), `FechaCreacion` (DateTime), `NodoId` (int), `ParqueSolarId` (int).
-- **DTO de listado:** `PanelListadoDto`
-  - Propiedades: `Id` (int), `Nombre` (string), `Estado` (string), `Potencia` (decimal).
-- **Servicio:** `PanelService` (implementa la interfaz `IPanelService`)
-  - Dependencias: `IPanelRepository` e `INodoRepository`.
-  - Métodos:
-    - `ObtenerPanelesPorNodoAsync(int nodoId, int parqueSolarId)`
-    - `ObtenerPanelAsync(int id, int nodoId, int parqueSolarId)`
+  - Propiedades: `Id` (int), `Nombre` (string), `FechaCreacion` (DateTime), `EstadoPanel` (string), `Encendido` (bool), `Potencia` (decimal), `VidaUtil` (string).
+- **DTOs de listado:** `InversorListadoDto` (`Id`, `Nombre`) y `NodoListadoDto` (`Id`, `Nombre`, `Paneles`).
+- **Puerto:** `ISolarUyApiPort`
+  - Métodos: `ObtenerInversoresAsync()`, `ObtenerNodosAsync(int idInversor)`, `ObtenerPanelesAsync(int idInversor, int idNodo)` y `ObtenerPanelAsync(int idInversor, int idNodo, int idPanel)`.
+- **Servicio:** `ConsultaPanelService` (implementa `IConsultaPanelService`)
+  - Dependencias: `ISolarUyApiPort`.
   - Lógica:
-    1. Cargar el nodo y comprobar que pertenece al parque seleccionado.
-    2. En el listado, obtener los paneles de ese nodo y proyectarlos a `PanelListadoDto`.
-    3. En el detalle, obtener el panel por `Id` y `NodoId`. Si no existe, lanzar excepción.
-    4. Proyectar la entidad a `PanelDetalleDto` y retornarla sin modificarla.
+    1. Recibe `idInversor`, `idNodo` e `idPanel` desde el endpoint.
+    2. Valida que los identificadores sean positivos.
+    3. Consulta la API de SolarUY y verifica que el panel pertenezca al nodo y al inversor indicados.
+    4. Si la API informa que el recurso no existe, devuelve el error correspondiente sin inventar datos.
+    5. Proyecta la respuesta a `PanelDetalleDto` y la retorna sin modificarla.
 
-### 3. Capa Infrastructure (Persistencia)
-- **Configuración de Entity Framework:**
-    - Reutilizar `PanelConfiguration` y `DbSet<Panel> Paneles` en `IParqueDbContext`.
-- **Repositorio:**
-    - La consulta del listado filtra por `NodoId` y ordena por `Nombre`.
-    - La consulta del detalle filtra por `Id` y `NodoId`, y proyecta solo los campos necesarios.
+### 3. Capa de Infraestructura (Cliente de SolarUY)
+- **Adaptador:** `SolarUyApiClient` implementa `ISolarUyApiPort` sobre `HttpClient`.
+  - URL base, credenciales y tiempo de espera configurados en `appsettings`.
+  - Maneja respuestas 404 y errores de red como resultados controlados.
+  - Compatible con ARM: sin dependencias de escritorio y con uso acotado de memoria.
 
-### 4. Capa Presentation (Blazor Server con Radzen)
-- **Componente de listado:** `Paneles.razor`
-  - **Ruta:** `@page "/parques/{ParqueId:int}/nodos/{NodoId:int}/paneles"`
-  - **Seguridad:** Utilizar `<AuthorizeView Roles="Administrador">` o el atributo `[Authorize(Roles = "Administrador")]`.
-  - **UI (Radzen):**
-    - Barra superior con un `RadzenButton` ("Registrar panel") hacia `/parques/{ParqueId}/nodos/{NodoId}/paneles/alta`.
-    - `RadzenDataGrid<PanelListadoDto>` con columnas Nombre, Estado y Potencia.
-    - Columna de acciones con botones para ver, editar y eliminar.
-- **Componente de detalle:** `DetallePanel.razor`
-  - **Ruta:** `@page "/parques/{ParqueId:int}/nodos/{NodoId:int}/paneles/{Id:int}"`
-  - **UI (Radzen):**
-    - Tarjeta o formulario de solo lectura con Nombre, Estado, Potencia, Vida útil y Fecha de creación.
-    - Contexto de parque y nodo en solo lectura.
-    - `RadzenButton` para volver al listado del nodo.
-  - **Flujo:**
-    1. `Paneles.razor` llama a `ObtenerPanelesPorNodoAsync` en `OnInitializedAsync`.
-    2. Al elegir un panel, `NavigationManager` abre `DetallePanel.razor`.
-    3. `DetallePanel.razor` llama a `ObtenerPanelAsync` y muestra los datos.
-    4. Si la consulta falla, `NotificationService` muestra el error.
+### 4. Capa de Integración (API mínima)
+- **Endpoint:** `GET /inversor/{idInversor}/nodo/{idNodo}/panel/{idPanel}`.
+- **Endpoints de navegación:** `GET /inversor`, `GET /inversor/{idInversor}/nodo` y `GET /inversor/{idInversor}/nodo/{idNodo}/panel`.
+- **Respuestas:** `200` con el detalle del panel, `404` si el inversor, nodo o panel no existe o no coincide, `502` si la API de SolarUY no responde.

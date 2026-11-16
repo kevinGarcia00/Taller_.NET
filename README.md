@@ -42,7 +42,7 @@ flowchart LR
     
     Database["Base de Datos\nMySQL"]
 
-    Browser <-->|HTTP| BLAZOR
+    Browser <-->|Web Socket| BLAZOR
     BLAZOR <-->|Acceso a datos| Database
 ```
 
@@ -133,6 +133,7 @@ string nombre
 - Sensación de trabajar en una caja negra: Relacionado al punto anterior, si bien el código puede ser leido y aprobado por una persona antes de ser subido al repositorio sigue estando esa sensación de que la persona pierde un poco el control sobre lo que se esta haciendo.
 - Discrepancias con el agente: Si no se es extremadamente especifico en el prompt. Si bien las funcionalidades se solicitan haciendo uso de unos .md que tienen las instrucciones para realizar la funcionalidad, si no se es extremadamente especifico en el prompt inicial el agente suele a tomar decisiones por su cuenta haciendo que el código entregado no cumpla con lo deseado.
 - Solución a las discrepancias: A la hora de trabajar con esta metodología se optó por algunas partes de trabajar con un branch local de pruebas. Esto con el objetivo de que si ocurre algo como el problema mencionado en el punto anterior se puede revertir el código hecho por el agente facilmente.
+- Limites de la IA en cuanto a sus aplicaciones: A modo de experimento se experimentó con cual podría ser el límite de la IA para poder llevar a cabo un proyecto sin perder totalmente el control, para ello se probó primero que la IA escriba exclusivamente con las instrucciones del usuario los archivos .MD de los casos de usos del sensor. Esto dió como resultado casos de usos incromprensibles y poco mantenibles a futuro. Tras este fallo se optó por probar armar dos casos de uso y luego solicitarle al agente que los lea y desarrolle un caso de uso en base a los otros dos a modo de ejemplo. Esto dió como resultado un caso de uso mucho mas coherente con lo que se buscaba realizar, si bien el resultado se podría catalogar como exitoso no quedó exento de intervención humana. También se comentó con el equipo y se concluyó que si bien la IA puede ser un impulsor a la hora de desarrollar no debería relacionarse demaciado a la hora del diseño ya que tiene una tendencia a sobredimensionar el problema y a dificultar la mantenibildad del software agregando cosas que no son relevantes.
 
 ## 6. Uso de Sonarqube
 A la hora de realizar un scan del código con Sonarqube la mayoría de problemas se dividían en dos catégorias: los que eran señalados por la falta de control sobre variables que podían ser nulas. Y los que se marcaban como problemas de mantenibilidad, a estas advertencias de Sonarqube si bien se revisaron se optó por no tratar de corregirlas por una cuestión de que se trata de una prueba de concepto y no un producto final en si. Esto significa que si el día de mañana el proyecto recibiera luz verde para salir a producción se tendría que trabajar en arreglar esos detalles o por su otra parte lo que se realiza en muchos casos en la cual se utiliza esta metodología la cual es reescribir el programa pero con una base limpia y con mayor participación humana a la hora de escribir código.

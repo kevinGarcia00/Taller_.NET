@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using System.Text.Encodings.Web;
+using System.Text.Json.Serialization;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -22,6 +23,7 @@ using Taller_.NET.Modulos.ParqueSolar.Infrastructure.Mediadores;
 using Taller_.NET.Modulos.ParqueSolar.Infrastructure.Persistencia;
 using Taller_.NET.Modulos.ParqueSolar.Infrastructure.Repositorios;
 using Taller_.NET.Modulos.ParqueSolar.Infrastructure.Seguridad;
+using Taller_.NET.Infraestructura;
 using Taller_.NET.Modulos.Auth;
 using Taller_.NET.Modulos.Usuario.Application.Seguridad;
 using Taller_.NET.Modulos.Usuario.Infrastructure;
@@ -184,7 +186,9 @@ builder.Services.AddAuthorization();
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddAntiforgery();
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddRazorComponents()
@@ -203,8 +207,12 @@ builder.Services.AddScoped<INodoRepository, NodoRepository>();
 builder.Services.AddScoped<INodoService, NodoService>();
 builder.Services.AddScoped<IPanelRepository, PanelRepository>();
 builder.Services.AddScoped<IPanelService, PanelService>();
+builder.Services.AddScoped<IConsultaInversorRepository, ConsultaInversorRepository>();
 builder.Services.AddScoped<IInversorRepository, InversorRepository>();
 builder.Services.AddScoped<IInversorService, InversorService>();
+builder.Services.AddScoped<IConsultaInversorService, ConsultaInversorService>();
+builder.Services.AddScoped<ICambiarEstadoPanelService, CambiarEstadoPanelService>();
+builder.Services.AddScoped<ICambiarVolcadoEnergiaPanelService, CambiarVolcadoEnergiaPanelService>();
 builder.Services.AddScoped<IMediadorNodoParque, MediadorNodoParque>();
 builder.Services.AddScoped<IMediadorNodoInversor, MediadorNodoInversor>();
 builder.Services.AddScoped<IUsuarioActualProvider, UsuarioActualProvider>();
@@ -252,7 +260,7 @@ public partial class Program
     private const string ModoDesarrolloAnonimo = "DesarrolloAnonimo";
 }
 
-namespace Taller_.NET.Modulos.Auth
+namespace Taller_.NET.Infraestructura
 {
 public class AutenticacionAnonimaHandler : AuthenticationHandler<AuthenticationSchemeOptions>
 {

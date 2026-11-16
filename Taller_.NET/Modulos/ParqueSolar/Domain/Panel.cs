@@ -12,6 +12,7 @@ namespace Taller_.NET.Modulos.ParqueSolar.Domain
         public string Nombre { get; private set; } = string.Empty;
         public DateTime FechaCreacion { get; private set; }
         public EstadoPanel Estado { get; private set; }
+        public bool VolcarEnergia { get; private set; }
         public decimal Potencia { get; private set; }
         public string VidaUtil { get; private set; } = string.Empty;
         public int NodoId { get; private set; }
@@ -21,7 +22,7 @@ namespace Taller_.NET.Modulos.ParqueSolar.Domain
         {
         }
 
-        public Panel(string nombre, EstadoPanel estado, decimal potencia, string vidaUtil)
+        public Panel(string nombre, EstadoPanel estado, decimal potencia, string vidaUtil, bool volcarEnergia = false)
         {
             ValidarNombre(nombre);
             ValidarEstado(estado);
@@ -30,6 +31,7 @@ namespace Taller_.NET.Modulos.ParqueSolar.Domain
 
             Nombre = nombre.Trim();
             Estado = estado;
+            VolcarEnergia = volcarEnergia;
             Potencia = potencia;
             VidaUtil = vidaUtil.Trim();
             FechaCreacion = DateTime.UtcNow;
@@ -51,7 +53,12 @@ namespace Taller_.NET.Modulos.ParqueSolar.Domain
             NodoId = nodo.Id;
         }
 
-        public void ActualizarDatos(string nombre, EstadoPanel estado, decimal potencia, string vidaUtil)
+        public void ActualizarDatos(
+            string nombre,
+            EstadoPanel estado,
+            decimal potencia,
+            string vidaUtil,
+            bool volcarEnergia)
         {
             ValidarNombre(nombre);
             ValidarEstado(estado);
@@ -60,8 +67,40 @@ namespace Taller_.NET.Modulos.ParqueSolar.Domain
 
             Nombre = nombre.Trim();
             Estado = estado;
+            VolcarEnergia = volcarEnergia;
             Potencia = potencia;
             VidaUtil = vidaUtil.Trim();
+        }
+
+        public void CambiarEstado(AccionEstadoPanel accion)
+        {
+            if (!Enum.IsDefined(accion))
+            {
+                throw new PanelInvalidoException("La accion sobre el panel no es valida.");
+            }
+
+            var estadoSolicitado = accion == AccionEstadoPanel.Encender
+                ? EstadoPanel.Encendido
+                : EstadoPanel.Apagado;
+
+            if (Estado == estadoSolicitado)
+            {
+                throw new PanelSinCambiosException(
+                    $"El panel ya se encuentra en estado {estadoSolicitado}.");
+            }
+
+            Estado = estadoSolicitado;
+        }
+
+        public void CambiarVolcadoEnergia(bool volcarEnergia)
+        {
+            if (VolcarEnergia == volcarEnergia)
+            {
+                throw new VolcadoEnergiaSinCambiosException(
+                    $"El panel ya tiene el volcado de energia en {(volcarEnergia ? "habilitado" : "deshabilitado")}.");
+            }
+
+            VolcarEnergia = volcarEnergia;
         }
 
         private static void ValidarNombre(string nombre)

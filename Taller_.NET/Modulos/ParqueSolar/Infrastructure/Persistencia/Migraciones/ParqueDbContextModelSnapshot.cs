@@ -127,6 +127,12 @@ namespace Taller_.NET.Modulos.ParqueSolar.Infrastructure.Persistencia.Migracione
                         .HasColumnType("TEXT")
                         .HasColumnName("vida_util");
 
+                    b.Property<bool>("VolcarEnergia")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(false)
+                        .HasColumnName("volcar_energia");
+
                     b.HasKey("Id");
 
                     b.HasIndex("NodoId");

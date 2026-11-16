@@ -32,6 +32,11 @@ namespace Taller_.NET.Modulos.ParqueSolar.Infrastructure.Persistencia.Configurac
                 .HasMaxLength(30)
                 .IsRequired();
 
+            builder.Property(panel => panel.VolcarEnergia)
+                .HasColumnName("volcar_energia")
+                .HasDefaultValue(false)
+                .IsRequired();
+
             builder.Property(panel => panel.Potencia)
                 .HasColumnName("potencia")
                 .HasPrecision(18, 2)

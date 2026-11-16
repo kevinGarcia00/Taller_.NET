@@ -63,6 +63,9 @@
                                 <RadzenTextBox @bind-Value="_modelo.VidaUtil" MaxLength="@Panel.LongitudMaximaVidaUtil" />
                             </RadzenFormField>
 
+                            <RadzenCheckBox TValue="bool" @bind-Value="_modelo.VolcarEnergia"
+                                            Text="Volcado de energia" />
+
                             <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem">
                                 <RadzenButton Text="Guardar cambios" ButtonType="ButtonType.Submit" Icon="save" />
                                 <RadzenButton Text="Cancelar" ButtonStyle="ButtonStyle.Secondary" Icon="close"

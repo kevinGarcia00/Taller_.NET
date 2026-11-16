@@ -8,6 +8,7 @@ namespace Taller_.NET.Modulos.ParqueSolar.Application.Dtos
         public int Id { get; set; }
         public string Nombre { get; set; } = string.Empty;
         public EstadoPanel Estado { get; set; }
+        public bool VolcarEnergia { get; set; }
         public decimal Potencia { get; set; }
         public string VidaUtil { get; set; } = string.Empty;
         public DateTime FechaCreacion { get; set; }
