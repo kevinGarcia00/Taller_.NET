@@ -31,9 +31,9 @@
             <RadzenDataGrid Data="@_registros" TItem="HistoricoMantenibilidadListadoDto" AllowSorting="true" IsLoading="@_cargando"
                             EmptyText="Este panel no tiene registros de mantenibilidad.">
                 <Columns>
-                    <RadzenDataGridColumn TItem="HistoricoMantenibilidadListadoDto" Property="IdMantenedor" Title="Mantenedor" />
+                    <RadzenDataGridColumn TItem="HistoricoMantenibilidadListadoDto" Property="IdMantenedor" Title="Id de Mantenedor" Width="22rem" CssClass="columna-texto" />
                     <RadzenDataGridColumn TItem="HistoricoMantenibilidadListadoDto" Property="Fecha" Title="Fecha" FormatString="{0:dd/MM/yyyy}" />
-                    <RadzenDataGridColumn TItem="HistoricoMantenibilidadListadoDto" Property="Observaciones" Title="Observaciones" />
+                    <RadzenDataGridColumn TItem="HistoricoMantenibilidadListadoDto" Property="Observaciones" Title="Observaciones" CssClass="columna-texto" />
                     <RadzenDataGridColumn TItem="HistoricoMantenibilidadListadoDto" Property="EstadoInicial" Title="Estado inicial" />
                     <RadzenDataGridColumn TItem="HistoricoMantenibilidadListadoDto" Property="EstadoResultante" Title="Estado resultante" />
                 </Columns>

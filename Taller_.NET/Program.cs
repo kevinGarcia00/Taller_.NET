@@ -13,6 +13,9 @@ using Microsoft.IdentityModel.Tokens;
 using Radzen;
 using Taller_.NET.Components;
 using Taller_.NET.Composicion.Seguridad;
+using Taller_.NET.Composicion.Mediadores;
+using Taller_.NET.Modulos.Historico.Application.Puertos;
+using Taller_.NET.Modulos.Historico.Infrastructure;
 using Taller_.NET.Modulos.ParqueSolar.Application;
 using Taller_.NET.Modulos.ParqueSolar.Application.Dtos;
 using Taller_.NET.Modulos.ParqueSolar.Application.Puertos;
@@ -219,6 +222,9 @@ builder.Services.AddScoped<IValidator<CrearInversorDto>, CrearInversorDtoValidat
 builder.Services.AddScoped<IValidator<ModificarInversorDto>, ModificarInversorDtoValidator>();
 
 builder.Services.AgregarModuloUsuario(builder.Configuration);
+builder.Services.AgregarModuloHistorico(builder.Configuration);
+builder.Services.AddScoped<IMediadorHistoricoParqueSolar, MediadorHistoricoParqueSolar>();
+builder.Services.AddScoped<IMediadorHistoricoUsuario, MediadorHistoricoUsuario>();
 
 var app = builder.Build();
 
