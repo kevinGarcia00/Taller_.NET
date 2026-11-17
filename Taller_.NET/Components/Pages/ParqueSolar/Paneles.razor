@@ -36,7 +36,7 @@
                     <RadzenDataGridColumn TItem="PanelListadoDto" Title="Acciones" Sortable="false" Filterable="false" Width="160px" CssClass="columna-acciones">
                         <Template Context="panel">
                             <RadzenStack Orientation="Orientation.Vertical" Gap="0.35rem" AlignItems="AlignItems.Start">
-                                <RadzenButton Text="Ver" Icon="visibility" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Secondary"
+                                <RadzenButton Text="Ver detalles" Icon="visibility" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Secondary"
                                               Click="@(() => NavigationManager.NavigateTo($"/parques/{ParqueId}/nodos/{NodoId}/paneles/{panel.Id}"))" />
                                 <AuthorizeView Roles="Mantenimiento">
                                     <Authorized>
@@ -46,7 +46,7 @@
                                 </AuthorizeView>
                                 <AuthorizeView Roles="Administrador">
                                     <Authorized>
-                                        <RadzenButton Text="Ver historial" Icon="history" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Secondary"
+                                        <RadzenButton Text="Ver historial de mantenibilidad" Icon="history" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Secondary"
                                                       Click="@(() => NavigationManager.NavigateTo($"/parques/{ParqueId}/nodos/{NodoId}/paneles/{panel.Id}/mantenibilidad"))" />
                                         <RadzenButton Text="Editar" Icon="edit" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary"
                                                       Click="@(() => NavigationManager.NavigateTo($"/parques/{ParqueId}/nodos/{NodoId}/paneles/editar/{panel.Id}"))" />
