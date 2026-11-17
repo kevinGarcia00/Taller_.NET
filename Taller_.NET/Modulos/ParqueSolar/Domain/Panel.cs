@@ -103,6 +103,11 @@ namespace Taller_.NET.Modulos.ParqueSolar.Domain
             VolcarEnergia = volcarEnergia;
         }
 
+        public decimal CalcularEnergiaAportada()
+        {
+            return Estado == EstadoPanel.Encendido && VolcarEnergia ? Potencia : 0m;
+        }
+
         private static void ValidarNombre(string nombre)
         {
             if (string.IsNullOrWhiteSpace(nombre))

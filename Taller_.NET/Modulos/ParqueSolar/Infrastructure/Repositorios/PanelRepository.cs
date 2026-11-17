@@ -25,6 +25,15 @@ namespace Taller_.NET.Modulos.ParqueSolar.Infrastructure.Repositorios
                     cancellationToken);
         }
 
+        public async Task<IReadOnlyList<PanelDomain>> ObtenerTodosAsync(
+            CancellationToken cancellationToken = default)
+        {
+            return await _contexto.Paneles
+                .AsNoTracking()
+                .OrderBy(panel => panel.Id)
+                .ToListAsync(cancellationToken);
+        }
+
         public async Task<IReadOnlyList<PanelDomain>> ObtenerPorNodoAsync(
             int nodoId,
             CancellationToken cancellationToken = default)

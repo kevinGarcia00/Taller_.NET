@@ -233,6 +233,34 @@ public class PanelTests
         Assert.True(panel.VolcarEnergia);
     }
 
+    [Fact]
+    public void CalcularEnergiaAportada_ConPanelEncendidoYVolcadoHabilitado_DevuelveLaPotencia()
+    {
+        var panel = new Panel("Panel Norte", EstadoPanel.Encendido, 450.5m, "25 anos", true);
+
+        Assert.Equal(450.5m, panel.CalcularEnergiaAportada());
+    }
+
+    [Fact]
+    public void CalcularEnergiaAportada_ConVolcadoDeshabilitado_DevuelveCero()
+    {
+        var panel = new Panel("Panel Norte", EstadoPanel.Encendido, 450.5m, "25 anos");
+
+        Assert.Equal(0m, panel.CalcularEnergiaAportada());
+    }
+
+    [Theory]
+    [InlineData(EstadoPanel.Apagado)]
+    [InlineData(EstadoPanel.Sucio)]
+    [InlineData(EstadoPanel.Roto)]
+    [InlineData(EstadoPanel.Deteriorado)]
+    public void CalcularEnergiaAportada_ConPanelNoEncendidoYVolcadoHabilitado_DevuelveCero(EstadoPanel estado)
+    {
+        var panel = new Panel("Panel Norte", estado, 450.5m, "25 anos", true);
+
+        Assert.Equal(0m, panel.CalcularEnergiaAportada());
+    }
+
     private static Nodo CrearNodoRegistrado(int id)
     {
         var nodo = new Nodo("Nodo Norte", "Sector A");

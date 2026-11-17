@@ -12,6 +12,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Radzen;
 using Taller_.NET.Components;
+using Taller_.NET.Composicion.Seguridad;
 using Taller_.NET.Modulos.ParqueSolar.Application;
 using Taller_.NET.Modulos.ParqueSolar.Application.Dtos;
 using Taller_.NET.Modulos.ParqueSolar.Application.Puertos;
@@ -252,7 +253,7 @@ public partial class Program
     private const string ModoDesarrolloAnonimo = "DesarrolloAnonimo";
 }
 
-namespace Taller_.NET.Modulos.Auth
+namespace Taller_.NET.Composicion.Seguridad
 {
 public class AutenticacionAnonimaHandler : AuthenticationHandler<AuthenticationSchemeOptions>
 {

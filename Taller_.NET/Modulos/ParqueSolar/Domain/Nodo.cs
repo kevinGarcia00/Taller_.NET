@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Taller_.NET.Modulos.ParqueSolar.Domain.Excepciones;
 
 namespace Taller_.NET.Modulos.ParqueSolar.Domain
@@ -90,6 +92,21 @@ namespace Taller_.NET.Modulos.ParqueSolar.Domain
             Nombre = nombre.Trim();
             UbicacionParque = ubicacionParque.Trim();
             InversorId = inversorId;
+        }
+
+        public void ActualizarEnergiaGenerada(IReadOnlyCollection<Panel> paneles)
+        {
+            if (paneles is null)
+            {
+                throw new NodoInvalidoException("Los paneles del nodo son obligatorios.");
+            }
+
+            if (paneles.Any(panel => panel.NodoId != Id))
+            {
+                throw new NodoInvalidoException("Los paneles indicados no pertenecen al nodo.");
+            }
+
+            EnergiaGenerada = paneles.Sum(panel => panel.CalcularEnergiaAportada());
         }
 
         private static void ValidarNombre(string nombre)

@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Taller_.NET.Modulos.Historico.Application.Dtos;
 using Taller_.NET.Modulos.Historico.Application.Puertos;
 using Taller_.NET.Modulos.Historico.Domain;
+using Taller_.NET.Modulos.ParqueSolar.Domain;
 using Taller_.NET.Modulos.ParqueSolar.Infrastructure.Persistencia;
 
 namespace Taller_.NET.Composicion.Mediadores
@@ -23,16 +24,33 @@ namespace Taller_.NET.Composicion.Mediadores
         public async Task<IReadOnlyList<EnergiaPanelDto>> ObtenerEnergiaTotalPanelesAsync(
             CancellationToken cancellationToken = default)
         {
-            return await (from panel in _contexto.Paneles
-                          join nodo in _contexto.Nodos on panel.NodoId equals nodo.Id
-                          orderby panel.Id
-                          select new EnergiaPanelDto
-                          {
-                              PanelId = panel.Id,
-                              NodoId = nodo.Id,
-                              ParqueSolarId = nodo.ParqueSolarId,
-                              EnergiaTotal = nodo.EnergiaGenerada
-                          }).ToListAsync(cancellationToken);
+            var registros = await (from panel in _contexto.Paneles.AsNoTracking()
+                                   join nodo in _contexto.Nodos.AsNoTracking() on panel.NodoId equals nodo.Id
+                                   orderby panel.Id
+                                   select new { Panel = panel, Nodo = nodo })
+                                  .ToListAsync(cancellationToken);
+
+            var nodos = registros.GroupBy(registro => registro.Nodo.Id)
+                .ToDictionary(grupo => grupo.Key, grupo => grupo.First().Nodo);
+            var panelesPorNodo = registros.GroupBy(registro => registro.Nodo.Id)
+                .ToDictionary(
+                    grupo => grupo.Key,
+                    grupo => (IReadOnlyCollection<Panel>)grupo.Select(registro => registro.Panel).ToList());
+
+            foreach (var (nodoId, paneles) in panelesPorNodo)
+            {
+                nodos[nodoId].ActualizarEnergiaGenerada(paneles);
+            }
+
+            return registros
+                .Select(registro => new EnergiaPanelDto
+                {
+                    PanelId = registro.Panel.Id,
+                    NodoId = registro.Nodo.Id,
+                    ParqueSolarId = registro.Nodo.ParqueSolarId,
+                    EnergiaTotal = registro.Nodo.EnergiaGenerada
+                })
+                .ToList();
         }
 
         public async Task<bool> ExistePanelAsync(
