@@ -43,7 +43,10 @@ flowchart LR
     Database["Base de Datos\nMySQL"]
 
     Browser <-->|Web Socket| BLAZOR
+    BLAZOR <-->|AUTENTICACION| AUTH0
     BLAZOR <-->|Acceso a datos| Database
+    MCP <-->|Acceso a datos| Database
+    SENSOR<-->|Acceso a API| BLAZOR
 ```
 
 ### Servidor MCP
@@ -155,5 +158,12 @@ string nombre
 - Solución a las discrepancias: A la hora de trabajar con esta metodología se optó por algunas partes de trabajar con un branch local de pruebas. Esto con el objetivo de que si ocurre algo como el problema mencionado en el punto anterior se puede revertir el código hecho por el agente facilmente.
 - Limites de la IA en cuanto a sus aplicaciones: A modo de experimento se experimentó con cual podría ser el límite de la IA para poder llevar a cabo un proyecto sin perder totalmente el control, para ello se probó primero que la IA escriba exclusivamente con las instrucciones del usuario los archivos .MD de los casos de usos del sensor. Esto dió como resultado casos de usos incromprensibles y poco mantenibles a futuro. Tras este fallo se optó por probar armar dos casos de uso y luego solicitarle al agente que los lea y desarrolle un caso de uso en base a los otros dos a modo de ejemplo. Esto dió como resultado un caso de uso mucho mas coherente con lo que se buscaba realizar, si bien el resultado se podría catalogar como exitoso no quedó exento de intervención humana. También se comentó con el equipo y se concluyó que si bien la IA puede ser un impulsor a la hora de desarrollar no debería relacionarse demaciado a la hora del diseño ya que tiene una tendencia a sobredimensionar el problema y a dificultar la mantenibildad del software agregando cosas que no son relevantes.
 
-## 6. Uso de Sonarqube
+## 6. Uso de Sonarqube.
 A la hora de realizar un scan del código con Sonarqube la mayoría de problemas se dividían en dos catégorias: los que eran señalados por la falta de control sobre variables que podían ser nulas. Y los que se marcaban como problemas de mantenibilidad, a estas advertencias de Sonarqube si bien se revisaron se optó por no tratar de corregirlas por una cuestión de que se trata de una prueba de concepto y no un producto final en si. Esto significa que si el día de mañana el proyecto recibiera luz verde para salir a producción se tendría que trabajar en arreglar esos detalles o por su otra parte lo que se realiza en muchos casos en la cual se utiliza esta metodología la cual es reescribir el programa pero con una base limpia y con mayor participación humana a la hora de escribir código.
+
+## 7. MCP.
+Se optó por hacer un proyecto aparte para el MCP, el cual verifica que el usuario que le consulta sea administrador y por una cuestión de tiempos y diseño se optó por que el MCP vaya directo a la base de datos. En caso de escalar la aplicación y llevarla a un mundo real se podría cambiar esto y que las consultas sean dirigidas hacia la API y de ahí a la base de datos.
+
+## 8. Sensor
+Es una aplicación por fuera de la API la cual esta pensada para arquitecturas ARM y funciona haciendo consultas a la API de solarUY mediante signalR
+En cuanto al sensor se realizó un experimento para saber cual es el límite de la metodología de trabajo, para ello se hizo que el agente tuviera dos tipos de participaciones en el diseño de las instrucciones MD. En su primer participación se probó que el agente construya los archivos desde cero, obteniendo como resultado casos de uso incompletos en cuanto a requerimientos o casos de uso demasiado complejos para la solución actual. Se trató de ver que pasaba en estos archivos pero la IA maneja ciertos conceptos diferentes y nombra variables de una manera que dificultaban la escalabilidad en un futuro y su mantenibilidad. Tras estos resultados se eliminaron dichos archivos y se probó otro enfoque: escribir casi todos los casos de uso manualmente y delegarle un caso de uso cualquiera para que lo haga en base a los otros archivos MD. Esto dió como resultado un archivo mas fiel a lo que se quería implementar, sin embargo no era perfecto y presentaba problemas en el nombre de algunas variables o componentes haciendo obligatoria la intervención humana.
