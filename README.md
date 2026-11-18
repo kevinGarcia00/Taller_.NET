@@ -46,6 +46,28 @@ flowchart LR
     BLAZOR <-->|Acceso a datos| Database
 ```
 
+### Servidor MCP
+
+El repositorio incluye `ServidorMcp`, un proceso independiente que publica consultas de solo lectura para clientes compatibles con Model Context Protocol (MCP). Su endpoint local predeterminado es `http://127.0.0.1:5285/mcp`.
+
+- Las consultas de parques, nodos, paneles e inversores llegan por HTTP a la API de Taller_.NET, que por defecto escucha en `http://127.0.0.1:5284`.
+- La herramienta `listar_usuarios` lee directamente, en modo de solo lectura, la tabla `Usuarios` del archivo SQLite `Taller_.NET/parquesolar.db`. No usa el endpoint de usuarios ni requiere un token de Auth0.
+- No se exponen herramientas de escritura ni de consulta de roles.
+
+Desde la raíz del repositorio, ejecutar cada proceso en una terminal separada:
+
+```bash
+# Terminal 1: API de Taller_.NET (necesaria para las consultas de parques)
+dotnet run --project Taller_.NET/Taller_.NET.csproj --launch-profile http
+
+# Terminal 2: servidor MCP
+dotnet run --project ServidorMcp/src/ServidorMcp/ServidorMcp.csproj --no-launch-profile
+```
+
+Para registrar el servidor en Antigravity CLI, usar `agy mcp add SolarUy http://127.0.0.1:5285/mcp`. El servidor MCP también puede registrarse en otros clientes compatibles. Sus puertos y la ruta de SQLite se configuran en `ServidorMcp/src/ServidorMcp/appsettings.json`; para otras instalaciones, configurar `ApiSolarUy__BaseUrl`, `Mcp__Urls` y `DatosSolarUy__RutaUsuarios` como variables de entorno.
+
+**Seguridad:** el MCP no tiene autenticación propia y `listar_usuarios` evita la autorización `users:read` de la API. Por defecto escucha solo en loopback; no debe exponerse a una red no confiable sin protección adicional. La guía completa está en [ServidorMcp/README.md](ServidorMcp/README.md).
+
 ---
 
 ## 4. Diagrama Modelo Entidad Relación (MER)

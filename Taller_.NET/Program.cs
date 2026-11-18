@@ -11,8 +11,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Radzen;
+using Taller_.NET;
 using Taller_.NET.Components;
 using Taller_.NET.Composicion.Mediadores;
+using Taller_.NET.Modulos.Chat.Application.Puertos;
+using Taller_.NET.Modulos.Chat.Application.Seguridad;
+using Taller_.NET.Modulos.Chat.Infrastructure;
 using Taller_.NET.Modulos.Historico.Application.Puertos;
 using Taller_.NET.Modulos.Historico.Infrastructure;
 using Taller_.NET.Modulos.ParqueSolar.Application;
@@ -178,12 +182,32 @@ else
         options.TokenValidationParameters = new TokenValidationParameters
         {
             NameClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier",
+            // Indica qué claim del token debe interpretarse como lista de roles;
+            // RequireRole lo usa al evaluar la política del Chat.
             RoleClaimType = builder.Configuration["Auth0:RolesClaim"] ?? "https://solaryu.com/roles"
         };
     });
 }
 
 builder.Services.AddAuthorization();
+// Registra la regla cuyo nombre se centraliza en PoliticasChat.Administrador.
+// Ese mismo nombre se aplica a la página /chat y al enlace del menú.
+builder.Services.AddAuthorizationBuilder()
+    .AddPolicy(
+        PoliticasChat.Administrador,
+        politica => politica
+            // La identidad debe haber iniciado sesión.
+            .RequireAuthenticatedUser()
+            // Además, el claim de roles debe incluir el rol Administrador.
+            .RequireRole(RolesAuth0.Administrador));
+builder.Services.AddAuthorizationBuilder()
+    .AddPolicy(
+        PoliticasInterfazUsuario.OcultarMantenimiento,
+        politica => politica
+            .RequireAuthenticatedUser()
+            .RequireAssertion(contexto =>
+                !contexto.User.IsInRole(RolesAuth0.Mantenimiento)
+                || contexto.User.IsInRole(RolesAuth0.Administrador)));
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddAntiforgery();
 
@@ -208,6 +232,8 @@ builder.Services.AddScoped<IPanelRepository, PanelRepository>();
 builder.Services.AddScoped<IPanelService, PanelService>();
 builder.Services.AddScoped<IInversorRepository, InversorRepository>();
 builder.Services.AddScoped<IInversorService, InversorService>();
+builder.Services.AddScoped<IConsultaInversorRepository, ConsultaInversorRepository>();
+builder.Services.AddScoped<IConsultaInversorService, ConsultaInversorService>();
 builder.Services.AddScoped<IMediadorNodoParque, MediadorNodoParque>();
 builder.Services.AddScoped<IMediadorNodoInversor, MediadorNodoInversor>();
 builder.Services.AddScoped<IUsuarioActualProvider, UsuarioActualProvider>();
@@ -219,6 +245,10 @@ builder.Services.AddScoped<IValidator<CrearPanelDto>, CrearPanelDtoValidator>();
 builder.Services.AddScoped<IValidator<ModificarPanelDto>, ModificarPanelDtoValidator>();
 builder.Services.AddScoped<IValidator<CrearInversorDto>, CrearInversorDtoValidator>();
 builder.Services.AddScoped<IValidator<ModificarInversorDto>, ModificarInversorDtoValidator>();
+
+builder.Services.Configure<OpcionesChat>(builder.Configuration.GetSection(OpcionesChat.Seccion));
+builder.Services.AddHttpClient<IProveedorHerramientasMcp, ProveedorHerramientasMcp>();
+builder.Services.AddScoped<IChatService, AntigravityChatService>();
 
 builder.Services.AgregarModuloUsuario(builder.Configuration);
 builder.Services.AgregarModuloHistorico(builder.Configuration);
@@ -258,7 +288,7 @@ public partial class Program
     private const string ModoDesarrolloAnonimo = "DesarrolloAnonimo";
 }
 
-namespace Taller_.NET.Modulos.Auth
+namespace Taller_.NET
 {
 public class AutenticacionAnonimaHandler : AuthenticationHandler<AuthenticationSchemeOptions>
 {

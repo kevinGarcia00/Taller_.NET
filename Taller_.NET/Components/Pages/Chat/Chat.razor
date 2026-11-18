@@ -1,0 +1,112 @@
+@page "/chat"
+@attribute [Authorize(Policy = PoliticasChat.Administrador)]
+@rendermode InteractiveServer
+@inject IChatService ChatService
+
+<PageTitle>Chat SolarUY</PageTitle>
+
+<div class="chat">
+    <h1>Chat SolarUY</h1>
+    <p class="text-muted">
+        Las respuestas se generan con Antigravity usando únicamente las herramientas MCP del servidor SolarUY.
+    </p>
+
+    <div class="chat-mensajes" aria-live="polite">
+        @foreach (var mensaje in _mensajes)
+        {
+            <div class="chat-mensaje chat-mensaje--@mensaje.Rol">
+                <strong>@(mensaje.Rol == "usuario" ? "Vos" : "Asistente"):</strong>
+                <span>@mensaje.Texto</span>
+            </div>
+        }
+
+        @if (_ocupado)
+        {
+            <div class="chat-mensaje chat-mensaje--asistente">
+                <strong>Asistente:</strong> pensando…
+            </div>
+        }
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(_error))
+    {
+        <div class="alert alert-danger" role="alert">@_error</div>
+    }
+
+    <div class="chat-entrada">
+        <textarea class="form-control" rows="3"
+                  placeholder="Ej: ¿Qué usuarios hay registrados?"
+                  @bind="_pregunta" disabled="@_ocupado"></textarea>
+        <button class="btn btn-primary mt-2" @onclick="EnviarAsync" disabled="@_ocupado">
+            Enviar
+        </button>
+    </div>
+</div>
+
+<style>
+    .chat-mensajes {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        min-height: 240px;
+        max-height: 420px;
+        overflow-y: auto;
+        padding: 0.75rem;
+        border: 1px solid #dee2e6;
+        border-radius: 0.375rem;
+        background-color: #f8f9fa;
+        margin-bottom: 0.75rem;
+    }
+
+    .chat-mensaje {
+        white-space: pre-wrap;
+        padding: 0.5rem 0.75rem;
+        border-radius: 0.375rem;
+        background-color: #ffffff;
+    }
+
+    .chat-mensaje--usuario {
+        background-color: #e7f1ff;
+    }
+</style>
+
+@code {
+    private sealed class MensajeChat
+    {
+        public string Rol { get; init; } = string.Empty;
+        public string Texto { get; init; } = string.Empty;
+    }
+
+    private readonly List<MensajeChat> _mensajes = new();
+    private string _pregunta = string.Empty;
+    private string _error = string.Empty;
+    private bool _ocupado;
+
+    private async Task EnviarAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_pregunta) || _ocupado)
+        {
+            return;
+        }
+
+        var pregunta = _pregunta.Trim();
+        _mensajes.Add(new MensajeChat { Rol = "usuario", Texto = pregunta });
+        _pregunta = string.Empty;
+        _error = string.Empty;
+        _ocupado = true;
+
+        try
+        {
+            var respuesta = await ChatService.ResponderAsync(pregunta);
+            _mensajes.Add(new MensajeChat { Rol = "asistente", Texto = respuesta });
+        }
+        catch (Exception excepcion)
+        {
+            _error = excepcion.Message;
+        }
+        finally
+        {
+            _ocupado = false;
+        }
+    }
+}

@@ -10,22 +10,28 @@ namespace Taller_.NET.Modulos.Usuario.Application.Seguridad
     /// </summary>
     public static class PermisosDeAccessToken
     {
+
         public static IReadOnlyList<string> Obtener(string? accessToken)
         {
+            //si el access token me llega null, devuelvo lista vacia
             if (string.IsNullOrWhiteSpace(accessToken))
             {
                 return Array.Empty<string>();
             }
 
+            // separo en segmentos el token
             var segmentos = accessToken.Split('.');
 
+            // controlo que sea un token valido
+            // para que sea valido tiene que tener 2 segmentos
             if (segmentos.Length < 2)
             {
                 return Array.Empty<string>();
             }
 
             try
-            {
+            {   
+                //decodificamos para tener el JSON
                 var payload = DecodificarBase64Url(segmentos[1]);
 
                 using var documento = JsonDocument.Parse(payload);
@@ -52,8 +58,27 @@ namespace Taller_.NET.Modulos.Usuario.Application.Seguridad
             {
                 return Array.Empty<string>();
             }
+
+        /*
+        JSON esperado
+            {
+                "iss": "https://dev-615iep3t3nwn45qm.us.auth0.com/",
+                "sub": "auth0|64f1a2b3c4d5e6f7a8b9c0d1",
+                "aud": ["https://api.misolaruy.com", "https://dev-615iep3t3nwn45qm.us.auth0.com/userinfo"],
+                "iat": 1731800000,
+                "exp": 1731836000,
+                "scope": "openid profile email",
+                "permissions": [
+                    "users:read",
+                    "users:create",
+                    "users:update",
+                    "users:delete"
+                ]
+            }
+        */
         }
 
+        // auxiliar para decodificar el json
         private static string DecodificarBase64Url(string valor)
         {
             var normalizado = valor.Replace('-', '+').Replace('_', '/');

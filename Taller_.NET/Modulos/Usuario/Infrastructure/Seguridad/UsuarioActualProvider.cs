@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using System.Text.Json;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Http;
 using Taller_.NET.Modulos.Usuario.Application.Puertos;
 using Taller_.NET.Modulos.Usuario.Application.Seguridad;
 
@@ -8,10 +9,14 @@ namespace Taller_.NET.Modulos.Usuario.Infrastructure.Seguridad
 {
     public class UsuarioActualProvider : IUsuarioActualProvider
     {
+        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly AuthenticationStateProvider _authenticationStateProvider;
 
-        public UsuarioActualProvider(AuthenticationStateProvider authenticationStateProvider)
+        public UsuarioActualProvider(
+            IHttpContextAccessor httpContextAccessor,
+            AuthenticationStateProvider authenticationStateProvider)
         {
+            _httpContextAccessor = httpContextAccessor;
             _authenticationStateProvider = authenticationStateProvider;
         }
 
@@ -97,6 +102,18 @@ namespace Taller_.NET.Modulos.Usuario.Infrastructure.Seguridad
 
         private async Task<ClaimsPrincipal> ObtenerUsuarioAutenticadoAsync()
         {
+            var contextoHttp = _httpContextAccessor.HttpContext;
+
+            // En controllers y APIs el principal lo arma el middleware de autenticacion.
+            // AuthenticationStateProvider pertenece al scope de un componente Blazor:
+            // llamarlo desde una peticion HTTP lanza "Do not call GetAuthenticationStateAsync
+            // outside of the DI scope for a Razor component".
+            if (contextoHttp is not null)
+            {
+                return contextoHttp.User;
+            }
+
+            // Sin HttpContext estamos dentro del circuito interactivo de Blazor.
             var estadoAutenticacion = await _authenticationStateProvider.GetAuthenticationStateAsync();
 
             return estadoAutenticacion.User;

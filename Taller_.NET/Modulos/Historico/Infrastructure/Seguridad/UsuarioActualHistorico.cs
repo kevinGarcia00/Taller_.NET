@@ -1,7 +1,6 @@
 using System.Security.Claims;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Http;
 using Taller_.NET.Modulos.Historico.Application.Puertos;
 
 namespace Taller_.NET.Modulos.Historico.Infrastructure.Seguridad
@@ -11,10 +10,14 @@ namespace Taller_.NET.Modulos.Historico.Infrastructure.Seguridad
         public const string RolMantenimiento = "Mantenimiento";
         public const string RolAdministrador = "Administrador";
 
+        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly AuthenticationStateProvider _authenticationStateProvider;
 
-        public UsuarioActualHistorico(AuthenticationStateProvider authenticationStateProvider)
+        public UsuarioActualHistorico(
+            IHttpContextAccessor httpContextAccessor,
+            AuthenticationStateProvider authenticationStateProvider)
         {
+            _httpContextAccessor = httpContextAccessor;
             _authenticationStateProvider = authenticationStateProvider;
         }
 
@@ -30,8 +33,7 @@ namespace Taller_.NET.Modulos.Historico.Infrastructure.Seguridad
 
         public async Task<string?> ObtenerAuth0UserIdAsync(CancellationToken cancellationToken = default)
         {
-            var estado = await _authenticationStateProvider.GetAuthenticationStateAsync();
-            var usuario = estado.User;
+            var usuario = await ObtenerUsuarioActualAsync();
 
             if (usuario.Identity?.IsAuthenticated != true)
             {
@@ -45,10 +47,25 @@ namespace Taller_.NET.Modulos.Historico.Infrastructure.Seguridad
 
         private async Task<bool> TieneRolAsync(string rol)
         {
-            var estado = await _authenticationStateProvider.GetAuthenticationStateAsync();
-            var usuario = estado.User;
+            var usuario = await ObtenerUsuarioActualAsync();
 
             return usuario.Identity?.IsAuthenticated == true && usuario.IsInRole(rol);
+        }
+
+        // En peticiones HTTP se usa el principal del middleware; en un circuito
+        // interactivo de Blazor se usa el AuthenticationStateProvider.
+        private async Task<ClaimsPrincipal> ObtenerUsuarioActualAsync()
+        {
+            var contextoHttp = _httpContextAccessor.HttpContext;
+
+            if (contextoHttp is not null)
+            {
+                return contextoHttp.User;
+            }
+
+            var estado = await _authenticationStateProvider.GetAuthenticationStateAsync();
+
+            return estado.User;
         }
     }
 }

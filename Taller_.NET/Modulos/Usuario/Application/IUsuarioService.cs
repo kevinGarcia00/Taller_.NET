@@ -5,6 +5,7 @@ namespace Taller_.NET.Modulos.Usuario.Application
 {
     public interface IUsuarioService
     {
+        // Se le pasa el cancellationToken para que se puedan cancelar la operacion  si es necesario.
         Task<Guid> CrearUsuarioAsync(CrearUsuarioDto dto, CancellationToken cancellationToken = default);
 
         Task<ModificarUsuarioDto> ObtenerParaEdicionAsync(Guid id, CancellationToken cancellationToken = default);

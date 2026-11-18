@@ -27,6 +27,7 @@ namespace Taller_.NET.Modulos.Usuario.Infrastructure
             servicios.AddDbContext<UsuarioDbContext>(options =>
                 options.UseSqlite(configuracion.GetConnectionString("Usuario")));
 
+            servicios.AddHttpContextAccessor();
             servicios.AddScoped<IUsuarioDbContext>(proveedor => proveedor.GetRequiredService<UsuarioDbContext>());
             servicios.AddScoped<IUsuarioRepository, UsuarioRepository>();
             servicios.AddScoped<IUsuarioService, UsuarioService>();

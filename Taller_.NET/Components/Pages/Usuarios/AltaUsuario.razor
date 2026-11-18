@@ -1,23 +1,18 @@
 @page "/usuarios/alta"
-@attribute [Authorize(Policy = PermisosUsuarios.PoliticaCrear)]
 @rendermode InteractiveServer
+@inherits PaginaUsuariosBase
 @inject NavigationManager NavigationManager
 
-<PageTitle>Alta de Usuario</PageTitle>
-
-<h1>Alta de Usuario</h1>
-
-<AuthorizeView Policy="@PermisosUsuarios.PoliticaCrear" Context="autorizacion">
+<AuthorizeView Policy="@PoliticasInterfazUsuario.OcultarMantenimiento" Context="autorizacion">
     <Authorized>
+        <PageTitle>Alta de Usuario</PageTitle>
+
+        <h1>Alta de Usuario</h1>
+
         <RadzenCard>
             <AltaUsuarioForm OnRegistrado="IrAlInicio" />
         </RadzenCard>
     </Authorized>
-    <NotAuthorized>
-        <RadzenAlert AlertStyle="AlertStyle.Warning" Title="Acceso restringido">
-            Solo los usuarios con el permiso users:create pueden registrar usuarios.
-        </RadzenAlert>
-    </NotAuthorized>
 </AuthorizeView>
 
 @code {

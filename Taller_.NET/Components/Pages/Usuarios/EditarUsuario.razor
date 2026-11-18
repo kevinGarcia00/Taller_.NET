@@ -1,18 +1,18 @@
 @page "/usuarios/editar"
 @page "/usuarios/editar/{Id:guid}"
-@attribute [Authorize(Policy = PermisosUsuarios.PoliticaActualizar)]
 @rendermode InteractiveServer
+@inherits PaginaUsuariosBase
 @using Taller_.NET.Modulos.Usuario.Application.Excepciones
 @inject IUsuarioService UsuarioService
 @inject NotificationService NotificationService
 @inject NavigationManager NavigationManager
 
-<PageTitle>Edicion de Usuario</PageTitle>
-
-<h1>Edicion de Usuario</h1>
-
-<AuthorizeView Policy="@PermisosUsuarios.PoliticaActualizar" Context="autorizacion">
+<AuthorizeView Policy="@PoliticasInterfazUsuario.OcultarMantenimiento" Context="autorizacion">
     <Authorized>
+        <PageTitle>Edicion de Usuario</PageTitle>
+
+        <h1>Edicion de Usuario</h1>
+
         @if (_cargando)
         {
             <RadzenProgressBar Mode="ProgressBarMode.Indeterminate" Style="height: 2rem" />
@@ -45,11 +45,6 @@
             </RadzenCard>
         }
     </Authorized>
-    <NotAuthorized>
-        <RadzenAlert AlertStyle="AlertStyle.Warning" Title="Acceso restringido">
-            Solo los usuarios con el permiso users:update pueden modificar usuarios.
-        </RadzenAlert>
-    </NotAuthorized>
 </AuthorizeView>
 
 @code {
@@ -65,6 +60,11 @@
 
     protected override async Task OnParametersSetAsync()
     {
+        if (!await PuedeVerInterfazAsync())
+        {
+            return;
+        }
+
         _cargando = true;
         _modelo = null;
 
