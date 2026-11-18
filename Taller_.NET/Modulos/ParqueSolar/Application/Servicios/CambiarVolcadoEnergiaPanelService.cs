@@ -35,7 +35,7 @@ namespace Taller_.NET.Modulos.ParqueSolar.Application.Servicios
             if (dto.VolcarEnergia is null)
             {
                 throw new ArgumentOutOfRangeException(
-                    nameof(dto.VolcarEnergia),
+                    nameof(dto),
                     "El valor de volcarEnergia es obligatorio.");
             }
 

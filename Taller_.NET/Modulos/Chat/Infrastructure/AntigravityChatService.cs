@@ -60,16 +60,22 @@ namespace Taller_.NET.Modulos.Chat.Infrastructure
                 // Fallar rápido: una respuesta sin herramientas MCP podría inventar datos del sistema.
                 const string aviso = "El chat no responderá: las herramientas MCP de SolarUY no están disponibles.";
 
-                _logger.LogCritical(excepcion, "{Aviso}", aviso);
+                if (_logger.IsEnabled(LogLevel.Critical))
+                {
+                    _logger.LogCritical(excepcion, "{Aviso}", aviso);
+                }
                 throw new InvalidOperationException(
                     aviso + " Iniciá el ServidorMcp y reintentá.",
                     excepcion);
             }
 
-            _logger.LogInformation(
-                "Herramientas MCP permitidas para el chat: {Cantidad} - {Nombres}",
-                herramientas.Count,
-                string.Join(", ", herramientas));
+            if (_logger.IsEnabled(LogLevel.Information))
+            {
+                _logger.LogInformation(
+                    "Herramientas MCP permitidas para el chat: {Cantidad} - {Nombres}",
+                    herramientas.Count,
+                    string.Join(", ", herramientas));
+            }
 
             // Se ejecuta sin shell para pasar cada argumento de forma independiente y evitar
             // que la pregunta o la configuración se interpreten como comandos del shell.

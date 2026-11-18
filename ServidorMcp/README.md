@@ -67,7 +67,7 @@ Desde la raíz del repositorio, inicia la API y el MCP en terminales separadas:
 
 ```bash
 # Terminal 1: API de Taller_.NET
-dotnet run --project Taller_.NET/Taller_.NET.csproj --launch-profile http
+dotnet run 
 
 # Terminal 2: servidor MCP
 dotnet run --project ServidorMcp/src/ServidorMcp/ServidorMcp.csproj --no-launch-profile

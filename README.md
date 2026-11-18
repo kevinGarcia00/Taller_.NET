@@ -57,16 +57,14 @@ El repositorio incluye `ServidorMcp`, un proceso independiente que publica consu
 Desde la raíz del repositorio, ejecutar cada proceso en una terminal separada:
 
 ```bash
-# Terminal 1: API de Taller_.NET (necesaria para las consultas de parques)
-dotnet run --project Taller_.NET/Taller_.NET.csproj --launch-profile http
+# Terminal 1: API de Taller_.NET 
+dotnet run
 
 # Terminal 2: servidor MCP
 dotnet run --project ServidorMcp/src/ServidorMcp/ServidorMcp.csproj --no-launch-profile
 ```
 
-Para registrar el servidor en Antigravity CLI, usar `agy mcp add SolarUy http://127.0.0.1:5285/mcp`. El servidor MCP también puede registrarse en otros clientes compatibles. Sus puertos y la ruta de SQLite se configuran en `ServidorMcp/src/ServidorMcp/appsettings.json`; para otras instalaciones, configurar `ApiSolarUy__BaseUrl`, `Mcp__Urls` y `DatosSolarUy__RutaUsuarios` como variables de entorno.
-
-**Seguridad:** el MCP no tiene autenticación propia y `listar_usuarios` evita la autorización `users:read` de la API. Por defecto escucha solo en loopback; no debe exponerse a una red no confiable sin protección adicional. La guía completa está en [ServidorMcp/README.md](ServidorMcp/README.md).
+**Seguridad:** el MCP no tiene autenticación propia y `listar_usuarios` evita la autorización `users:read` de la API.
 
 ---
 

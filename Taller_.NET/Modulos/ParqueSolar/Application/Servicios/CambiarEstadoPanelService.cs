@@ -35,7 +35,7 @@ namespace Taller_.NET.Modulos.ParqueSolar.Application.Servicios
             if (!Enum.IsDefined(dto.Accion))
             {
                 throw new ArgumentOutOfRangeException(
-                    nameof(dto.Accion),
+                    nameof(dto),
                     "La accion sobre el panel no es valida.");
             }
 

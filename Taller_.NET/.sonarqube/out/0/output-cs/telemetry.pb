@@ -1,1 +1,1 @@
-KR>/home/void/Projects/Taller_.NET/Taller_.NET/Taller_.NET.csprojòCSharp14
+JR=/home/kevin/GitHub/Taller_.NET/Taller_.NET/Taller_.NET.csprojòCSharp14

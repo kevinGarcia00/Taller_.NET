@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "/home/void/Projects/Taller_.NET/sensor/sensor.Tests/sensor.Tests.csproj": {}
+    "/home/kevin/GitHub/Taller_.NET/sensor/sensor.Tests/sensor.Tests.csproj": {}
   },
   "projects": {
-    "/home/void/Projects/Taller_.NET/sensor/sensor.Tests/sensor.Tests.csproj": {
+    "/home/kevin/GitHub/Taller_.NET/sensor/sensor.Tests/sensor.Tests.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/home/void/Projects/Taller_.NET/sensor/sensor.Tests/sensor.Tests.csproj",
+        "projectUniqueName": "/home/kevin/GitHub/Taller_.NET/sensor/sensor.Tests/sensor.Tests.csproj",
         "projectName": "sensor.Tests",
-        "projectPath": "/home/void/Projects/Taller_.NET/sensor/sensor.Tests/sensor.Tests.csproj",
-        "packagesPath": "/home/void/.nuget/packages/",
-        "outputPath": "/home/void/Projects/Taller_.NET/sensor/sensor.Tests/obj/",
+        "projectPath": "/home/kevin/GitHub/Taller_.NET/sensor/sensor.Tests/sensor.Tests.csproj",
+        "packagesPath": "/home/kevin/.nuget/packages/",
+        "outputPath": "/home/kevin/GitHub/Taller_.NET/sensor/sensor.Tests/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "/home/void/.nuget/NuGet/NuGet.Config"
+          "/home/kevin/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net10.0"
@@ -24,11 +24,10 @@
         },
         "frameworks": {
           "net10.0": {
-            "framework": "net10.0",
             "targetAlias": "net10.0",
             "projectReferences": {
-              "/home/void/Projects/Taller_.NET/sensor/sensor/sensor.csproj": {
-                "projectPath": "/home/void/Projects/Taller_.NET/sensor/sensor/sensor.csproj"
+              "/home/kevin/GitHub/Taller_.NET/sensor/sensor/sensor.csproj": {
+                "projectPath": "/home/kevin/GitHub/Taller_.NET/sensor/sensor/sensor.csproj"
               }
             }
           }
@@ -43,11 +42,10 @@
           "auditLevel": "low",
           "auditMode": "all"
         },
-        "SdkAnalysisLevel": "10.0.400"
+        "SdkAnalysisLevel": "10.0.100"
       },
       "frameworks": {
         "net10.0": {
-          "framework": "net10.0",
           "targetAlias": "net10.0",
           "dependencies": {
             "Microsoft.NET.Test.Sdk": {
@@ -81,7 +79,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/home/void/.dotnet/sdk/10.0.400/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/10.0.111/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.CSharp": "(,4.7.32767]",
             "Microsoft.VisualBasic": "(,10.4.32767]",
@@ -359,17 +357,17 @@
         }
       }
     },
-    "/home/void/Projects/Taller_.NET/sensor/sensor/sensor.csproj": {
+    "/home/kevin/GitHub/Taller_.NET/sensor/sensor/sensor.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/home/void/Projects/Taller_.NET/sensor/sensor/sensor.csproj",
+        "projectUniqueName": "/home/kevin/GitHub/Taller_.NET/sensor/sensor/sensor.csproj",
         "projectName": "sensor",
-        "projectPath": "/home/void/Projects/Taller_.NET/sensor/sensor/sensor.csproj",
-        "packagesPath": "/home/void/.nuget/packages/",
-        "outputPath": "/home/void/Projects/Taller_.NET/sensor/sensor/obj/",
+        "projectPath": "/home/kevin/GitHub/Taller_.NET/sensor/sensor/sensor.csproj",
+        "packagesPath": "/home/kevin/.nuget/packages/",
+        "outputPath": "/home/kevin/GitHub/Taller_.NET/sensor/sensor/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "/home/void/.nuget/NuGet/NuGet.Config"
+          "/home/kevin/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net10.0"
@@ -379,7 +377,6 @@
         },
         "frameworks": {
           "net10.0": {
-            "framework": "net10.0",
             "targetAlias": "net10.0",
             "projectReferences": {}
           }
@@ -394,11 +391,10 @@
           "auditLevel": "low",
           "auditMode": "all"
         },
-        "SdkAnalysisLevel": "10.0.400"
+        "SdkAnalysisLevel": "10.0.100"
       },
       "frameworks": {
         "net10.0": {
-          "framework": "net10.0",
           "targetAlias": "net10.0",
           "imports": [
             "net461",
@@ -419,7 +415,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/home/void/.dotnet/sdk/10.0.400/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/10.0.111/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.AspNetCore": "(,10.0.32767]",
             "Microsoft.AspNetCore.Antiforgery": "(,10.0.32767]",

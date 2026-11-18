@@ -26,16 +26,52 @@
       <Key>S3449</Key>
     </Rule>
     <Rule>
+      <Key>S3598</Key>
+    </Rule>
+    <Rule>
+      <Key>S4507</Key>
+    </Rule>
+    <Rule>
       <Key>S5856</Key>
+    </Rule>
+    <Rule>
+      <Key>S6930</Key>
+    </Rule>
+    <Rule>
+      <Key>S1048</Key>
+    </Rule>
+    <Rule>
+      <Key>S1656</Key>
     </Rule>
     <Rule>
       <Key>S1862</Key>
     </Rule>
     <Rule>
+      <Key>S2068</Key>
+      <Parameters>
+        <Parameter>
+          <Key>credentialWords</Key>
+          <Value>password, passwd, pwd, passphrase</Value>
+        </Parameter>
+      </Parameters>
+    </Rule>
+    <Rule>
+      <Key>S2257</Key>
+    </Rule>
+    <Rule>
       <Key>S2368</Key>
     </Rule>
     <Rule>
-      <Key>S3598</Key>
+      <Key>S3453</Key>
+    </Rule>
+    <Rule>
+      <Key>S3464</Key>
+    </Rule>
+    <Rule>
+      <Key>S3466</Key>
+    </Rule>
+    <Rule>
+      <Key>S3903</Key>
     </Rule>
     <Rule>
       <Key>S3923</Key>
@@ -53,7 +89,10 @@
       <Key>S4423</Key>
     </Rule>
     <Rule>
-      <Key>S4507</Key>
+      <Key>S4428</Key>
+    </Rule>
+    <Rule>
+      <Key>S4790</Key>
     </Rule>
     <Rule>
       <Key>S5542</Key>
@@ -65,31 +104,10 @@
       <Key>S5659</Key>
     </Rule>
     <Rule>
-      <Key>S6930</Key>
-    </Rule>
-    <Rule>
-      <Key>S1048</Key>
-    </Rule>
-    <Rule>
-      <Key>S2257</Key>
-    </Rule>
-    <Rule>
-      <Key>S3453</Key>
-    </Rule>
-    <Rule>
-      <Key>S3464</Key>
-    </Rule>
-    <Rule>
-      <Key>S3466</Key>
-    </Rule>
-    <Rule>
-      <Key>S4428</Key>
-    </Rule>
-    <Rule>
       <Key>S5753</Key>
     </Rule>
     <Rule>
-      <Key>S1656</Key>
+      <Key>S1313</Key>
     </Rule>
     <Rule>
       <Key>S1751</Key>
@@ -98,52 +116,10 @@
       <Key>S1764</Key>
     </Rule>
     <Rule>
-      <Key>S2068</Key>
-      <Parameters>
-        <Parameter>
-          <Key>credentialWords</Key>
-          <Value>password, passwd, pwd, passphrase</Value>
-        </Parameter>
-      </Parameters>
-    </Rule>
-    <Rule>
       <Key>S2077</Key>
     </Rule>
     <Rule>
       <Key>S2178</Key>
-    </Rule>
-    <Rule>
-      <Key>S2757</Key>
-    </Rule>
-    <Rule>
-      <Key>S3603</Key>
-    </Rule>
-    <Rule>
-      <Key>S3903</Key>
-    </Rule>
-    <Rule>
-      <Key>S4583</Key>
-    </Rule>
-    <Rule>
-      <Key>S4586</Key>
-    </Rule>
-    <Rule>
-      <Key>S4790</Key>
-    </Rule>
-    <Rule>
-      <Key>S5443</Key>
-    </Rule>
-    <Rule>
-      <Key>S5693</Key>
-      <Parameters>
-        <Parameter>
-          <Key>fileUploadSizeLimit</Key>
-          <Value>8388608</Value>
-        </Parameter>
-      </Parameters>
-    </Rule>
-    <Rule>
-      <Key>S1313</Key>
     </Rule>
     <Rule>
       <Key>S2437</Key>
@@ -155,10 +131,56 @@
       <Key>S2612</Key>
     </Rule>
     <Rule>
-      <Key>S2761</Key>
+      <Key>S2757</Key>
+    </Rule>
+    <Rule>
+      <Key>S3603</Key>
     </Rule>
     <Rule>
       <Key>S3889</Key>
+    </Rule>
+    <Rule>
+      <Key>S4583</Key>
+    </Rule>
+    <Rule>
+      <Key>S4586</Key>
+    </Rule>
+    <Rule>
+      <Key>S5443</Key>
+    </Rule>
+    <Rule>
+      <Key>S5445</Key>
+    </Rule>
+    <Rule>
+      <Key>S5693</Key>
+      <Parameters>
+        <Parameter>
+          <Key>fileUploadSizeLimit</Key>
+          <Value>8388608</Value>
+        </Parameter>
+      </Parameters>
+    </Rule>
+    <Rule>
+      <Key>S6418</Key>
+      <Parameters>
+        <Parameter>
+          <Key>secretWords</Key>
+          <Value>api[_\-]?key, auth, credential, secret, token</Value>
+        </Parameter>
+        <Parameter>
+          <Key>randomnessSensibility</Key>
+          <Value>3</Value>
+        </Parameter>
+      </Parameters>
+    </Rule>
+    <Rule>
+      <Key>S6444</Key>
+    </Rule>
+    <Rule>
+      <Key>S2761</Key>
+    </Rule>
+    <Rule>
+      <Key>S3869</Key>
     </Rule>
     <Rule>
       <Key>S3981</Key>
@@ -176,35 +198,13 @@
       <Key>S4260</Key>
     </Rule>
     <Rule>
+      <Key>S4275</Key>
+    </Rule>
+    <Rule>
       <Key>S4277</Key>
     </Rule>
     <Rule>
       <Key>S4830</Key>
-    </Rule>
-    <Rule>
-      <Key>S5445</Key>
-    </Rule>
-    <Rule>
-      <Key>S6418</Key>
-      <Parameters>
-        <Parameter>
-          <Key>randomnessSensibility</Key>
-          <Value>3</Value>
-        </Parameter>
-        <Parameter>
-          <Key>secretWords</Key>
-          <Value>api[_\-]?key, auth, credential, secret, token</Value>
-        </Parameter>
-      </Parameters>
-    </Rule>
-    <Rule>
-      <Key>S6444</Key>
-    </Rule>
-    <Rule>
-      <Key>S3869</Key>
-    </Rule>
-    <Rule>
-      <Key>S4275</Key>
     </Rule>
   </Rules>
   <Files>

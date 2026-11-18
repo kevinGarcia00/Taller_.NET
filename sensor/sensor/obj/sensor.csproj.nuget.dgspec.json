@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "/home/void/Projects/Taller_.NET/sensor/sensor/sensor.csproj": {}
+    "/home/kevin/GitHub/Taller_.NET/sensor/sensor/sensor.csproj": {}
   },
   "projects": {
-    "/home/void/Projects/Taller_.NET/sensor/sensor/sensor.csproj": {
+    "/home/kevin/GitHub/Taller_.NET/sensor/sensor/sensor.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/home/void/Projects/Taller_.NET/sensor/sensor/sensor.csproj",
+        "projectUniqueName": "/home/kevin/GitHub/Taller_.NET/sensor/sensor/sensor.csproj",
         "projectName": "sensor",
-        "projectPath": "/home/void/Projects/Taller_.NET/sensor/sensor/sensor.csproj",
-        "packagesPath": "/home/void/.nuget/packages/",
-        "outputPath": "/home/void/Projects/Taller_.NET/sensor/sensor/obj/",
+        "projectPath": "/home/kevin/GitHub/Taller_.NET/sensor/sensor/sensor.csproj",
+        "packagesPath": "/home/kevin/.nuget/packages/",
+        "outputPath": "/home/kevin/GitHub/Taller_.NET/sensor/sensor/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "/home/void/.nuget/NuGet/NuGet.Config"
+          "/home/kevin/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net10.0"
@@ -24,7 +24,6 @@
         },
         "frameworks": {
           "net10.0": {
-            "framework": "net10.0",
             "targetAlias": "net10.0",
             "projectReferences": {}
           }
@@ -39,11 +38,10 @@
           "auditLevel": "low",
           "auditMode": "all"
         },
-        "SdkAnalysisLevel": "10.0.400"
+        "SdkAnalysisLevel": "10.0.100"
       },
       "frameworks": {
         "net10.0": {
-          "framework": "net10.0",
           "targetAlias": "net10.0",
           "imports": [
             "net461",
@@ -64,7 +62,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/home/void/.dotnet/sdk/10.0.400/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/10.0.111/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.AspNetCore": "(,10.0.32767]",
             "Microsoft.AspNetCore.Antiforgery": "(,10.0.32767]",

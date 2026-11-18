@@ -50,7 +50,7 @@ namespace Taller_.NET.Modulos.Chat.Infrastructure
             var cuerpo = await respuesta.Content.ReadAsStringAsync(cancellationToken);
             var nombres = ExtraerNombres(cuerpo);
 
-            if (nombres.Count == 0)
+            if (nombres.Length == 0)
             {
                 // Un servidor accesible pero sin tools no permite responder bajo el modelo
                 // de permisos restringidos; se informa como indisponibilidad funcional.
@@ -61,7 +61,7 @@ namespace Taller_.NET.Modulos.Chat.Infrastructure
             return nombres;
         }
 
-        private static IReadOnlyList<string> ExtraerNombres(string cuerpo)
+        private static string[] ExtraerNombres(string cuerpo)
         {
             var nombres = new List<string>();
 
