@@ -1,11 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Taller_.NET.Modulos.ParqueSolar.Application.Dtos;
 using Taller_.NET.Modulos.ParqueSolar.Application.Puertos;
-using Taller_.NET.Modulos.ParqueSolar.Domain;
 using Taller_.NET.Modulos.ParqueSolar.Infrastructure.Persistencia;
 
 namespace Taller_.NET.Modulos.ParqueSolar.Infrastructure.Mediadores
@@ -54,32 +52,7 @@ namespace Taller_.NET.Modulos.ParqueSolar.Infrastructure.Mediadores
                 return new List<NodoResumenDto>();
             }
 
-            CalcularEnergiaGenerada(nodos);
-
             return nodos;
-        }
-
-        private void CalcularEnergiaGenerada(IReadOnlyCollection<NodoResumenDto> nodos)
-        {
-            if (nodos.Count == 0)
-            {
-                return;
-            }
-
-            var ids = nodos.Select(nodo => nodo.Id).ToHashSet();
-            var energiaPorNodo = _contexto.Paneles
-                .AsNoTracking()
-                .Where(panel => ids.Contains(panel.NodoId))
-                .ToList()
-                .GroupBy(panel => panel.NodoId)
-                .ToDictionary(
-                    grupo => grupo.Key,
-                    grupo => grupo.Sum(panel => panel.CalcularEnergiaAportada()));
-
-            foreach (var nodo in nodos)
-            {
-                nodo.EnergiaGenerada = energiaPorNodo.GetValueOrDefault(nodo.Id);
-            }
         }
 
         private void AbrirConexionSiEsNecesario()

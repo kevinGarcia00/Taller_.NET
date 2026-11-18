@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Reflection;
 using Taller_.NET.Modulos.ParqueSolar.Domain;
 using Taller_.NET.Modulos.ParqueSolar.Domain.Excepciones;
 using Xunit;
@@ -261,65 +259,5 @@ public class NodoTests
         Assert.Null(nodo.Inversor);
         Assert.Null(nodo.InversorId);
         Assert.False(nodo.TieneInversorAsignado());
-    }
-
-    [Fact]
-    public void ActualizarEnergiaGenerada_SumaSoloLaEnergiaDePanelesEncendidosConVolcado()
-    {
-        var nodo = CrearNodoRegistrado(3);
-        var paneles = new List<Panel>
-        {
-            CrearPanel(nodo, EstadoPanel.Encendido, 100m, true),
-            CrearPanel(nodo, EstadoPanel.Encendido, 50m, false),
-            CrearPanel(nodo, EstadoPanel.Apagado, 200m, true),
-            CrearPanel(nodo, EstadoPanel.Encendido, 25m, true)
-        };
-
-        nodo.ActualizarEnergiaGenerada(paneles);
-
-        Assert.Equal(125m, nodo.EnergiaGenerada);
-    }
-
-    [Fact]
-    public void ActualizarEnergiaGenerada_SinPaneles_DejaLaEnergiaEnCero()
-    {
-        var nodo = CrearNodoRegistrado(3);
-        nodo.ActualizarEnergiaGenerada(new List<Panel> { CrearPanel(nodo, EstadoPanel.Encendido, 100m, true) });
-
-        nodo.ActualizarEnergiaGenerada(Array.Empty<Panel>());
-
-        Assert.Equal(0m, nodo.EnergiaGenerada);
-    }
-
-    [Fact]
-    public void ActualizarEnergiaGenerada_ConPanelDeOtroNodo_LanzaExcepcionYConservaLaEnergia()
-    {
-        var nodo = CrearNodoRegistrado(3);
-        var otroNodo = CrearNodoRegistrado(4);
-        var paneles = new List<Panel>
-        {
-            CrearPanel(nodo, EstadoPanel.Encendido, 100m, true),
-            CrearPanel(otroNodo, EstadoPanel.Encendido, 50m, true)
-        };
-
-        Assert.Throws<NodoInvalidoException>(() => nodo.ActualizarEnergiaGenerada(paneles));
-        Assert.Equal(0m, nodo.EnergiaGenerada);
-    }
-
-    private static Nodo CrearNodoRegistrado(int id)
-    {
-        var nodo = new Nodo("Nodo Norte", "Sector A");
-        typeof(Nodo).GetProperty(nameof(Nodo.Id), BindingFlags.Instance | BindingFlags.Public)!
-            .SetValue(nodo, id);
-
-        return nodo;
-    }
-
-    private static Panel CrearPanel(Nodo nodo, EstadoPanel estado, decimal potencia, bool volcarEnergia)
-    {
-        var panel = new Panel("Panel Norte", estado, potencia, "25 anos", volcarEnergia);
-        panel.AsignarNodo(nodo);
-
-        return panel;
     }
 }

@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("sensor.Tests")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+aecef5783018379dd8020c846e5ae3807277c2ea")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+48300e8cf7f95b181eb2d70efcc2f223f3d437ed")]
 [assembly: System.Reflection.AssemblyProductAttribute("sensor.Tests")]
 [assembly: System.Reflection.AssemblyTitleAttribute("sensor.Tests")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

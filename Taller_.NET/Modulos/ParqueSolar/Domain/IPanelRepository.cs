@@ -11,9 +11,6 @@ namespace Taller_.NET.Modulos.ParqueSolar.Domain
             int nodoId,
             CancellationToken cancellationToken = default);
 
-        Task<IReadOnlyList<Panel>> ObtenerTodosAsync(
-            CancellationToken cancellationToken = default);
-
         Task<IReadOnlyList<Panel>> ObtenerPorNodoAsync(
             int nodoId,
             CancellationToken cancellationToken = default);
